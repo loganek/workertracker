@@ -73,12 +73,14 @@ std::string XWindowInfoProvider::get_app_name(Window win) const
         ret = clh.res_name;
         if (ret.empty()) {
             ret = clh.res_class;
-            if (ret.empty()) {
-                ret = "(unknown)";
-            }
         }
         XFree(clh.res_name);
         XFree(clh.res_class);
+    }
+
+    if (ret.empty())
+    {
+        ret = "(unknown)";
     }
 
     std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);

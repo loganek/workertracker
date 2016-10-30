@@ -153,8 +153,9 @@ bool AnalyzerWindow::filter_func(const Gtk::TreeModel::const_iterator& it)
     }
     else
     {
-        std::string value = it->get_value(columns.m_col_name);
-        return !filter_pattern || std::regex_search(value, filter_pattern.get());
+        return !filter_pattern
+                || std::regex_search(static_cast<std::string>(it->get_value(columns.m_col_name)), filter_pattern.get())
+                || std::regex_search(static_cast<std::string>(it->parent()->get_value(columns.m_col_name)), filter_pattern.get());
     }
 }
 

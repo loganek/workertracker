@@ -99,7 +99,8 @@ void SQLiteDataAccess::create_database()
         throw std::runtime_error("Unable to open database: " + std::string(sqlite3_errmsg(db)));
     }
     auto sql = "CREATE TABLE " + table_name + "(" \
-                      "TIME         INTEGER PRIMARY KEY  NOT NULL," \
+                      "TIME_START   INTEGER PRIMARY KEY  NOT NULL," \
+                      "TIME_END     INTEGER," \
                       "PROC_NAME    CHAR(50)," \
                       "DESCRIPTION  CHAR(150));";
 
@@ -122,7 +123,8 @@ void SQLiteDataAccess::persist_records()
 
     for (const auto& entry : entries)
     {
-        sql_s << "INSERT INTO WT_ENTRIES(TIME, PROC_NAME, DESCRIPTION) VALUES(" << entry.time << ", '" << entry.proc_name << "', '" << entry.description << "');";
+        sql_s << "INSERT INTO WT_ENTRIES(TIME_START, TIME_END, PROC_NAME, DESCRIPTION) VALUES("
+              << entry.time_start << ", " << entry.time_end << ", '" << entry.proc_name << "', '" << entry.description << "');";
     }
 
     execute_query(sql_s.str().c_str());

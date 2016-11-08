@@ -8,7 +8,8 @@ namespace WT {
 
 struct DataEntry
 {
-    std::time_t time;
+    std::time_t time_start;
+    std::time_t time_end;
     std::string proc_name;
     std::string description;
 };

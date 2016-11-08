@@ -39,9 +39,9 @@ void MethodOutput::output(const std::string& msg, LogLevel level)
     }
 }
 
-MethodOutput::MethodType MethodOutput::type = MethodOutput::UNSET;
+MethodOutput::MethodType MethodOutput::type = MethodOutput::LIMITED;
 MethodOutput::method_full_t MethodOutput::out_method_full;
-MethodOutput::method_limited_t MethodOutput::out_method_limited;
+MethodOutput::method_limited_t MethodOutput::out_method_limited = StdOutput::output;
 
 void MethodOutput::set_method(method_full_t method)
 {

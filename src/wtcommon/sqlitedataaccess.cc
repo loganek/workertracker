@@ -13,6 +13,18 @@ SQLiteDataAccess::SQLiteDataAccess(const std::string &filename)
 {
 }
 
+int SQLiteDataAccess::query_container_callback(void *data_access, int argc, char **argv, char ** /*col_name*/)
+{
+    SQLiteDataAccess* this_ = reinterpret_cast<SQLiteDataAccess*>(data_access);
+
+    for (int i = 0; i < argc; i += 3)
+    {
+        this_->container.insert(argv[i], argv[i+1], std::chrono::seconds(std::stoll(argv[i+2])));
+    }
+
+   return 0;
+}
+
 int SQLiteDataAccess::db_created_callback(void *data_access, int argc, char **argv, char ** /*col_name*/)
 {
     SQLiteDataAccess* this_ = reinterpret_cast<SQLiteDataAccess*>(data_access);
@@ -64,6 +76,8 @@ SQLiteDataAccess::~SQLiteDataAccess()
 int SQLiteDataAccess::execute_query(const std::string &sql, sqlite3_callback callback)
 {
     char *err_msg = nullptr;
+
+    WT_LOG(LogLevel::DEBUG) << "Executing query " << sql;
     int rc = sqlite3_exec(db, sql.c_str(), callback, this, &err_msg);
 
     if (rc != SQLITE_OK)
@@ -160,6 +174,17 @@ void SQLiteDataAccess::persist_records()
 
     last_entry = entries.back();
     entries.clear();
+}
+
+DataContainer SQLiteDataAccess::get_tree(DataPeriod)
+{
+    container.clear();
+    std::ostringstream sql_s;
+
+    sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " GROUP BY PROC_NAME, DESCRIPTION;";
+    execute_query(sql_s.str(), query_container_callback);
+
+    return container;
 }
 
 }

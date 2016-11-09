@@ -23,7 +23,10 @@ class SQLiteDataAccess : public DataAccess
     std::string filename;
     bool create_db;
 
+    DataContainer container;
+
     static int db_created_callback(void *data_access, int argc, char **argv, char **col_name);
+    static int query_container_callback(void *data_access, int argc, char **argv, char **col_name);
 
     int execute_query(const std::string &sql, sqlite3_callback callback = nullptr);
     void on_database_created();
@@ -35,6 +38,7 @@ public:
     void open() override;
     void save_entry(const DataEntry &entry) override;
     void persist_records() override;
+    DataContainer get_tree(DataPeriod period = DataPeriod()) override;
 
     virtual ~SQLiteDataAccess();
 };

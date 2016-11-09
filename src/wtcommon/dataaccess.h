@@ -1,6 +1,8 @@
 #ifndef DATAACCESS_H
 #define DATAACCESS_H
 
+#include "datacontainer.h"
+
 #include <ctime>
 #include <string>
 
@@ -14,6 +16,12 @@ struct DataEntry
     std::string description;
 };
 
+struct DataPeriod
+{
+    std::time_t from = 0;
+    std::time_t to = 0;
+};
+
 class DataAccess
 {
 public:
@@ -22,6 +30,7 @@ public:
     virtual void open() = 0;
     virtual void save_entry(const DataEntry &entry) = 0;
     virtual void persist_records() = 0;
+    virtual DataContainer get_tree(DataPeriod period = DataPeriod()) = 0;
 };
 
 }

@@ -1,6 +1,6 @@
 #include "analyzerwindow.h"
 
-#include "wtcommon/filestorage.h"
+#include "wtcommon/sqlitedataaccess.h"
 #include "wtcommon/logger.h"
 
 AnalyzerWindow::AnalyzerWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder)
@@ -94,9 +94,9 @@ void AnalyzerWindow::on_search_changed()
 
 void AnalyzerWindow::load_model(const std::string& filename)
 {
-    WT::FileStorage storage(filename);
-    container.clear();
-    storage.load_data(container);
+    WT::SQLiteDataAccess data_access(filename);
+    data_access.open();
+    container = data_access.get_tree();
 
     auto tree_model = Gtk::TreeStore::create(columns);
     filter_model = Gtk::TreeModelFilter::create(tree_model);
@@ -183,8 +183,8 @@ void AnalyzerWindow::on_export_current_view()
             }
         }
 
-        WT::FileStorage storage(dialog.get_filename());
-        storage.save_data(filtered_container);
+        // TODO: WT::FileStorage storage(dialog.get_filename());
+        // TODO: storage.save_data(filtered_container);
     }
 }
 
@@ -197,6 +197,6 @@ void AnalyzerWindow::on_load_log()
     if (dialog.run() == Gtk::RESPONSE_ACCEPT)
     {
         load_model(dialog.get_filename());
-	tree_view->expand_all();
+        tree_view->expand_all();
     }
 }

@@ -112,26 +112,54 @@ void SQLiteDataAccess::create_database()
     WT_LOG(LogLevel::INFO) << "Database succesfully created!";
 }
 
+static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)
+{
+    return before.description == after.description
+            && before.proc_name == after.proc_name
+            && before.time_end == after.time_start;
+}
+
 void SQLiteDataAccess::save_entry(const DataEntry &entry)
 {
-    entries.push_back(entry);
+    if (!entries.empty() && is_continuous_entry(entries.back(), entry))
+    {
+        entries.back().time_end = entry.time_end;
+    }
+    else
+    {
+        entries.push_back(entry);
+    }
 }
 
 void SQLiteDataAccess::persist_records()
 {
-    std::ostringstream sql_s;
-
-    for (const auto& entry : entries)
+    if (entries.empty())
     {
-        sql_s << "INSERT INTO WT_ENTRIES(TIME_START, TIME_END, PROC_NAME, DESCRIPTION) VALUES("
-              << entry.time_start << ", " << entry.time_end << ", '" << entry.proc_name << "', '" << entry.description << "');";
+        return;
     }
 
+    std::ostringstream sql_s;
+    std::size_t i = 0;
+
+    if (is_continuous_entry(last_entry, entries.front()))
+    {
+        sql_s << "UPDATE " << table_name<< " set TIME_END = "
+              << entries.back().time_end << " WHERE TIME_END = " << entries.back().time_start << "; ";
+        i++;
+        WT_LOG(LogLevel::DEBUG) << "Updating entry";
+    }
+
+    for (; i < entries.size(); i++)
+    {
+        sql_s << "INSERT INTO " << table_name << "(TIME_START, TIME_END, PROC_NAME, DESCRIPTION) VALUES("
+              << entries[i].time_start << ", " << entries[i].time_end << ", '" << entries[i].proc_name << "', '" << entries[i].description << "');";
+    }
+
+    WT_LOG(LogLevel::DEBUG) << "Persisting " << entries.size() << " records in sqlite data base";
     execute_query(sql_s.str().c_str());
 
+    last_entry = entries.back();
     entries.clear();
-
-    execute_query("select * from WT_ENTRIES;");
 }
 
 }

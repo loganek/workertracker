@@ -4,6 +4,7 @@
 #include "windowinfoprovider.h"
 #include "itracksuspendable.h"
 
+#include "wtcommon/dataaccess.h"
 #include "wtcommon/datacontainer.h"
 #include "wtcommon/filestorage.h"
 
@@ -19,12 +20,14 @@ class TrackerJob
     std::condition_variable terminate;
     bool is_running = true;
 
+    DataEntry entry;
+
     std::chrono::seconds period;
     std::shared_ptr<WindowInfoProvider> window_info_provider;
     std::thread th;
     DataContainer container;
     int store_cnt;
-    std::shared_ptr<FileStorage> storage;
+    std::shared_ptr<DataAccess> data_access;
     std::vector<std::shared_ptr<ITrackSuspendable>> suspendable;
 
     bool is_suspended();

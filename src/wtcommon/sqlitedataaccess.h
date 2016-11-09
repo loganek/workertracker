@@ -16,6 +16,8 @@ class SQLiteDataAccess : public DataAccess
 
     const std::string table_name = "WT_ENTRIES";
 
+    DataEntry last_entry;
+
     std::vector<DataEntry> entries;
     sqlite3 *db = nullptr;
     std::string filename;

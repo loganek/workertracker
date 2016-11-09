@@ -1,6 +1,8 @@
 #include "trackerjob.h"
 #include "wtcommon/logger.h"
 #include "gnomescreensaver.h"
+#include "wtcommon/sqlitedataaccess.h"
+
 namespace WT {
 
 TrackerJob::TrackerJob(std::chrono::seconds read_interval, int save_interval, const std::string &filename)
@@ -15,32 +17,45 @@ TrackerJob::TrackerJob(std::chrono::seconds read_interval, int save_interval, co
         stop();
     }
 
-    storage = std::make_shared<FileStorage>(filename);
+    data_access = std::make_shared<SQLiteDataAccess>(filename);
 
-    storage->load_data(container);
+    data_access->open();
 }
 
 void TrackerJob::read_window_info()
 {
     int counter = 0;
     auto locked = std::unique_lock<std::mutex>(mutex);
+    entry.time_end = std::time(nullptr);
 
     while (is_running)
     {
+        auto window_info = window_info_provider->get_current_window_info();
+
+        entry.description = window_info.window_title;
+        entry.proc_name = window_info.app_name;
+        entry.time_start = entry.time_end;
+
         terminate.wait_for(locked, period);
+
+        entry.time_end = std::time(nullptr);
 
         if (is_suspended())
         {
+            WT_LOG(LogLevel::DEBUG) << "Logging suspended";
+
             continue;
         }
 
-        auto window_info = window_info_provider->get_current_window_info();
+        WT_LOG(LogLevel::DEBUG) << "Saving entry: {" << entry.proc_name << ", " << entry.description << "}";
 
-        container.insert(window_info.app_name, window_info.window_title, period);
+        data_access->save_entry(entry);
 
         if (++counter % store_cnt == 0)
         {
-            storage->save_data(container);
+            WT_LOG(LogLevel::DEBUG) << "Persisiting records";
+            // TODO should be async:
+            data_access->persist_records();
             counter = 0;
         }
     }
@@ -78,7 +93,7 @@ void TrackerJob::run()
         th.join();
     }
 
-    storage->save_data(container);
+    data_access->persist_records();
 }
 
 }

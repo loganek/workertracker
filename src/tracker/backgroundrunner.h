@@ -1,7 +1,7 @@
 #ifndef BACKGROUNDRUNNER_H
 #define BACKGROUNDRUNNER_H
 
-#include "registrable.h"
+#include "wtcommon/registrable.h"
 
 namespace WT {
 

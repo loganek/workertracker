@@ -4,7 +4,8 @@ add_library(wtcommon
     filestorage.cc
     dataaccess.h
     sqlitedataaccess.cc
-    logger.cc)
+    logger.cc
+    registrable.h)
 
 target_link_libraries(wtcommon
     ${SQLITE_LIBRARIES}

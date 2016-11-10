@@ -34,7 +34,7 @@ int SQLiteDataAccess::db_created_callback(void *data_access, int argc, char **ar
    return 0;
 }
 
-void SQLiteDataAccess::open()
+void SQLiteDataAccess::open(bool readonly)
 {
     create_db = false;
 
@@ -64,7 +64,14 @@ void SQLiteDataAccess::open()
 
     if (create_db)
     {
-        create_database();
+        if (readonly)
+        {
+            throw std::runtime_error("Cannot open database!");
+        }
+        else
+        {
+            create_database();
+        }
     }
 }
 

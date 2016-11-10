@@ -19,7 +19,7 @@ TrackerJob::TrackerJob(std::chrono::seconds read_interval, int save_interval, co
 
     data_access = std::make_shared<SQLiteDataAccess>(filename);
 
-    data_access->open();
+    data_access->open(false);
 }
 
 void TrackerJob::read_window_info()

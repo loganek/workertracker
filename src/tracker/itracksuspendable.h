@@ -1,7 +1,7 @@
 #ifndef ITRACKSUSPENDABLE_H
 #define ITRACKSUSPENDABLE_H
 
-#include "registrable.h"
+#include "wtcommon/registrable.h"
 
 namespace WT {
 

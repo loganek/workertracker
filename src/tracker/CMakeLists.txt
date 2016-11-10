@@ -6,7 +6,6 @@ add_executable(workertracker
     itracksuspendable.h
     gnomescreensaver.cc
     daemonizer.cc
-    registrable.h
     windowinfoprovider.h
     backgroundrunner.h
     wtconstants.h)

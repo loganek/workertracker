@@ -1,7 +1,7 @@
 #ifndef WINDOWINFOPROVIDER_H
 #define WINDOWINFOPROVIDER_H
 
-#include "registrable.h"
+#include "wtcommon/registrable.h"
 
 #include <string>
 

@@ -30,6 +30,9 @@ add_custom_command(
 add_executable(workertracker-analyzer
     main.cc
     analyzerwindow.cc
+    analyzercontroller.cc
+    imainwindow.h
+    gtkanalyzercontroller.cc
     ${RESOURCE_CC_FILE})
 
 target_link_libraries(workertracker-analyzer

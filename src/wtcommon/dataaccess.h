@@ -27,7 +27,7 @@ class DataAccess
 public:
     virtual ~DataAccess() {}
 
-    virtual void open() = 0;
+    virtual void open(bool readonly) = 0;
     virtual void save_entry(const DataEntry &entry) = 0;
     virtual void persist_records() = 0;
     virtual DataContainer get_tree(DataPeriod period = DataPeriod()) = 0;

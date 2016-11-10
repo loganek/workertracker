@@ -35,7 +35,7 @@ class SQLiteDataAccess : public DataAccess
 public:
     SQLiteDataAccess(const std::string &filename);
 
-    void open() override;
+    void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
     void persist_records() override;
     DataContainer get_tree(DataPeriod period = DataPeriod()) override;

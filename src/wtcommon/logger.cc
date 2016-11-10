@@ -82,7 +82,7 @@ void SysLogOutput::output(const std::string &str, LogLevel level)
         break;
     }
 
-    syslog(sys_level, str.c_str());
+    syslog(sys_level, "%s", str.c_str());
 }
 
 void SysLogOutput::init_log(const std::string &daemon_name)

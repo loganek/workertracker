@@ -176,12 +176,27 @@ void SQLiteDataAccess::persist_records()
     entries.clear();
 }
 
-DataContainer SQLiteDataAccess::get_tree(DataPeriod)
+DataContainer SQLiteDataAccess::get_tree(DataPeriod period)
 {
     container.clear();
     std::ostringstream sql_s;
 
-    sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " GROUP BY PROC_NAME, DESCRIPTION;";
+    sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " ";
+
+    if (period.from > 0 && period.to > 0)
+    {
+        sql_s << "WHERE TIME_START >= " << period.from << " && TIME_END <=" << period.to << " ";
+    }
+    else if (period.from > 0)
+    {
+        sql_s << "WHERE TIME_START >= " << period.from << " ";
+    }
+    else if (period.to > 0)
+    {
+        sql_s << "WHERE TIME_END <= " << period.from << " ";
+    }
+
+    sql_s << "GROUP BY PROC_NAME, DESCRIPTION;";
     execute_query(sql_s.str(), query_container_callback);
 
     return container;

@@ -3,11 +3,6 @@
 
 int GtkAnalyzerController::run(int argc, char **argv)
 {
-    return !AnalyzerController::run(argc, argv) && app->run(*dynamic_cast<Gtk::Window*>(main_window));
-}
-
-void GtkAnalyzerController::init(int argc, char **argv)
-{
     app = Gtk::Application::create(argc, argv, "eu.cookandcommit.workertracker.analyzer");
 
     app->signal_activate().connect([this] {
@@ -18,6 +13,7 @@ void GtkAnalyzerController::init(int argc, char **argv)
     filter_model->set_visible_func([this] (const Gtk::TreeModel::const_iterator& it) {
         return filter_func(it);
     });
+    return !AnalyzerController::run(argc, argv) && app->run(*dynamic_cast<Gtk::Window*>(main_window));
 }
 
 IMainWindow* GtkAnalyzerController::construct_window()

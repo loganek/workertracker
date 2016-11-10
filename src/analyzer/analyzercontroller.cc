@@ -5,9 +5,8 @@
 
 #include <boost/date_time.hpp>
 
-int AnalyzerController::run(int argc, char **argv)
+int AnalyzerController::run(int, char **)
 {
-    init(argc, argv);
     main_window = construct_window();
     main_window->set_controller(this);
 

@@ -15,17 +15,18 @@ class AnalyzerController : public WT::RegistrableSingle<AnalyzerController>
 protected:
     boost::optional<std::regex> filter_pattern = boost::none;
 
-    IMainWindow *main_window;
+    IMainWindow *main_window = nullptr;
 
     std::shared_ptr<WT::DataAccess> data_access;
 
     virtual void load_model_to_view(const WT::DataContainer &container) = 0;
 
     virtual void apply_filter() = 0;
-    virtual void init(int argc, char **argv) = 0;
     virtual IMainWindow* construct_window() = 0;
 
 public:
+    virtual ~AnalyzerController() {}
+
     virtual int run(int argc, char **argv);
     void on_search(const std::string &search_text);
     void load_from_file(const std::string &filename);

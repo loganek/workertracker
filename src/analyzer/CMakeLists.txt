@@ -32,7 +32,10 @@ if (WITH_GTK)
     set(FRAMEWORK_SPECIFIC_LIBRARIES ${GTKMM3_LIBRARIES})
 
 elseif(WITH_QT)
-
+    qt5_wrap_cpp(WTANALYZER_HDR_MOC qtanalyzerwindow.h)
+    qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui)
+    set(FRAMEWORK_SPECIFIC_SOURCES qtanalyzercontroller.cc qtanalyzerwindow.cc  ${WTANALYZER_UI_MOC})
+    set(FRAMEWORK_SPECIFIC_LIBRARIES ${Qt5Widgets_LIBRARIES})
 endif(WITH_GTK)
 
 add_executable(workertracker-analyzer
@@ -45,4 +48,4 @@ target_link_libraries(workertracker-analyzer
     wtcommon
     ${FRAMEWORK_SPECIFIC_LIBRARIES})
 
-
+set_property(TARGET workertracker-analyzer PROPERTY CXX_STANDARD 14)

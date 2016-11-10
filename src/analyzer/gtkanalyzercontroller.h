@@ -27,7 +27,6 @@ class GtkAnalyzerController : public AnalyzerController
 
     bool filter_func(const Gtk::TreeModel::const_iterator& it);
     void update_parents_values();
-    void init(int argc, char **argv) override;
 
     void load_model_to_view(const WT::DataContainer &container) override;
     void apply_filter() override;

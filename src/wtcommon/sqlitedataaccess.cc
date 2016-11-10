@@ -3,6 +3,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <fstream>
 #include <functional>
 #include <stdexcept>
 

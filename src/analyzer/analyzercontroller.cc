@@ -5,8 +5,6 @@
 
 #include <boost/date_time.hpp>
 
-#include <gtkmm.h>
-
 int AnalyzerController::run(int argc, char **argv)
 {
     init(argc, argv);

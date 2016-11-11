@@ -7,7 +7,8 @@ namespace WT {
 
 TrackerJob::TrackerJob(std::chrono::seconds read_interval, int save_interval, const std::string &filename)
     : period(read_interval),
-      store_cnt(save_interval)
+      store_cnt(save_interval),
+      suspendable("/home/loganek/repos/workertracker/build/src/dummytrackerplugin")
 {
     window_info_provider = WindowInfoProvider::registry();
 
@@ -40,7 +41,7 @@ void TrackerJob::read_window_info()
 
         entry.time_end = std::time(nullptr);
 
-        if (is_suspended())
+        if (suspendable.suspend_tracking())
         {
             WT_LOG(LogLevel::DEBUG) << "Logging suspended";
 
@@ -59,19 +60,6 @@ void TrackerJob::read_window_info()
             counter = 0;
         }
     }
-}
-
-bool TrackerJob::is_suspended()
-{
-    for (const auto& susp : ITrackSuspendable::registry())
-    {
-        if (susp.second->suspend_tracking())
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 void TrackerJob::stop()

@@ -112,6 +112,11 @@ public:
 #define WT_SYS_LOG(level) WT_IF_LOG(WT::Logger<WT::SysLogOutput>, level)
 #define WT_LOG(level) WT_IF_LOG(WT::Logger<WT::MethodOutput>, level)
 
+#define WT_LOG_D WT_LOG(LogLevel::DEBUG)
+#define WT_LOG_EMG WT_LOG(LogLevel::EMERGENCY)
+#define WT_LOG_ERR WT_LOG(LogLevel::ERROR)
+#define WT_LOG_I WT_LOG(LogLevel::INFO)
+#define WT_LOG_W WT_LOG(LogLevel::WARNING)
 }
 
 #endif // LOGGER_H

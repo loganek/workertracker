@@ -15,4 +15,10 @@ public:
 
 }
 
+#ifdef WIN32
+# define WT_PLUGIN_EXPORT __declspec(dllexport)
+#else
+# define WT_PLUGIN_EXPORT // empty
+#endif
+
 #endif // ITRACKSUSPENDABLE_H

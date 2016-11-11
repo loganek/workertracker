@@ -5,6 +5,7 @@ add_library(wtcommon
     dataaccess.h
     sqlitedataaccess.cc
     logger.cc
+    itracksuspendable.h
     registrable.h)
 
 target_link_libraries(wtcommon

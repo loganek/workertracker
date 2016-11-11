@@ -2,7 +2,8 @@
 #define TRACKERJOB_H
 
 #include "windowinfoprovider.h"
-#include "itracksuspendable.h"
+#include "wtcommon/itracksuspendable.h"
+#include "suspendablecontainer.h"
 
 #include "wtcommon/dataaccess.h"
 #include "wtcommon/datacontainer.h"
@@ -28,10 +29,10 @@ class TrackerJob
     DataContainer container;
     int store_cnt;
     std::shared_ptr<DataAccess> data_access;
-    std::vector<std::shared_ptr<ITrackSuspendable>> suspendable;
 
-    bool is_suspended();
     void read_window_info();
+
+    SuspendableContainer suspendable;
 
 public:
     TrackerJob(std::chrono::seconds read_interval, int save_interval, const std::string &filename);

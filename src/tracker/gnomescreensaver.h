@@ -1,7 +1,7 @@
 #ifndef GNOMESCREENSAVER_H
 #define GNOMESCREENSAVER_H
 
-#include "itracksuspendable.h"
+#include "wtcommon/itracksuspendable.h"
 
 struct _GDBusConnection;
 struct _GDBusMessage;

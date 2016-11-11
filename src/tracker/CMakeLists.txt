@@ -1,6 +1,6 @@
 if (UNIX)
     set(SYSTEM_SPECIFIC_SOURCES xwindowinfoprovider.cc gnomescreensaver.cc)
-    set(SYSTEM_SPECIFIC_LIBRARIES ${GIO2_LIBRARIES})
+    set(SYSTEM_SPECIFIC_LIBRARIES ${GIO2_LIBRARIES} dl)
 elseif(WIN32)
 
 endif(UNIX)
@@ -9,7 +9,8 @@ add_executable(workertracker
     main.cc
     workertracker.cc
     trackerjob.cc
-    itracksuspendable.h
+    suspendablecontainer.cc
+    suspendableloader.cc
     daemonizer.cc
     windowinfoprovider.h
     backgroundrunner.h

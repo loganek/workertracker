@@ -23,15 +23,24 @@ Configuration::Configuration(const std::string &path)
 
 void Configuration::init_default()
 {
+    if (!prop_tree.get_child_optional(general_name))
+    {
+        prop_tree.add_child(general_name, boost::property_tree::ptree());
+    }
+
     std::map<std::string, std::string> default_config = {
         {"save-period", "12"},
         {"read-period", "5"},
         {"data-path", (boost::filesystem::path(path).parent_path() / "data.dat").string()}
     };
 
+    auto& general = prop_tree.get_child(general_name);
     for (const auto &entry : default_config)
     {
-        set_general_param(entry.first, entry.second);
+        if (!general.get_child_optional(entry.first))
+        {
+            set_general_param(entry.first, entry.second);
+        }
     }
 }
 
@@ -71,14 +80,7 @@ boost::optional<std::string> Configuration::get_general_param(const std::string 
 
 void Configuration::set_general_param(const std::string &param, const std::string &value)
 {
-    if (!prop_tree.get_child_optional(general_name))
-    {
-        prop_tree.add_child(general_name, boost::property_tree::ptree());
-    }
-    boost::property_tree::ptree &general = prop_tree.get_child(general_name);
-
-
-    general.push_back(boost::property_tree::ptree::value_type(std::make_pair(param, value)));
+    prop_tree.get_child(general_name).push_back(boost::property_tree::ptree::value_type(std::make_pair(param, value)));
 }
 
 std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name) const
@@ -96,10 +98,10 @@ std::pair<char***, int> Configuration::get_plugin_configuration(const std::strin
 
         for (auto entry : plugin_cfg.get())
         {
-            config[0][size] = new char[entry.second.data().size() + 1];
-            strcpy(config[0][size], entry.second.data().c_str());
-            config[1][size] = new char[entry.first.size() + 1];
+            config[0][size] = new char[entry.first.size() + 1];
             strcpy(config[0][size], entry.first.c_str());
+            config[1][size] = new char[entry.second.data().size() + 1];
+            strcpy(config[1][size], entry.second.data().c_str());
             size++;
         }
     }

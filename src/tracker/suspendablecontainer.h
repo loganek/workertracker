@@ -18,7 +18,7 @@ class SuspendableContainer
     void load_configuration_to_plugins(const std::shared_ptr<Configuration> &configuration);
 
 public:
-    SuspendableContainer(const std::string &plugin_path, const std::shared_ptr<Configuration> &configuration);
+    SuspendableContainer(const std::shared_ptr<Configuration> &configuration);
 
     bool suspend_tracking() const;
 };

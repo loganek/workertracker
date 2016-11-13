@@ -4,8 +4,8 @@
 
 namespace WT {
 
-SuspendableContainer::SuspendableContainer(const std::string &plugin_path, const std::shared_ptr<Configuration> &configuration)
-    : loader(plugin_path)
+SuspendableContainer::SuspendableContainer(const std::shared_ptr<Configuration> &configuration)
+    : loader(configuration->get_general_param("plugins-path").get())
 {
     load_configuration_to_plugins(configuration);
 }

@@ -31,7 +31,8 @@ void Configuration::init_default()
     std::map<std::string, std::string> default_config = {
         {"save-period", "12"},
         {"read-period", "5"},
-        {"data-path", (boost::filesystem::path(path).parent_path() / "data.dat").string()}
+        {"data-path", (boost::filesystem::path(path).parent_path() / "data.dat").string()},
+        {"plugins-path", (boost::filesystem::path(path).parent_path() / "plugins").string()}
     };
 
     auto& general = prop_tree.get_child(general_name);

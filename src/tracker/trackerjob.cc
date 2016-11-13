@@ -8,7 +8,7 @@ namespace WT {
 TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
     : period(configuration->get_general_param<int>("read-period").get()),
       store_cnt(configuration->get_general_param<int>("save-period").get()),
-      suspendable("/home/loganek/repos/build-workertracker-Desktop-Debug/src/dummytrackerplugin", configuration)
+      suspendable(configuration)
 {
     window_info_provider = WindowInfoProvider::registry();
 

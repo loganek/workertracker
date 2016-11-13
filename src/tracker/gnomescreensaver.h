@@ -27,6 +27,9 @@ public:
     virtual ~GNOMEScreenSaver();
 
     bool suspend_tracking() override;
+    void load_configuration(const char **/*config*/[2], int /*size*/) override {}
+
+    const char* get_name() override { return "gnomescreensaver"; }
 
     static RegistrarCollection<GNOMEScreenSaver> registrar;
 };

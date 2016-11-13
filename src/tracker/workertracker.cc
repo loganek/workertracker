@@ -12,11 +12,15 @@ namespace WT {
 WorkerTracker::WorkerTracker()
 {
     WT::MethodOutput::set_method(StdOutput::output);
+
+    load_configuration();
 }
 
 bool WorkerTracker::process_parameters(int argc, char **argv)
 {
     namespace po = boost::program_options;
+
+    int save_period, read_period;
 
     // Declare the supported options.
     po::options_description desc("Allowed options");
@@ -24,8 +28,8 @@ bool WorkerTracker::process_parameters(int argc, char **argv)
         ("help,h", "Print help")
         ("daemon,d", "Run as daemon")
         ("stop,s", "Stop daemon")
-        ("save-period", po::value<int>(&save_period)->default_value(save_period_default), "Save period (value * read period)")
-        ("read-period", po::value<int>(&read_period)->default_value(read_period_default), "Read period (in seconds)")
+            ("save-period", po::value<int>(&save_period), "Save period (value * read period)")
+        ("read-period", po::value<int>(&read_period), "Read period (in seconds)")
     ;
 
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -35,6 +39,15 @@ bool WorkerTracker::process_parameters(int argc, char **argv)
     {
         std::cout << desc << std::endl;
         return false;
+    }
+
+    if (vm.count("save-period"))
+    {
+        configuration->set_general_param("save-period", save_period);
+    }
+    if (vm.count("read-period"))
+    {
+        configuration->set_general_param("read-period", read_period);
     }
 
     return true;
@@ -77,26 +90,30 @@ int WorkerTracker::run(int argc, char **argv)
         return ret;
     }
 
-    const char *home_env = std::getenv("HOME");
-    boost::filesystem::path data_path(home_env != nullptr ? home_env : "");
-    data_path /= std::string(".") + project_name;
+    configuration->print_all_general_params();
 
-    try {
-        boost::filesystem::create_directories(data_path);
-    } catch (const boost::filesystem::filesystem_error &ex)
-    {
-        WT_LOG(LogLevel::ERROR) << ex.what();
-        return -1;
-    }
-
-    data_path /= "data.dat";
-
-    WT_LOG(LogLevel::INFO) << "Data path: " << data_path;
-
-    job = std::make_shared<TrackerJob>(std::chrono::seconds(read_period), save_period, data_path.string());
+    job = std::make_shared<TrackerJob>(configuration);
     job->run();
 
     return 0;
+}
+
+void WorkerTracker::load_configuration()
+{
+    const char *home_env = std::getenv("HOME");
+    boost::filesystem::path config_path(home_env != nullptr ? home_env : "");
+    config_path /= std::string(".") + project_name;
+
+    // TODO might throw exception
+    if (!boost::filesystem::exists(config_path))
+    {
+        boost::filesystem::create_directories(config_path);
+    }
+
+    config_path /= project_name + std::string(".config");
+
+    WT_LOG_D  << "Load configuration from " << config_path;
+    configuration = std::make_shared<WT::Configuration>(config_path.string());
 }
 
 }

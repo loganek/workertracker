@@ -7,7 +7,7 @@
 
 #include "wtcommon/dataaccess.h"
 #include "wtcommon/datacontainer.h"
-#include "wtcommon/filestorage.h"
+#include "wtcommon/configuration.h"
 
 #include <csignal>
 #include <condition_variable>
@@ -35,7 +35,7 @@ class TrackerJob
     SuspendableContainer suspendable;
 
 public:
-    TrackerJob(std::chrono::seconds read_interval, int save_interval, const std::string &filename);
+    TrackerJob(const std::shared_ptr<Configuration>& configuration);
 
     void run();
     void stop();

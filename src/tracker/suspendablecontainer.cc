@@ -4,9 +4,30 @@
 
 namespace WT {
 
-SuspendableContainer::SuspendableContainer(const std::string &plugin_path)
+SuspendableContainer::SuspendableContainer(const std::string &plugin_path, const std::shared_ptr<Configuration> &configuration)
     : loader(plugin_path)
 {
+    load_configuration_to_plugins(configuration);
+}
+
+void SuspendableContainer::load_configuration_to_plugins(const std::shared_ptr<Configuration> &configuration)
+{
+    for (auto susp : loader.get_suspendable())
+    {
+        auto config = configuration->get_plugin_configuration(susp->get_name());
+        susp->load_configuration((const char***)config.first, config.second);
+
+        for (int i = 0; i < config.second; i++)
+        {
+            delete [] config.first[0][i];
+            delete [] config.first[1][i];
+        }
+
+        delete [] config.first[0];
+        delete [] config.first[1];
+
+        delete [] config.first;
+    }
 }
 
 bool SuspendableContainer::suspend_tracking() const

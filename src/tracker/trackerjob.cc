@@ -5,10 +5,10 @@
 
 namespace WT {
 
-TrackerJob::TrackerJob(std::chrono::seconds read_interval, int save_interval, const std::string &filename)
-    : period(read_interval),
-      store_cnt(save_interval),
-      suspendable("/home/loganek/repos/workertracker/build/src/dummytrackerplugin")
+TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
+    : period(configuration->get_general_param<int>("read-period").get()),
+      store_cnt(configuration->get_general_param<int>("save-period").get()),
+      suspendable("/home/loganek/repos/build-workertracker-Desktop-Debug/src/dummytrackerplugin", configuration)
 {
     window_info_provider = WindowInfoProvider::registry();
 
@@ -18,7 +18,7 @@ TrackerJob::TrackerJob(std::chrono::seconds read_interval, int save_interval, co
         stop();
     }
 
-    data_access = std::make_shared<SQLiteDataAccess>(filename);
+    data_access = std::make_shared<SQLiteDataAccess>(configuration->get_general_param("data-path").get());
 
     data_access->open(false);
 }

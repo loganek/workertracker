@@ -4,6 +4,8 @@
 #include "trackerjob.h"
 #include "backgroundrunner.h"
 
+#include "wtcommon/configuration.h"
+
 #include <boost/program_options.hpp>
 
 namespace WT {
@@ -15,16 +17,14 @@ class WorkerTracker
     std::shared_ptr<TrackerJob> job;
     std::shared_ptr<BackgroundRunner> bg_runner;
 
-    const int save_period_default = 12;
-    const int read_period_default = 5;
+    std::shared_ptr<Configuration> configuration;
 
     std::string pid_file_name;
-    int save_period;
-    int read_period;
 
     boost::program_options::variables_map vm;
 
     bool process_parameters(int argc, char **argv);
+    void load_configuration();
 
     WorkerTracker(WorkerTracker const&) = delete;
     WorkerTracker(WorkerTracker&&) = delete;

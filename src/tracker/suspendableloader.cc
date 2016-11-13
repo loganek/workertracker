@@ -64,6 +64,7 @@ void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
                 WT_LOG_D << "symbol 'create_suspendable' has been found";
                 handlers.push_back(handle);
                 suspendable.push_back(std::shared_ptr<ITrackSuspendable>(create()));
+                WT_LOG_D << "Add pluign " << suspendable.back()->get_name();
             }
         }
     }

@@ -3,6 +3,8 @@
 
 #include "suspendableloader.h"
 
+#include "wtcommon/configuration.h"
+
 #include <string>
 
 namespace WT {
@@ -13,8 +15,10 @@ class SuspendableContainer
 
     std::vector<ITrackSuspendable*> suspendable;
 
+    void load_configuration_to_plugins(const std::shared_ptr<Configuration> &configuration);
+
 public:
-    SuspendableContainer(const std::string &plugin_path);
+    SuspendableContainer(const std::string &plugin_path, const std::shared_ptr<Configuration> &configuration);
 
     bool suspend_tracking() const;
 };

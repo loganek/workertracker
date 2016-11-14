@@ -27,5 +27,6 @@ add_executable(workertracker
 target_link_libraries(workertracker
     wtcommon
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
     ${SYSTEM_SPECIFIC_LIBRARIES})
 

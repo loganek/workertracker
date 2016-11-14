@@ -2,7 +2,6 @@
 
 #include "wtcommon/logger.h"
 
-#include <dlfcn.h>
 #include <boost/filesystem.hpp>
 
 namespace WT {
@@ -15,14 +14,7 @@ SuspendableLoader::SuspendableLoader(const std::string &plugin_dir_path)
 SuspendableLoader::~SuspendableLoader()
 {
     suspendable.clear();
-
-    for (auto handle : handlers)
-    {
-        if (dlclose(handle))
-        {
-            WT_LOG_ERR << "Error on closing handler: " << dlerror();
-        }
-    }
+    handlers.clear();
 }
 
 void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
@@ -45,7 +37,8 @@ void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
 
         if (fs::is_regular_file(path) && path.extension() == ".so")
         {
-            void* handle = dlopen(path.c_str(), RTLD_NOW);
+            // TODO error handling
+            auto handle = std::make_shared<boost::dll::shared_library>(path, boost::dll::load_mode::append_decorations);
             if (!handle)
             {
                 WT_LOG_W << "cannot open dynamic library " << it->path()<< ": "<< dlerror();
@@ -54,7 +47,8 @@ void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
 
             WT_LOG_D << "library " << path << " has been loaded";
 
-            auto create = (ITrackSuspendable* (*)())dlsym(handle, "create_suspendable");
+            typedef WT::ITrackSuspendable* (suspendable_create_t)();
+            auto create = handle->get<suspendable_create_t>("create_suspendable");
             if (!create)
             {
                 WT_LOG_W << "cannot load symbol 'create_suspendable'";

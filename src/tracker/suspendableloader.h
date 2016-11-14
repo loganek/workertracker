@@ -3,6 +3,8 @@
 
 #include "wtcommon/itracksuspendable.h"
 
+#include <boost/dll/shared_library.hpp>
+
 #include <vector>
 #include <functional>
 
@@ -10,7 +12,7 @@ namespace WT {
 
 class SuspendableLoader
 {
-    std::vector<void*> handlers;
+    std::vector<std::shared_ptr<boost::dll::shared_library>> handlers;
     std::vector<std::shared_ptr<ITrackSuspendable>> suspendable;
 
 

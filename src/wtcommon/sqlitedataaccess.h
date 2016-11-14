@@ -3,7 +3,7 @@
 
 #include "dataaccess.h"
 
-#include <sqlite3.h>
+#include "sqlite3/sqlite3.h"
 
 #include <functional>
 #include <vector>

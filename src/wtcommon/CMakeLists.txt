@@ -10,6 +10,6 @@ add_library(wtcommon
     registrable.h)
 
 target_link_libraries(wtcommon
-    ${SQLITE_LIBRARIES}
+    sqlite3
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY})

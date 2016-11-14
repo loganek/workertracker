@@ -7,12 +7,11 @@ find_package(Boost 1.55 COMPONENTS filesystem program_options REQUIRED)
 if (UNIX)
     find_package (PkgConfig REQUIRED)
     pkg_check_modules (GIO2 REQUIRED gio-2.0)
-    pkg_check_modules (SQLITE REQUIRED sqlite3)
 
     include_directories (${GIO2_INCLUDE_DIRS})
     link_directories (${GIO2_LIBRARY_DIRS})
 elseif(WIN32)
-    # TODO find SQLITE3
+
 endif(UNIX)
 
 if (NOT DEFINED WITH_GTK AND NOT DEFINED WITH_QT)

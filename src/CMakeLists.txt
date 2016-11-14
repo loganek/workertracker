@@ -1,3 +1,4 @@
+add_subdirectory(sqlite3)
 add_subdirectory(wtcommon)
 add_subdirectory(tracker)
 add_subdirectory(analyzer)

@@ -1,7 +1,7 @@
 add_library(wtcommon
     datacontainer.cc
     datastorage.h
-#    filestorage.cc
+#    filestorage.cc TODO
     dataaccess.h
     sqlitedataaccess.cc
     logger.cc

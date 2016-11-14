@@ -53,6 +53,18 @@ bool WorkerTracker::process_parameters(int argc, char **argv)
     return true;
 }
 
+std::shared_ptr<BackgroundRunner> WorkerTracker::get_bg_runner()
+{
+    auto bg_runner = BackgroundRunner::registry();
+
+    if (!bg_runner)
+    {
+        WT_LOG(LogLevel::WARNING) << "Background runner has not been registered in the system!";
+    }
+
+    return bg_runner;
+}
+
 int WorkerTracker::run(int argc, char **argv)
 {
     if (!process_parameters(argc, argv))
@@ -60,29 +72,31 @@ int WorkerTracker::run(int argc, char **argv)
         return 0;
     }
 
-    bg_runner = BackgroundRunner::registry();
-
-    if (!bg_runner)
-    {
-        WT_LOG(LogLevel::EMERGENCY) << "Background runner has not been registered in the system!";
-        return -1;
-    }
-
     int ret = 1;
 
     if (vm.count("daemon"))
     {
-        bg_runner->register_kill_method([] (int) {
-            WT::WorkerTracker::instance().job->stop();
-        });
+        if (auto bg_runner = get_bg_runner())
+        {
+            bg_runner->register_kill_method([] (int) {
+                WT::WorkerTracker::instance().job->stop();
+            });
 
-        MethodOutput::set_method(SysLogOutput::output);
-        ret = bg_runner->move_to_background();
+            MethodOutput::set_method(SysLogOutput::output);
+            ret = bg_runner->move_to_background();
+        }
     }
 
     if (vm.count("stop"))
     {
-        ret = bg_runner->kill_process();
+        if (auto bg_runner = get_bg_runner())
+        {
+            ret = bg_runner->kill_process();
+        }
+        else
+        {
+            ret = -1;
+        }
     }
 
     if (ret != 1)

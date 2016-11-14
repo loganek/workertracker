@@ -15,7 +15,6 @@ class WorkerTracker
     const char* const project_name = "workertracker";
 
     std::shared_ptr<TrackerJob> job;
-    std::shared_ptr<BackgroundRunner> bg_runner;
 
     std::shared_ptr<Configuration> configuration;
 
@@ -25,6 +24,8 @@ class WorkerTracker
 
     bool process_parameters(int argc, char **argv);
     void load_configuration();
+
+    static std::shared_ptr<BackgroundRunner> get_bg_runner();
 
     WorkerTracker(WorkerTracker const&) = delete;
     WorkerTracker(WorkerTracker&&) = delete;

@@ -32,9 +32,9 @@ if (WITH_GTK)
     set(FRAMEWORK_SPECIFIC_LIBRARIES ${GTKMM3_LIBRARIES})
 
 elseif(WITH_QT)
-    qt5_wrap_cpp(WTANALYZER_HDR_MOC qtanalyzerwindow.h)
-    qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui)
-    set(FRAMEWORK_SPECIFIC_SOURCES qtanalyzercontroller.cc qtanalyzerwindow.cc  ${WTANALYZER_UI_MOC})
+    qt5_wrap_cpp(WTANALYZER_HDR_MOC qtanalyzerwindow.h qtconfigurationdialog.h)
+    qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui qtconfigurationdialog.ui)
+    set(FRAMEWORK_SPECIFIC_SOURCES qtanalyzercontroller.cc qtanalyzerwindow.cc qtconfigurationdialog.cc ${WTANALYZER_UI_MOC})
     set(FRAMEWORK_SPECIFIC_LIBRARIES ${Qt5Widgets_LIBRARIES})
 endif(WITH_GTK)
 

@@ -14,6 +14,7 @@ int QtAnalyzerController::run(int argc, char **argv)
     {
         dynamic_cast<QtAnalyzerWindow*>(main_window)->show();
         ret = app->exec();
+        app.reset();
     }
 
     return ret;

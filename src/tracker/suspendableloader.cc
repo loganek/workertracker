@@ -35,31 +35,28 @@ void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
         auto path = it->path();
         ++it;
 
-        if (fs::is_regular_file(path) && path.extension() == ".so")
+        if (!fs::is_regular_file(path) || path.extension() != boost::dll::shared_library::suffix())
         {
-            // TODO error handling
-            auto handle = std::make_shared<boost::dll::shared_library>(path, boost::dll::load_mode::append_decorations);
-            if (!handle)
-            {
-                WT_LOG_W << "cannot open dynamic library " << it->path()<< ": "<< dlerror();
-                continue;
-            }
+            continue;
+        }
 
-            WT_LOG_D << "library " << path << " has been loaded";
+        try
+        {
+            WT_LOG_D << "Trying to load plugin: " << path;
+            auto handle = std::make_shared<boost::dll::shared_library>(path);
 
             typedef WT::ITrackSuspendable* (suspendable_create_t)();
             auto create = handle->get<suspendable_create_t>("create_suspendable");
-            if (!create)
-            {
-                WT_LOG_W << "cannot load symbol 'create_suspendable'";
-            }
-            else
-            {
-                WT_LOG_D << "symbol 'create_suspendable' has been found";
-                handlers.push_back(handle);
-                suspendable.push_back(std::shared_ptr<ITrackSuspendable>(create()));
-                WT_LOG_D << "Add pluign " << suspendable.back()->get_name();
-            }
+
+            handlers.push_back(handle);
+            suspendable.push_back(std::shared_ptr<ITrackSuspendable>(create()));
+
+            WT_LOG_I << "Added pluign " << suspendable.back()->get_name();
+        }
+        catch (const boost::system::system_error& err)
+        {
+            WT_LOG_W << "cannot load plugin " << it->path()<< ": "<< err.what();
+            continue;
         }
     }
 }

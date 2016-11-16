@@ -26,38 +26,14 @@ std::ostringstream& prepare_stream(std::ostringstream& os, LogLevel level)
 
 void MethodOutput::output(const std::string& msg, LogLevel level)
 {
-    switch (type)
-    {
-    case LIMITED:
-        out_method_limited(msg);
-        break;
-    case FULL:
-        out_method_full(msg, level);
-        break;
-    default:
-        break;
-    }
+    out_method(msg, level);
 }
 
-MethodOutput::MethodType MethodOutput::type = MethodOutput::LIMITED;
-MethodOutput::method_full_t MethodOutput::out_method_full;
-MethodOutput::method_limited_t MethodOutput::out_method_limited = StdOutput::output;
+MethodOutput::method_t MethodOutput::out_method = [](const std::string& str, LogLevel) { std::cout << str << std::flush; };
 
-void MethodOutput::set_method(method_full_t method)
+void MethodOutput::set_method(method_t method)
 {
-    type = FULL;
-    out_method_full = method;
-}
-
-void MethodOutput::set_method(method_limited_t method)
-{
-    type = LIMITED;
-    out_method_limited = method;
-}
-
-void StdOutput::output(const std::string &str)
-{
-    std::cout << str << std::flush;
+    out_method = method;
 }
 
 void SysLogOutput::output(const std::string &str, LogLevel level)
@@ -77,7 +53,7 @@ void SysLogOutput::output(const std::string &str, LogLevel level)
     case LogLevel::INFO:
         sys_level = LOG_INFO;
         break;
-    case LogLevel::DEBUG:
+    default:
         sys_level = LOG_DEBUG;
         break;
     }

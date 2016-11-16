@@ -67,34 +67,25 @@ Logger<TOutputPolicy>::~Logger()
 template <typename TOutputPolicy>
 LogLevel& Logger<TOutputPolicy>::reporting_level()
 {
-    static LogLevel reportingLevel = LogLevel::DEBUG;
+    static LogLevel reportingLevel =
+#if !defined(NDEBUG)
+            LogLevel::DEBUG;
+#else
+            LogLevel::INFO;
+#endif
     return reportingLevel;
 }
 
 class MethodOutput
 {
 private:
-    using method_full_t = std::function<void(const std::string&, LogLevel)>;
-    using method_limited_t = std::function<void(const std::string&)>;
+    using method_t = std::function<void(const std::string&, LogLevel)>;
 
-    static method_full_t out_method_full;
-    static method_limited_t out_method_limited;
-
-    enum MethodType {
-        UNSET, LIMITED, FULL
-    };
-    static MethodType type;
+    static method_t out_method;
 
 public:
     static void output(const std::string& msg, LogLevel level);
-    static void set_method(method_full_t method);
-    static void set_method(method_limited_t method);
-};
-
-class StdOutput
-{
-public:
-    static void output(const std::string& msg);
+    static void set_method(method_t method);
 };
 
 #define WT_IF_LOG(LOG_T, level) \
@@ -108,8 +99,6 @@ public:
     static void init_log(const std::string &daemon_name);
 };
 
-#define WT_STD_LOG(level) WT_IF_LOG(WT::Logger<WT::StdOutput>, level)
-#define WT_SYS_LOG(level) WT_IF_LOG(WT::Logger<WT::SysLogOutput>, level)
 #define WT_LOG(level) WT_IF_LOG(WT::Logger<WT::MethodOutput>, level)
 
 #define WT_LOG_D WT_LOG(WT::LogLevel::DEBUG)

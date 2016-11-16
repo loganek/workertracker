@@ -11,7 +11,9 @@ namespace WT {
 
 WorkerTracker::WorkerTracker()
 {
-    WT::MethodOutput::set_method(StdOutput::output);
+    WT::MethodOutput::set_method([](const std::string& str, LogLevel) {
+        std::cout << str << std::flush;
+    });
 
     load_configuration();
 }
@@ -82,7 +84,6 @@ int WorkerTracker::run(int argc, char **argv)
                 WT::WorkerTracker::instance().job->stop();
             });
 
-            MethodOutput::set_method(SysLogOutput::output);
             ret = bg_runner->move_to_background();
         }
     }
@@ -126,7 +127,7 @@ void WorkerTracker::load_configuration()
 
     config_path /= project_name + std::string(".config");
 
-    WT_LOG_D  << "Load configuration from " << config_path;
+    WT_LOG_I  << "Load configuration from " << config_path;
     configuration = std::make_shared<WT::Configuration>(config_path.string());
 }
 

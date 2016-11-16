@@ -2,6 +2,7 @@
 
 #include "wtconstants.h"
 #include "wtcommon/logger.h"
+#include "wtcommon/unixsyslogloggermethod.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -56,8 +57,8 @@ int Daemonizer::move_to_background()
         return -1;
     }
 
-    SysLogOutput::init_log(daemon_name);
-    MethodOutput::set_method(SysLogOutput::output);
+    UNIXSysLogLoggerMethod::init_log(daemon_name);
+    MethodOutput::set_method(UNIXSysLogLoggerMethod::output);
 
     pid_file_handle = open(pid_file_name.c_str(), O_RDWR|O_CREAT, 0600);
 

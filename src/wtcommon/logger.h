@@ -3,7 +3,6 @@
 
 #include <sstream>
 #include <functional>
-#include <type_traits>
 
 namespace WT {
 
@@ -91,13 +90,6 @@ public:
 #define WT_IF_LOG(LOG_T, level) \
     if (level > LOG_T::reporting_level()); \
     else LOG_T().get(level)
-
-class SysLogOutput
-{
-public:
-    static void output(const std::string& msg, LogLevel level);
-    static void init_log(const std::string &daemon_name);
-};
 
 #define WT_LOG(level) WT_IF_LOG(WT::Logger<WT::MethodOutput>, level)
 

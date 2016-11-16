@@ -1,3 +1,10 @@
+if (UNIX)
+    set(SYSTEM_SPECIFIC_SOURCES
+        unixsyslogloggermethod.cc)
+elseif(WIN32)
+
+endif(UNIX)
+
 add_library(wtcommon
     datacontainer.cc
     datastorage.h
@@ -7,7 +14,8 @@ add_library(wtcommon
     logger.cc
     itracksuspendable.h
     configuration.cc
-    registrable.h)
+    registrable.h
+    ${SYSTEM_SPECIFIC_SOURCES})
 
 target_link_libraries(wtcommon
     sqlite3

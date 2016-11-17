@@ -14,15 +14,15 @@ class XWindowInfoProvider : public WindowInfoProvider
     Display *display;
     Info window_info;
 
-    std::string get_window_title(Window win) const;
-    std::string get_app_name(Window win) const;
+    std::string get_window_title(Window win);
+    std::string get_app_name(Window win);
 
     static RegistrarSingle<XWindowInfoProvider> registrar;
 
 public:
     XWindowInfoProvider(const char* display_name = nullptr);
 
-    Info get_current_window_info() const override;
+    Info get_current_window_info() override;
 };
 
 }

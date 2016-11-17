@@ -18,7 +18,7 @@ static void strip_non_printable(std::string &str)
     str.erase(remove_if(str.begin(),str.end(), [](char c) { return !::isprint(c);}), str.end());
 }
 
-std::string XWindowInfoProvider::get_window_title(Window win) const
+std::string XWindowInfoProvider::get_window_title(Window win)
 {
     std::string ret;
 
@@ -54,7 +54,7 @@ std::string XWindowInfoProvider::get_window_title(Window win) const
     return ret.empty() ? std::string("(unknown)") : ret;
 }
 
-std::string XWindowInfoProvider::get_app_name(Window win) const
+std::string XWindowInfoProvider::get_app_name(Window win)
 {
     std::string ret;
 
@@ -96,7 +96,7 @@ std::string XWindowInfoProvider::get_app_name(Window win) const
 }
 
 
-XWindowInfoProvider::Info XWindowInfoProvider::get_current_window_info() const
+XWindowInfoProvider::Info XWindowInfoProvider::get_current_window_info()
 {
     Window window;
     int rev;

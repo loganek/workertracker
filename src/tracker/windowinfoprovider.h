@@ -18,7 +18,7 @@ public:
 
     virtual ~WindowInfoProvider() {}
 
-    virtual Info get_current_window_info() const = 0;
+    virtual Info get_current_window_info() = 0;
 };
 
 }

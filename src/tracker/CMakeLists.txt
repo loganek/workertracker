@@ -10,7 +10,8 @@ if (UNIX)
         X11
         pthread)
 elseif(WIN32)
-
+    set(SYSTEM_SPECIFIC_SOURCES
+        mswindowswindowinfoprovider.cc)
 endif(UNIX)
 
 add_executable(workertracker

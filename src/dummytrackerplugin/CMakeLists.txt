@@ -1,2 +1,6 @@
-add_library(dummytrackerplugin SHARED dummytrackerplugin.cc)
+add_library(dummytrackerplugin 
+    SHARED
+    dummytrackerplugin.cc)
 
+target_link_libraries(dummytrackerplugin
+    wtcommon)

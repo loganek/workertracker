@@ -116,7 +116,13 @@ int WorkerTracker::run(int argc, char **argv)
 void WorkerTracker::load_configuration()
 {
     const char *home_env = std::getenv("HOME");
-    boost::filesystem::path config_path(home_env != nullptr ? home_env : "");
+
+    if (!home_env)
+    {
+        home_env = std::getenv("HOMEPATH");
+    }
+
+    boost::filesystem::path config_path(home_env ? home_env : "");
     config_path /= std::string(".") + project_name;
 
     // TODO might throw exception

@@ -26,7 +26,7 @@ class GNOMEScreenSaver : public ITrackSuspendable
 public:
     virtual ~GNOMEScreenSaver();
 
-    bool suspend_tracking() override;
+    bool suspend_tracking(const char *app_name, const char *window_title) override;
     void load_configuration(const char **/*config*/[2], int /*size*/) override {}
 
     const char* get_name() override { return "gnomescreensaver"; }

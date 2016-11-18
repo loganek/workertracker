@@ -41,7 +41,7 @@ void TrackerJob::read_window_info()
 
         entry.time_end = std::time(nullptr);
 
-        if (suspendable.suspend_tracking())
+        if (suspendable.suspend_tracking(window_info))
         {
             WT_LOG(LogLevel::DEBUG) << "Logging suspended";
 

@@ -10,7 +10,7 @@ class ITrackSuspendable : public RegistrableCollection<ITrackSuspendable>
 public:
     virtual ~ITrackSuspendable() {}
 
-    virtual bool suspend_tracking() = 0;
+    virtual bool suspend_tracking(const char *app_name, const char *window_title) = 0;
 
     virtual void load_configuration(const char **config[2], int size) = 0;
 

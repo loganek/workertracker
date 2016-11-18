@@ -9,7 +9,7 @@ class DummyTrackerPlugin : public WT::ITrackSuspendable
     bool silent = false;
 
 public:
-    bool suspend_tracking() override
+    bool suspend_tracking(const char *, const char *) override
     {
         if (!silent)
         {

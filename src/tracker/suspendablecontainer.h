@@ -2,6 +2,7 @@
 #define SUSPENDABLECONTAINER_H
 
 #include "suspendableloader.h"
+#include "windowinfoprovider.h"
 
 #include "wtcommon/configuration.h"
 
@@ -20,7 +21,7 @@ class SuspendableContainer
 public:
     SuspendableContainer(const std::shared_ptr<Configuration> &configuration);
 
-    bool suspend_tracking() const;
+    bool suspend_tracking(const WindowInfoProvider::Info &window_info) const;
 };
 
 }

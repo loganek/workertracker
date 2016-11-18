@@ -36,18 +36,24 @@ void SuspendableContainer::load_configuration_to_plugins(const std::shared_ptr<C
     }
 }
 
-bool SuspendableContainer::suspend_tracking() const
+bool SuspendableContainer::suspend_tracking(const WindowInfoProvider::Info &window_info) const
 {
     WT_LOG_D << "Checking if tracking should be suspended...";
 
     for (auto susp : loader.get_suspendable())
     {
-        if (susp->suspend_tracking()) return true;
+        if (susp->suspend_tracking(window_info.app_name.c_str(), window_info.window_title.c_str()))
+        {
+            return true;
+        }
     }
 
     for (auto susp : RegistrableCollection<ITrackSuspendable>::registry())
     {
-        if (susp.second->suspend_tracking()) return true;
+        if (susp.second->suspend_tracking(window_info.app_name.c_str(), window_info.window_title.c_str()))
+        {
+            return true;
+        }
     }
 
     WT_LOG_D << "Tracking NOT suspended";

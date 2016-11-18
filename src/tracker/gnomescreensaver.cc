@@ -78,7 +78,7 @@ GDBusMessage *GNOMEScreenSaver::send_get_active_message()
 }
 
 
-bool GNOMEScreenSaver::suspend_tracking()
+bool GNOMEScreenSaver::suspend_tracking(const char *, const char *)
 {
     if (!is_running())
     {

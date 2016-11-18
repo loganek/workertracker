@@ -17,8 +17,10 @@ add_library(wtcommon
     registrable.h
     ${SYSTEM_SPECIFIC_SOURCES})
 
-set_target_properties(wtcommon PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})    
-  
+if(DEFINED BUILD_FLAGS)
+    set_target_properties(wtcommon PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
+endif()
+    
 target_link_libraries(wtcommon
     sqlite3
     ${Boost_FILESYSTEM_LIBRARY}

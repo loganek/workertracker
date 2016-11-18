@@ -115,14 +115,13 @@ int WorkerTracker::run(int argc, char **argv)
 
 void WorkerTracker::load_configuration()
 {
-    const char *home_env = std::getenv("HOME");
+    boost::filesystem::path config_path;
+#if defined(BOOST_POSIX_API)
+    config_path = std::getenv("HOME");
+#elif defined(BOOST_WINDOWS_API)
+    config_path = boost::filesystem::path(std::getenv("HOMEDRIVE")) / std::getenv("HOMEPATH");
+#endif
 
-    if (!home_env)
-    {
-        home_env = std::getenv("HOMEPATH");
-    }
-
-    boost::filesystem::path config_path(home_env ? home_env : "");
     config_path /= std::string(".") + project_name;
 
     // TODO might throw exception

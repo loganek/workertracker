@@ -15,6 +15,12 @@ void SuspendableContainer::load_configuration_to_plugins(const std::shared_ptr<C
     for (auto susp : loader.get_suspendable())
     {
         auto config = configuration->get_plugin_configuration(susp->get_name());
+
+        if (!config.first)
+        {
+            continue;
+        }
+
         susp->load_configuration((const char***)config.first, config.second);
 
         for (int i = 0; i < config.second; i++)

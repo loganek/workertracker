@@ -55,7 +55,7 @@ void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
         }
         catch (const boost::system::system_error& err)
         {
-            WT_LOG_W << "cannot load plugin " << it->path()<< ": "<< err.what();
+            WT_LOG_W << "cannot load plugin " << path << ": "<< err.what();
             continue;
         }
     }

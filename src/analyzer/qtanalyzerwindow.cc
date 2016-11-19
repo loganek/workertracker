@@ -1,7 +1,7 @@
 #include "qtanalyzerwindow.h"
 #include "ui_qtanalyzerwindow.h"
-
 #include "qtconfigurationdialog.h"
+#include "analyzercontroller.h"
 
 QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,6 +13,10 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
         QtConfigurationDialog* dialog = new QtConfigurationDialog(this);
         dialog->setModal(true);
         dialog->show();
+    });
+
+    connect(ui->searchText, &QLineEdit::textEdited, this, [this] {
+        controller->on_search(ui->searchText->text().toStdString());
     });
 }
 

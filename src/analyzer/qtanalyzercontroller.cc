@@ -25,46 +25,57 @@ IMainWindow* QtAnalyzerController::construct_window()
     return new QtAnalyzerWindow();
 }
 
-static QList<QStandardItem *> prepareRow(const std::string &first,
-                                         long int third)
+QList<QStandardItem*> QtAnalyzerController::create_model_item(const std::string &name, qlonglong time)
 {
     QList<QStandardItem *> rowItems;
-    rowItems << new QStandardItem(QString::fromStdString(first));
-    rowItems << new QStandardItem(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(third))));
+
+    auto time_string = AnalyzerController::time_to_display(std::chrono::seconds(time));
+    rowItems << new QStandardItem(QString::fromStdString(time_string));
+
+    rowItems << new QStandardItem(QString::fromStdString(name));
+
+    auto item = new QStandardItem();
+    item->setData(QVariant(time), Qt::DisplayRole);
+    rowItems << item;
+
     return rowItems;
 }
 
 void QtAnalyzerController::load_model_to_view(const WT::DataContainer &container)
 {
-    auto treeView = dynamic_cast<QtAnalyzerWindow*>(main_window)->get_tree_view();
-    auto standardModel = new QStandardItemModel();
-    QStandardItem *root_item = standardModel->invisibleRootItem();
+    auto standard_model = new QStandardItemModel();
+    QStandardItem *root_item = standard_model->invisibleRootItem();
 
     for (auto app : container.get_keys())
     {
-        QList<QStandardItem *> app_row = prepareRow(app, 0);
-        long int sum = 0;
+        QList<QStandardItem *> app_row = create_model_item(app, 0);
+        qlonglong total_time = 0;
         for (auto details : container.get_values(app))
         {
-            auto tme = container.get_duration(app, details).count();
-            QList<QStandardItem *> detail_row = prepareRow(details, tme);
-            app_row.first()->appendRow(detail_row);
+            auto duration = container.get_duration(app, details).count();
+            app_row.first()->appendRow(create_model_item(details, duration));
 
-            sum += tme;
+            total_time += duration;
         }
 
-        app_row[1] = new QStandardItem(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(sum))));
+        app_row[0]->setData(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(total_time))), Qt::DisplayRole);
+
         root_item->appendRow(app_row);
     }
 
-    treeView->setModel(standardModel);
-    treeView->expandAll();
-    treeView->resizeColumnToContents(0);
+    proxy_model.setSourceModel(standard_model);
+
+    auto tree_view = dynamic_cast<QtAnalyzerWindow*>(main_window)->get_tree_view();
+    tree_view->setModel(&proxy_model);
+    tree_view->expandAll();
+    tree_view->resizeColumnToContents(1);
+    tree_view->hideColumn(2);
 }
 
 
 void QtAnalyzerController::apply_filter()
 {
+    proxy_model.setFilterRegExp(filter_pattern);
 }
 
 QtAnalyzerController::RegistrarSingle<QtAnalyzerController> QtAnalyzerController::registrar;

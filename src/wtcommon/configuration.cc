@@ -45,19 +45,16 @@ void Configuration::init_default()
     }
 }
 
-void Configuration::print_all_general_params() const
-{
-    auto general = prop_tree.get_child(general_name);
-
-    for (auto p : general)
-    {
-        WT_LOG_D << "Configuration parameter: " << p.first.data() << ": " << p.second.data();
-    }
-}
-
 void Configuration::save_configuration()
 {
-    boost::property_tree::json_parser::write_json(path, prop_tree);
+    try
+    {
+        boost::property_tree::json_parser::write_json(path, prop_tree);
+    }
+    catch (const boost::property_tree::json_parser_error &error)
+    {
+        WT_LOG_ERR << "Cannot save configuration: " << error.what();
+    }
 }
 
 boost::optional<std::string> Configuration::get_config_node(const std::string &category, const std::string &parameter) const
@@ -86,14 +83,13 @@ void Configuration::set_general_param(const std::string &param, const std::strin
 
 std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name) const
 {
-    char*** config = nullptr;
+    char*** config = new char**[2] {nullptr, nullptr};
 
     auto plugin_cfg = prop_tree.get_child_optional("plugin_" + plugin_name);
     int size = 0;
 
     if (plugin_cfg && plugin_cfg.get().size() > 0)
     {
-        config = new char**[2];
         config[0] = new char*[plugin_cfg.get().size()];
         config[1] = new char*[plugin_cfg.get().size()];
 
@@ -110,12 +106,24 @@ std::pair<char***, int> Configuration::get_plugin_configuration(const std::strin
     return std::make_pair(config, size);
 }
 
+void Configuration::free_configuration(const std::pair<char***, int> &config)
+{
+    for (int i = 0; i < config.second; i++)
+    {
+        delete [] config.first[0][i];
+        delete [] config.first[1][i];
+    }
+
+    delete [] config.first[0];
+    delete [] config.first[1];
+}
+
 template<>
 boost::optional<int> Configuration::get_general_param(const std::string &param) const
 {
     auto v = get_general_param(param);
-    if (!v) return boost::none;
-    return std::stoi(v.get());
+
+    return v ? boost::make_optional(std::stoi(v.get())) : boost::none;
 }
 
 }

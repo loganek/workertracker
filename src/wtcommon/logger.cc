@@ -6,7 +6,7 @@
 
 namespace WT {
 
-std::string to_string(LogLevel level)
+static std::string to_string(LogLevel level)
 {
     static const char* const buffer[] = {"EMERGENCY", "ERROR", "WARNING", "INFO", "DEBUG"};
     return buffer[static_cast<std::underlying_type_t<LogLevel>>(level)];

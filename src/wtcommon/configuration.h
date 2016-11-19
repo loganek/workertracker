@@ -21,6 +21,7 @@ public:
     void save_configuration();
 
     std::pair<char***, int> get_plugin_configuration(const std::string &plugin_name) const;
+    static void free_configuration(const std::pair<char***, int> &config);
 
     boost::optional<std::string> get_general_param(const std::string &param) const;
 
@@ -34,8 +35,6 @@ public:
     {
         set_general_param(param, std::to_string(value));
     }
-
-    void print_all_general_params() const;
 };
 
 }

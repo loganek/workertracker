@@ -105,8 +105,6 @@ int WorkerTracker::run(int argc, char **argv)
         return ret;
     }
 
-    configuration->print_all_general_params();
-
     job = std::make_shared<TrackerJob>(configuration);
     job->run();
 

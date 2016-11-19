@@ -6,6 +6,7 @@
 
 #include "wtcommon/configuration.h"
 
+#include <functional>
 #include <string>
 
 namespace WT {
@@ -17,6 +18,8 @@ class SuspendableContainer
     std::vector<ITrackSuspendable*> suspendable;
 
     void load_configuration_to_plugins(const std::shared_ptr<Configuration> &configuration);
+
+    bool foreach_suspendable(std::function<bool(const std::shared_ptr<ITrackSuspendable>&)> func) const;
 
 public:
     SuspendableContainer(const std::shared_ptr<Configuration> &configuration);

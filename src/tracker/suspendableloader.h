@@ -15,7 +15,7 @@ class SuspendableLoader
     std::vector<std::shared_ptr<boost::dll::shared_library>> handlers;
     std::vector<std::shared_ptr<ITrackSuspendable>> suspendable;
 
-
+    void try_load_plugin(const std::string &path);
     void load_handlers(const std::string &plugin_dir_path);
 
 public:

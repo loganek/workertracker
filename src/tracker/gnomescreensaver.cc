@@ -31,7 +31,7 @@ bool GNOMEScreenSaver::is_running()
                                                   nullptr,
                                                   nullptr);
 
-    //if (reply)
+    if (reply)
     {
         g_variant_unref(reply);
     }

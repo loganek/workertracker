@@ -1,7 +1,10 @@
 #include "trackerjob.h"
-#include "wtcommon/logger.h"
 #include "gnomescreensaver.h"
+
+#include "wtcommon/logger.h"
 #include "wtcommon/sqlitedataaccess.h"
+
+#include <future>
 
 namespace WT {
 
@@ -29,6 +32,8 @@ void TrackerJob::read_window_info()
     auto locked = std::unique_lock<std::mutex>(mutex);
     entry.time_end = std::time(nullptr);
 
+    std::future<void> persist_result;
+
     while (is_running)
     {
         auto window_info = window_info_provider->get_current_window_info();
@@ -44,21 +49,28 @@ void TrackerJob::read_window_info()
         if (suspendable.suspend_tracking(window_info))
         {
             WT_LOG(LogLevel::DEBUG) << "Logging suspended";
-
             continue;
         }
 
         WT_LOG(LogLevel::DEBUG) << "Saving entry: {" << entry.proc_name << ", " << entry.description << "}";
 
-        data_access->save_entry(entry);
-
-        if (++counter % store_cnt == 0)
+        if (persist_result.valid())
         {
-            WT_LOG(LogLevel::DEBUG) << "Persisiting records";
-            // TODO should be async:
-            data_access->persist_records();
-            counter = 0;
+            persist_result.get();
         }
+
+        persist_result = std::future<void>(std::async([this, &counter] {
+            data_access->save_entry(entry);
+
+            // TODO move this to data access, so the interface will have only
+            // save_entry() method.
+            if (++counter % store_cnt == 0)
+            {
+                WT_LOG(LogLevel::DEBUG) << "Persisiting records";
+                data_access->persist_records();
+                counter = 0;
+            }
+        }));
     }
 }
 

@@ -113,22 +113,13 @@ int WorkerTracker::run(int argc, char **argv)
 
 void WorkerTracker::load_configuration()
 {
-    boost::filesystem::path config_path;
-#if defined(BOOST_POSIX_API)
-    config_path = std::getenv("HOME");
-#elif defined(BOOST_WINDOWS_API)
-    config_path = boost::filesystem::path(std::getenv("HOMEDRIVE")) / std::getenv("HOMEPATH");
-#endif
-
-    config_path /= std::string(".") + project_name;
+    boost::filesystem::path config_path = Configuration::get_default_config_path();
 
     // TODO might throw exception
-    if (!boost::filesystem::exists(config_path))
+    if (!boost::filesystem::exists(config_path.parent_path()))
     {
-        boost::filesystem::create_directories(config_path);
+        boost::filesystem::create_directories(config_path.parent_path());
     }
-
-    config_path /= project_name + std::string(".config");
 
     WT_LOG_I  << "Load configuration from " << config_path;
     configuration = std::make_shared<WT::Configuration>(config_path.string());

@@ -12,8 +12,6 @@ namespace WT {
 
 class WorkerTracker
 {
-    const char* const project_name = "workertracker";
-
     std::shared_ptr<TrackerJob> job;
 
     std::shared_ptr<Configuration> configuration;

@@ -9,6 +9,8 @@
 
 namespace WT {
 
+const std::string Configuration::project_name = "workertracker";
+
 Configuration::Configuration(const std::string &path)
     : path(path)
 {
@@ -124,6 +126,25 @@ boost::optional<int> Configuration::get_general_param(const std::string &param) 
     auto v = get_general_param(param);
 
     return v ? boost::make_optional(std::stoi(v.get())) : boost::none;
+}
+
+std::string Configuration::get_default_config_path()
+{
+    static boost::filesystem::path config_path;
+
+    if (config_path.empty())
+    {
+#if defined(BOOST_POSIX_API)
+        config_path = std::getenv("HOME");
+#elif defined(BOOST_WINDOWS_API)
+        config_path = boost::filesystem::path(std::getenv("HOMEDRIVE")) / std::getenv("HOMEPATH");
+#endif
+
+        config_path /= std::string(".") + project_name;
+        config_path /= project_name + ".config";
+    }
+
+    return config_path.string();
 }
 
 }

@@ -11,6 +11,7 @@ class Configuration
     std::string path;
 
     const std::string general_name = "general";
+    const static std::string project_name;
 
     void init_default();
     boost::optional<std::string> get_config_node(const std::string &category, const std::string &parameter) const;
@@ -35,6 +36,8 @@ public:
     {
         set_general_param(param, std::to_string(value));
     }
+
+    static std::string get_default_config_path();
 };
 
 }

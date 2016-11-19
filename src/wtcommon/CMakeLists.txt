@@ -8,7 +8,6 @@ endif(UNIX)
 
 add_library(wtcommon
     datacontainer.cc
-    datastorage.h
     dataaccess.h
     sqlitedataaccess.cc
     logger.cc

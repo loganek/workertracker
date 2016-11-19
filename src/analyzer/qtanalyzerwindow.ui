@@ -57,12 +57,24 @@
     </property>
     <addaction name="actionConfiguration"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="loadDataFileAction"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionConfiguration">
    <property name="text">
     <string>Configuration...</string>
+   </property>
+  </action>
+  <action name="loadDataFileAction">
+   <property name="text">
+    <string>Load data file...</string>
    </property>
   </action>
  </widget>

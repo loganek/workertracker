@@ -2,6 +2,7 @@
 
 #include "wtcommon/sqlitedataaccess.h"
 #include "wtcommon/logger.h"
+#include "wtcommon/configuration.h"
 
 #include <boost/date_time.hpp>
 
@@ -10,7 +11,9 @@ int AnalyzerController::run(int, char **)
     main_window = construct_window();
     main_window->set_controller(this);
 
-    load_from_file("/home/loganek/.workertracker/data.dat");
+    WT::Configuration config(WT::Configuration::get_default_config_path());
+
+    load_from_file(config.get_general_param("data-path").get());
 
     return 0;
 }

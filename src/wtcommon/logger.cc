@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iostream>
 #include <chrono>
+#include <iomanip>
 
 namespace WT {
 
@@ -17,7 +18,9 @@ std::ostringstream& prepare_stream(std::ostringstream& os, LogLevel level)
     auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto now_tm = std::localtime(&now_time);
 
-    os << "- " << now_tm->tm_hour << ":" << now_tm->tm_min << ":" << now_tm->tm_sec;
+    os << "- " << std::setfill('0') << std::setw(2) << now_tm->tm_hour
+       << ":" << std::setfill('0') << std::setw(2) << now_tm->tm_min
+       << ":" << std::setfill('0') << std::setw(2) << now_tm->tm_sec;
     os << " " << to_string(level) << ": ";
 
     return os;

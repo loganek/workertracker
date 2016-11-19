@@ -15,9 +15,18 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
         dialog->show();
     });
 
-    connect(ui->searchText, &QLineEdit::textEdited, this, [this] {
-        controller->on_search(ui->searchText->text().toStdString());
+    connect(ui->caseSensitiveCheckBox, &QCheckBox::stateChanged, this, [this] (int) {
+        perform_search();
     });
+
+    connect(ui->searchText, &QLineEdit::textEdited, this, [this] {
+        perform_search();
+    });
+}
+
+void QtAnalyzerWindow::perform_search()
+{
+    controller->on_search(ui->searchText->text().toStdString(), ui->caseSensitiveCheckBox->isChecked());
 }
 
 QtAnalyzerWindow::~QtAnalyzerWindow()

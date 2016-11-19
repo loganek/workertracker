@@ -15,6 +15,8 @@ class QtAnalyzerWindow : public QMainWindow, public IMainWindow
 {
     Q_OBJECT
 
+    void perform_search();
+
 public:
     explicit QtAnalyzerWindow(QWidget *parent = 0);
     ~QtAnalyzerWindow();

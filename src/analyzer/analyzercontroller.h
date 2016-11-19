@@ -28,7 +28,7 @@ public:
     virtual ~AnalyzerController() {}
 
     virtual int run(int argc, char **argv);
-    void on_search(const std::string &search_text);
+    void on_search(const std::string &search_text, bool case_sensitive);
     void load_from_file(const std::string &filename);
 
     static std::time_t seconds_from_epoch(const std::string& s);

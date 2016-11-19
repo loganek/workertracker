@@ -53,11 +53,16 @@ std::time_t AnalyzerController::seconds_from_epoch(const std::string& s)
     return diff.ticks() / bt::time_duration::rep_type::ticks_per_second;
 }
 
-void AnalyzerController::on_search(const std::string &search_text)
+void AnalyzerController::on_search(const std::string &search_text, bool case_sensitive)
 {
     try
     {
-        filter_pattern = search_text.empty() ? boost::none : boost::make_optional(std::regex(search_text));
+        std::regex::flag_type flags = std::regex::ECMAScript;
+        if (!case_sensitive)
+        {
+            flags |= std::regex::icase;
+        }
+        filter_pattern = search_text.empty() ? boost::none : boost::make_optional(std::regex(search_text, flags));
     }
     catch (const std::regex_error &ex)
     {

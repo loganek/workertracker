@@ -20,6 +20,21 @@ bool QTFilterProxyModel::filterAcceptsRow(int sourceRow,
 
 }
 
+bool QTFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    int left_row  = left.row();
+    int right_row = right.row();
+    int compared_column = 2;
+
+    QModelIndex left_idx = sourceModel()->index(left_row, compared_column, left.parent());
+    QModelIndex right_idx = sourceModel()->index(right_row, compared_column, right.parent());
+
+    qlonglong leftData = sourceModel()->data(left_idx).toLongLong();
+    qlonglong rightData = sourceModel()->data(right_idx).toLongLong();
+
+    return leftData < rightData;
+}
+
 void QTFilterProxyModel::setFilterRegExp(const boost::optional<std::regex> &filter)
 {
     filter_pattern = filter;

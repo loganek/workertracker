@@ -59,6 +59,7 @@ void QtAnalyzerController::load_model_to_view(const WT::DataContainer &container
         }
 
         app_row[0]->setData(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(total_time))), Qt::DisplayRole);
+        app_row[2]->setData(total_time, Qt::DisplayRole);
         root_item->appendRow(app_row);
     }
 

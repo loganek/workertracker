@@ -12,6 +12,8 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->treeView->setSortingEnabled(true);
+
     total_label = new QLabel();
     statusBar()->addWidget(total_label);
 

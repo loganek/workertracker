@@ -45,6 +45,7 @@ endif(WITH_GTK)
 add_executable(workertracker-analyzer
     main.cc
     analyzercontroller.cc
+    filtertokenizer.cc
     imainwindow.h
     ${FRAMEWORK_SPECIFIC_SOURCES})
 

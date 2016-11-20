@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(workertracker)
 
+include_directories(${PROJECT_SOURCE_DIR}/src)
+
 find_package(Boost 1.61 COMPONENTS system filesystem program_options REQUIRED)
 
 if (UNIX)
@@ -46,8 +48,13 @@ endif(WITH_GTK)
 
 
 set(PROJECT_SOURCE_DIR "${workertracker_SOURCE_DIR}/src")
-include_directories("${Boost_INCLUDE_DIRS}")
+include_directories("${Boost_INCLUDE_DIRS}" )
 
 include_directories("${workertracker_SOURCE_DIR}/src")
 
 add_subdirectory(src)
+
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+add_subdirectory(tests)

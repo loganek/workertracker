@@ -88,4 +88,3 @@ TEST(FilterTokenizerTest, StringToken_InvalidIntegerLiteral)
 {
     EXPECT_THROW(FilterTokenizer("123a").get_tokens(), std::runtime_error);
 }
-

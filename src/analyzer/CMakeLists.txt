@@ -47,6 +47,7 @@ add_executable(workertracker-analyzer
     analyzercontroller.cc
     filtertokenizer.cc
     imainwindow.h
+    filterexpressionparser.cc
     ${FRAMEWORK_SPECIFIC_SOURCES})
 
 target_link_libraries(workertracker-analyzer

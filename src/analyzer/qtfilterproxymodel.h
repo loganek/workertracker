@@ -12,6 +12,7 @@ class QTFilterProxyModel : public QSortFilterProxyModel
     Q_OBJECT
 
     boost::optional<std::regex> filter_pattern;
+    qlonglong total_time;
 
     void update_parents_values();
 
@@ -21,6 +22,7 @@ protected:
 public:
     QTFilterProxyModel(QObject *parent = 0);
     void setFilterRegExp(const boost::optional<std::regex> &filter);
+    qlonglong get_total_time() const { return total_time; }
 };
 
 #endif // QTFILTERPROXYMODEL_H

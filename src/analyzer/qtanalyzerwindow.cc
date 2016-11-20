@@ -4,12 +4,16 @@
 #include "analyzercontroller.h"
 
 #include <QFileDialog>
+#include <QLabel>
 
 QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::QtAnalyzerWindow)
 {
     ui->setupUi(this);
+
+    total_label = new QLabel();
+    statusBar()->addWidget(total_label);
 
     ui->loadDataFileAction->setShortcut(Qt::Key_O | Qt::CTRL);
     connect(ui->loadDataFileAction, &QAction::triggered, this, [this] {
@@ -34,6 +38,13 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
 void QtAnalyzerWindow::perform_search()
 {
     controller->on_search(ui->searchText->text().toStdString(), ui->caseSensitiveCheckBox->isChecked());
+    update_total_time();
+}
+
+void QtAnalyzerWindow::update_total_time()
+{
+    total_label->setText(QString("Total time: %1").arg(QString::fromStdString(
+                                                           AnalyzerController::time_to_display(controller->get_total_time()))));
 }
 
 void QtAnalyzerWindow::load_data_file()
@@ -44,6 +55,16 @@ void QtAnalyzerWindow::load_data_file()
     {
         controller->load_from_file(file_name.toStdString());
     }
+}
+
+void QtAnalyzerWindow::update_for_new_model()
+{
+    ui->treeView->expandAll();
+    ui->treeView->resizeColumnToContents(1);
+    ui->treeView->hideColumn(2);
+
+    // TODO perform_search should be requested by controller
+    perform_search();
 }
 
 QtAnalyzerWindow::~QtAnalyzerWindow()

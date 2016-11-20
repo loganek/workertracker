@@ -32,6 +32,7 @@ void QTFilterProxyModel::setFilterRegExp(const boost::optional<std::regex> &filt
 
 void QTFilterProxyModel::update_parents_values()
 {
+    total_time = 0;
     for (int r = 0; r < rowCount(); r++)
     {
         QModelIndex parent_index = index(r, 0);
@@ -42,6 +43,8 @@ void QTFilterProxyModel::update_parents_values()
             QVariant v = data(index(child_row, 2, parent_index));
             total += v.toLongLong();
         }
+
+        total_time += total;
 
         setData(index(r, 2), QVariant(total));
         setData(index(r, 0), QVariant(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(total)))));

@@ -59,7 +59,6 @@ void QtAnalyzerController::load_model_to_view(const WT::DataContainer &container
         }
 
         app_row[0]->setData(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(total_time))), Qt::DisplayRole);
-
         root_item->appendRow(app_row);
     }
 
@@ -67,11 +66,9 @@ void QtAnalyzerController::load_model_to_view(const WT::DataContainer &container
 
     auto tree_view = dynamic_cast<QtAnalyzerWindow*>(main_window)->get_tree_view();
     tree_view->setModel(&proxy_model);
-    tree_view->expandAll();
-    tree_view->resizeColumnToContents(1);
-    tree_view->hideColumn(2);
-}
 
+    main_window->update_for_new_model();
+}
 
 void QtAnalyzerController::apply_filter()
 {

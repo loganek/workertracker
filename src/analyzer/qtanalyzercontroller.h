@@ -23,6 +23,8 @@ class QtAnalyzerController : public AnalyzerController
 
 public:
     int run(int argc, char **argv) override;
+
+    std::chrono::seconds get_total_time() override { return std::chrono::seconds(proxy_model.get_total_time()); }
 };
 
 #endif // QTANALYZERCONTROLLER_H

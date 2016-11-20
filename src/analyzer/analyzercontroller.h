@@ -31,6 +31,8 @@ public:
     void on_search(const std::string &search_text, bool case_sensitive);
     void load_from_file(const std::string &filename);
 
+    virtual std::chrono::seconds get_total_time() = 0;
+
     static std::time_t seconds_from_epoch(const std::string& s);
     static std::string time_to_display(std::chrono::seconds sec);
 };

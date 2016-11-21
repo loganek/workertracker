@@ -12,6 +12,8 @@
 
 class AnalyzerController : public WT::RegistrableSingle<AnalyzerController>
 {
+    WT::DataPeriod period;
+
 protected:
     boost::optional<std::regex> filter_pattern = boost::none;
 
@@ -35,6 +37,8 @@ public:
 
     static std::time_t seconds_from_epoch(const std::string& s);
     static std::string time_to_display(std::chrono::seconds sec);
+
+    void set_period(const WT::DataPeriod &period);
 };
 
 #endif // ANALYZERCONTROLLER_H

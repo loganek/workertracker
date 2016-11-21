@@ -6,6 +6,8 @@
 #include <QFileDialog>
 #include <QLabel>
 
+QStringList PredefinedDateTime::values = {"Today", "Yesterday", "This month", "Last month", "Custom"};
+
 QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::QtAnalyzerWindow)
@@ -32,9 +34,67 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
         perform_search();
     });
 
+    connect(ui->fromDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, [this] (QDateTime) {
+        if (set_datetime_transaction) return;
+        ui->dateSelectorComboBox->setCurrentIndex(PredefinedDateTime::CUSTOM);
+        set_current_datetime();
+    });
+
+    connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, [this] (QDateTime) {
+        if (set_datetime_transaction) return;
+        ui->dateSelectorComboBox->setCurrentIndex(PredefinedDateTime::CUSTOM);
+        set_current_datetime();
+    });
+
     connect(ui->searchText, &QLineEdit::textEdited, this, [this] {
         perform_search();
     });
+
+    ui->dateSelectorComboBox->addItems(PredefinedDateTime::values);
+    connect(ui->dateSelectorComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        set_to_predefined_datetime((PredefinedDateTime::Type)index);
+    });
+}
+
+void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime::Type type)
+{
+    auto set_datetime_controls = [this] (QDateTime from, QDateTime to) {
+        ui->toDateTimeEdit->setDateTime(to);
+        ui->fromDateTimeEdit->setDateTime(from);
+    };
+
+    set_datetime_transaction = true;
+
+    auto current_date = QDate::currentDate();
+    switch (type)
+    {
+    case PredefinedDateTime::TODAY:
+        set_datetime_controls((QDateTime)current_date, QDateTime::currentDateTime());
+        break;
+    case PredefinedDateTime::YESTERDAY:
+        set_datetime_controls((QDateTime)current_date.addDays(-1), (QDateTime)current_date);
+        break;
+    case PredefinedDateTime::THIS_MONTH:
+        set_datetime_controls((QDateTime)QDate(current_date.year(), current_date.month(), 1), QDateTime::currentDateTime());
+        break;
+    case PredefinedDateTime::LAST_MONTH:
+    {
+        auto this_month = QDate(current_date.year(), current_date.month(), 1);
+        set_datetime_controls((QDateTime)this_month.addMonths(-1), (QDateTime)this_month);
+        break;
+    }
+    default:
+        set_datetime_transaction = false;
+        return;
+    }
+
+    set_datetime_transaction = false;
+    set_current_datetime();
+}
+
+void QtAnalyzerWindow::set_current_datetime()
+{
+    controller->set_period({ui->fromDateTimeEdit->dateTime().toTime_t(), ui->toDateTimeEdit->dateTime().toTime_t()});
 }
 
 void QtAnalyzerWindow::perform_search()
@@ -77,4 +137,13 @@ QtAnalyzerWindow::~QtAnalyzerWindow()
 QTreeView* QtAnalyzerWindow::get_tree_view() const
 {
     return ui->treeView;
+}
+
+void QtAnalyzerWindow::set_controller(AnalyzerController *controller)
+{
+    IMainWindow::set_controller(controller);
+
+    auto date_time = PredefinedDateTime::TODAY;
+    ui->dateSelectorComboBox->setCurrentIndex((int)date_time);
+    set_to_predefined_datetime(date_time);
 }

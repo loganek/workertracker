@@ -160,6 +160,7 @@ void SQLiteDataAccess::persist_records()
         return;
     }
 
+    // TODO transactions
     std::ostringstream sql_s;
     std::size_t i = 0;
 
@@ -193,7 +194,7 @@ DataContainer SQLiteDataAccess::get_tree(DataPeriod period)
 
     if (period.from > 0 && period.to > 0)
     {
-        sql_s << "WHERE TIME_START >= " << period.from << " && TIME_END <=" << period.to << " ";
+        sql_s << "WHERE TIME_START >= " << period.from << " AND TIME_END <=" << period.to << " ";
     }
     else if (period.from > 0)
     {

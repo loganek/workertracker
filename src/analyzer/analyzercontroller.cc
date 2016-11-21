@@ -82,10 +82,20 @@ void AnalyzerController::load_from_file(const std::string &filename)
     {
         data_access = std::make_shared<WT::SQLiteDataAccess>(filename);
         data_access->open(true);
-        load_model_to_view(data_access->get_tree());
+        load_model_to_view(data_access->get_tree(period));
     }
     catch (const std::runtime_error &ex)
     {
         main_window->print_error(std::string("Error: ") + ex.what());
+    }
+}
+
+void AnalyzerController::set_period(const WT::DataPeriod &period)
+{
+    // TODO Pull mode, signals
+    this->period = period;
+    if (data_access)
+    {
+        load_model_to_view(data_access->get_tree(period));
     }
 }

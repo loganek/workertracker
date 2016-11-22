@@ -1,6 +1,6 @@
 if (UNIX)
     set(SYSTEM_SPECIFIC_SOURCES
-        xwindowinfoprovider.cc
+        x11windowinfoprovider.cc
         gnomescreensaver.cc
         daemonizer.cc)
 

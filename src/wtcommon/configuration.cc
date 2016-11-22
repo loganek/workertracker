@@ -80,7 +80,15 @@ boost::optional<std::string> Configuration::get_general_param(const std::string 
 
 void Configuration::set_general_param(const std::string &param, const std::string &value)
 {
-    prop_tree.get_child(general_name).push_back(boost::property_tree::ptree::value_type(std::make_pair(param, value)));
+    boost::optional<decltype(prop_tree)&> child_node = prop_tree.get_child(general_name).get_child_optional(param);
+    if (child_node)
+    {
+        child_node.get().data() = value;
+    }
+    else
+    {
+        prop_tree.get_child(general_name).push_back(boost::property_tree::ptree::value_type(std::make_pair(param, value)));
+    }
 }
 
 std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name) const

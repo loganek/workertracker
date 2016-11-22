@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(workertracker)
 
+add_definitions(-DWT_PROJECT_NAME="${PROJECT_NAME}")
+
 find_package(Boost 1.61 COMPONENTS system filesystem program_options REQUIRED)
 
 if (UNIX)

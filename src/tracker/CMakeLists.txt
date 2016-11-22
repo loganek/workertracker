@@ -22,7 +22,6 @@ add_executable(workertracker
     suspendableloader.cc
     windowinfoprovider.h
     backgroundrunner.h
-    wtconstants.h
     ${SYSTEM_SPECIFIC_SOURCES})
 
 target_link_libraries(workertracker

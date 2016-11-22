@@ -1,7 +1,5 @@
 #include "daemonizer.h"
 
-#include "wtconstants.h"
-#include "wtcommon/logger.h"
 #include "wtcommon/unixsyslogloggermethod.h"
 
 #include <unistd.h>

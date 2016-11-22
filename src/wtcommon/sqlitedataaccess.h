@@ -38,7 +38,7 @@ public:
     void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
     void persist_records() override;
-    DataContainer get_tree(DataPeriod period = DataPeriod()) override;
+    DataContainer get_tree(DateRange period = DateRange()) override;
 
     virtual ~SQLiteDataAccess();
 };

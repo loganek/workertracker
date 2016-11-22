@@ -3,6 +3,7 @@
 #include "qtconfigurationdialog.h"
 #include "analyzercontroller.h"
 
+#include <QErrorMessage>
 #include <QFileDialog>
 #include <QLabel>
 
@@ -146,4 +147,10 @@ void QtAnalyzerWindow::set_controller(AnalyzerController *controller)
     auto date_time = PredefinedDateTime::TODAY;
     ui->dateSelectorComboBox->setCurrentIndex((int)date_time);
     set_to_predefined_datetime(date_time);
+}
+
+void QtAnalyzerWindow::print_error(const std::string &message)
+{
+    QErrorMessage msg;
+    msg.showMessage(QString::fromStdString(message));
 }

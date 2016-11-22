@@ -185,7 +185,7 @@ void SQLiteDataAccess::persist_records()
     entries.clear();
 }
 
-DataContainer SQLiteDataAccess::get_tree(DataPeriod period)
+DataContainer SQLiteDataAccess::get_tree(DateRange period)
 {
     container.clear();
     std::ostringstream sql_s;

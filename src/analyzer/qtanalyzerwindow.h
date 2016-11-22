@@ -44,7 +44,7 @@ public:
     explicit QtAnalyzerWindow(QWidget *parent = 0);
     ~QtAnalyzerWindow();
 
-    void print_error(const std::string &) override {}
+    void print_error(const std::string &) override;
 
     QTreeView *get_tree_view() const;
 

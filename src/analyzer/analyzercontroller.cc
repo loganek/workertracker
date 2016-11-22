@@ -90,7 +90,7 @@ void AnalyzerController::load_from_file(const std::string &filename)
     }
 }
 
-void AnalyzerController::set_period(const WT::DataPeriod &period)
+void AnalyzerController::set_period(const WT::DateRange &period)
 {
     // TODO Pull mode, signals
     this->period = period;

@@ -13,11 +13,8 @@ namespace WT {
 class WorkerTracker
 {
     std::shared_ptr<TrackerJob> job;
-
     std::shared_ptr<Configuration> configuration;
-
     std::string pid_file_name;
-
     boost::program_options::variables_map vm;
 
     bool process_parameters(int argc, char **argv);

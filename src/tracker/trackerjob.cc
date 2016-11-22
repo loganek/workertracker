@@ -1,5 +1,4 @@
 #include "trackerjob.h"
-#include "gnomescreensaver.h"
 
 #include "wtcommon/logger.h"
 #include "wtcommon/sqlitedataaccess.h"
@@ -30,6 +29,8 @@ void TrackerJob::read_window_info()
 {
     int counter = 0;
     auto locked = std::unique_lock<std::mutex>(mutex);
+
+    DataEntry entry;
     entry.time_end = std::time(nullptr);
 
     std::future<void> persist_result;
@@ -65,7 +66,7 @@ void TrackerJob::read_window_info()
             persist_result.get();
         }
 
-        persist_result = std::future<void>(std::async([this, &counter] {
+        persist_result = std::future<void>(std::async([this, entry, &counter] {
             data_access->save_entry(entry);
 
             // TODO move this to data access, so the interface will have only

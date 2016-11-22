@@ -41,18 +41,24 @@ void TrackerJob::read_window_info()
         entry.description = window_info.window_title;
         entry.proc_name = window_info.app_name;
         entry.time_start = entry.time_end;
-
         terminate.wait_for(locked, period);
-
         entry.time_end = std::time(nullptr);
 
-        if (suspendable.suspend_tracking(window_info))
+        // TODO: it's a hack. I need to figure out better way than this.
+        // And the magic number...
+        if (entry.time_end - entry.time_start > period.count() * 3)
         {
-            WT_LOG(LogLevel::DEBUG) << "Logging suspended";
+            WT_LOG_D << "Logging canceled. Most likely computer has been suspended during the waiting period.";
             continue;
         }
 
-        WT_LOG(LogLevel::DEBUG) << "Saving entry: {" << entry.proc_name << ", " << entry.description << "}";
+        if (suspendable.suspend_tracking(window_info))
+        {
+            WT_LOG_D << "Logging suspended";
+            continue;
+        }
+
+        WT_LOG_D << "Saving entry: {" << entry.proc_name << ", " << entry.description << ", " << (entry.time_end - entry.time_start) << "}";
 
         if (persist_result.valid())
         {
@@ -66,7 +72,7 @@ void TrackerJob::read_window_info()
             // save_entry() method.
             if (++counter % store_cnt == 0)
             {
-                WT_LOG(LogLevel::DEBUG) << "Persisiting records";
+                WT_LOG_D << "Persisiting records";
                 data_access->persist_records();
                 counter = 0;
             }

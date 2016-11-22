@@ -2,9 +2,14 @@
 
 #include "analyzercontroller.h"
 #include "wtcommon/logger.h"
+#include "wtcommon/datetimeutils.h"
+
+#include <QStandardItemModel>
+
 QTFilterProxyModel::QTFilterProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
+    this->setSourceModel(new QStandardItemModel());
 }
 
 bool QTFilterProxyModel::filterAcceptsRow(int sourceRow,
@@ -62,6 +67,6 @@ void QTFilterProxyModel::update_parents_values()
         total_time += total;
 
         setData(index(r, 2), QVariant(total));
-        setData(index(r, 0), QVariant(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(total)))));
+        setData(index(r, 0), QVariant(QString::fromStdString(WT::time_to_display(std::chrono::seconds(total)))));
     }
 }

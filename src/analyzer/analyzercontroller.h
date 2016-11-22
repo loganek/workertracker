@@ -16,27 +16,19 @@ class AnalyzerController : public WT::RegistrableSingle<AnalyzerController>
 
 protected:
     boost::optional<std::regex> filter_pattern = boost::none;
-
     IMainWindow *main_window = nullptr;
-
     std::shared_ptr<WT::DataAccess> data_access;
 
-    virtual void load_model_to_view(const WT::DataContainer &container) = 0;
-
-    virtual void apply_filter() = 0;
+    virtual void load_model(const WT::DataContainer &container) = 0;
     virtual IMainWindow* construct_window() = 0;
 
 public:
     virtual ~AnalyzerController() {}
 
     virtual int run(int argc, char **argv);
-    void on_search(const std::string &search_text, bool case_sensitive);
+
+    virtual void apply_filter(const std::string &search_text, bool case_sensitive);
     void load_from_file(const std::string &filename);
-
-    virtual std::chrono::seconds get_total_time() = 0;
-
-    static std::time_t seconds_from_epoch(const std::string& s);
-    static std::string time_to_display(std::chrono::seconds sec);
 
     void set_period(const WT::DateRange &period);
 };

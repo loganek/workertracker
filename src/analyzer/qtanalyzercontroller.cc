@@ -1,5 +1,6 @@
 #include "qtanalyzercontroller.h"
 #include "qtanalyzerwindow.h"
+#include "wtcommon/datetimeutils.h"
 
 #include <QTreeView>
 #include <QStandardItem>
@@ -29,9 +30,7 @@ QList<QStandardItem*> QtAnalyzerController::create_model_item(const std::string 
 {
     QList<QStandardItem *> rowItems;
 
-    auto time_string = AnalyzerController::time_to_display(std::chrono::seconds(time));
-    rowItems << new QStandardItem(QString::fromStdString(time_string));
-
+    rowItems << new QStandardItem(QString::fromStdString(WT::time_to_display(std::chrono::seconds(time))));
     rowItems << new QStandardItem(QString::fromStdString(name));
 
     auto item = new QStandardItem();
@@ -41,10 +40,10 @@ QList<QStandardItem*> QtAnalyzerController::create_model_item(const std::string 
     return rowItems;
 }
 
-void QtAnalyzerController::load_model_to_view(const WT::DataContainer &container)
+void QtAnalyzerController::load_model(const WT::DataContainer &container)
 {
-    auto standard_model = new QStandardItemModel();
-    QStandardItem *root_item = standard_model->invisibleRootItem();
+    auto standard_model = proxy_model.get_source_model();
+    standard_model->clear();
 
     for (auto app : container.get_keys())
     {
@@ -58,22 +57,23 @@ void QtAnalyzerController::load_model_to_view(const WT::DataContainer &container
             total_time += duration;
         }
 
-        app_row[0]->setData(QString::fromStdString(AnalyzerController::time_to_display(std::chrono::seconds(total_time))), Qt::DisplayRole);
+        app_row[0]->setData(QString::fromStdString(WT::time_to_display(std::chrono::seconds(total_time))), Qt::DisplayRole);
         app_row[2]->setData(total_time, Qt::DisplayRole);
-        root_item->appendRow(app_row);
+        standard_model->invisibleRootItem()->appendRow(app_row);
     }
 
-    proxy_model.setSourceModel(standard_model);
-
-    auto tree_view = dynamic_cast<QtAnalyzerWindow*>(main_window)->get_tree_view();
-    tree_view->setModel(&proxy_model);
+    dynamic_cast<QtAnalyzerWindow*>(main_window)->set_model(&proxy_model);
 
     main_window->update_for_new_model();
+    proxy_model.setFilterRegExp(filter_pattern);
+    main_window->update_total_time(proxy_model.get_total_time());
 }
 
-void QtAnalyzerController::apply_filter()
+void QtAnalyzerController::apply_filter(const std::string &search_text, bool case_sensitive)
 {
+    AnalyzerController::apply_filter(search_text, case_sensitive);
     proxy_model.setFilterRegExp(filter_pattern);
+    main_window->update_total_time(proxy_model.get_total_time());
 }
 
 QtAnalyzerController::RegistrarSingle<QtAnalyzerController> QtAnalyzerController::registrar;

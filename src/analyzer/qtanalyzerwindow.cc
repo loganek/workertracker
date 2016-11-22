@@ -1,13 +1,12 @@
 #include "qtanalyzerwindow.h"
 #include "ui_qtanalyzerwindow.h"
-#include "qtconfigurationdialog.h"
 #include "analyzercontroller.h"
+
+#include "wtcommon/datetimeutils.h"
 
 #include <QErrorMessage>
 #include <QFileDialog>
 #include <QLabel>
-
-QStringList PredefinedDateTime::values = {"Today", "Yesterday", "This month", "Last month", "Custom"};
 
 QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,99 +14,83 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->treeView->setSortingEnabled(true);
-
     total_label = new QLabel();
     statusBar()->addWidget(total_label);
 
+    ui->treeView->setSortingEnabled(true);
     ui->loadDataFileAction->setShortcut(Qt::Key_O | Qt::CTRL);
-    connect(ui->loadDataFileAction, &QAction::triggered, this, [this] {
-        load_data_file();
-    });
+    ui->dateSelectorComboBox->addItems({tr("Today"), tr("Yesterday"), tr("This month"), tr("Last month"), tr("Custom")});
 
-    connect(ui->actionConfiguration, &QAction::triggered, this, [this] {
-        QtConfigurationDialog* dialog = new QtConfigurationDialog(this);
-        dialog->setModal(true);
-        dialog->show();
-    });
-
-    connect(ui->caseSensitiveCheckBox, &QCheckBox::stateChanged, this, [this] (int) {
-        perform_search();
-    });
-
-    connect(ui->fromDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, [this] (QDateTime) {
-        if (set_datetime_transaction) return;
-        ui->dateSelectorComboBox->setCurrentIndex(PredefinedDateTime::CUSTOM);
-        set_current_datetime();
-    });
-
-    connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, [this] (QDateTime) {
-        if (set_datetime_transaction) return;
-        ui->dateSelectorComboBox->setCurrentIndex(PredefinedDateTime::CUSTOM);
-        set_current_datetime();
-    });
-
-    connect(ui->searchText, &QLineEdit::textEdited, this, [this] {
-        perform_search();
-    });
-
-    ui->dateSelectorComboBox->addItems(PredefinedDateTime::values);
-    connect(ui->dateSelectorComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        set_to_predefined_datetime((PredefinedDateTime::Type)index);
-    });
+    connect_signals();
 }
 
-void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime::Type type)
+void QtAnalyzerWindow::connect_signals()
 {
-    auto set_datetime_controls = [this] (QDateTime from, QDateTime to) {
-        ui->toDateTimeEdit->setDateTime(to);
-        ui->fromDateTimeEdit->setDateTime(from);
-    };
+    connect(ui->loadDataFileAction, &QAction::triggered, this, [this] { load_data_file(); });
+    connect(ui->searchText, &QLineEdit::textEdited, this, [this] { perform_search(); });
+    connect(ui->caseSensitiveCheckBox, &QCheckBox::stateChanged, this, [this] (int) { perform_search(); });
 
-    set_datetime_transaction = true;
+    connect(ui->dateSelectorComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        set_to_predefined_datetime((PredefinedDateTime)index);
+    });
+
+    auto on_date_time_changed = [this] (QDateTime) {
+        if (set_datetime_lock) return;
+        ui->dateSelectorComboBox->setCurrentIndex(PredefinedDateTime::CUSTOM);
+        set_period();
+    };
+    connect(ui->fromDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
+    connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
+}
+
+void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime type)
+{
+    QDateTime from, to;
 
     auto current_date = QDate::currentDate();
     switch (type)
     {
     case PredefinedDateTime::TODAY:
-        set_datetime_controls((QDateTime)current_date, QDateTime::currentDateTime());
+        from = (QDateTime)current_date, to = QDateTime::currentDateTime();
         break;
     case PredefinedDateTime::YESTERDAY:
-        set_datetime_controls((QDateTime)current_date.addDays(-1), (QDateTime)current_date);
+        from = (QDateTime)current_date.addDays(-1), to = (QDateTime)current_date;
         break;
     case PredefinedDateTime::THIS_MONTH:
-        set_datetime_controls((QDateTime)QDate(current_date.year(), current_date.month(), 1), QDateTime::currentDateTime());
+        from = (QDateTime)QDate(current_date.year(), current_date.month(), 1), to = QDateTime::currentDateTime();
         break;
     case PredefinedDateTime::LAST_MONTH:
     {
         auto this_month = QDate(current_date.year(), current_date.month(), 1);
-        set_datetime_controls((QDateTime)this_month.addMonths(-1), (QDateTime)this_month);
+        from = (QDateTime)this_month.addMonths(-1), to = (QDateTime)this_month;
         break;
     }
     default:
-        set_datetime_transaction = false;
         return;
     }
 
-    set_datetime_transaction = false;
-    set_current_datetime();
+    set_datetime_lock = true;
+    ui->toDateTimeEdit->setDateTime(to);
+    ui->fromDateTimeEdit->setDateTime(from);
+    set_datetime_lock = false;
+
+    set_period();
 }
 
-void QtAnalyzerWindow::set_current_datetime()
+void QtAnalyzerWindow::set_period()
 {
     controller->set_period({ui->fromDateTimeEdit->dateTime().toTime_t(), ui->toDateTimeEdit->dateTime().toTime_t()});
 }
 
 void QtAnalyzerWindow::perform_search()
 {
-    controller->on_search(ui->searchText->text().toStdString(), ui->caseSensitiveCheckBox->isChecked());
-    update_total_time();
+    controller->apply_filter(ui->searchText->text().toStdString(), ui->caseSensitiveCheckBox->isChecked());
 }
 
-void QtAnalyzerWindow::update_total_time()
+void QtAnalyzerWindow::update_total_time(const std::chrono::seconds& update_total_time)
 {
-    total_label->setText(QString("Total time: %1").arg(QString::fromStdString(
-                                                           AnalyzerController::time_to_display(controller->get_total_time()))));
+    total_label->setText(QString(tr("Total time: %1")).arg(QString::fromStdString(
+                                                           WT::time_to_display(update_total_time))));
 }
 
 void QtAnalyzerWindow::load_data_file()
@@ -125,9 +108,6 @@ void QtAnalyzerWindow::update_for_new_model()
     ui->treeView->expandAll();
     ui->treeView->resizeColumnToContents(1);
     ui->treeView->hideColumn(2);
-
-    // TODO perform_search should be requested by controller
-    perform_search();
 }
 
 QtAnalyzerWindow::~QtAnalyzerWindow()
@@ -135,9 +115,9 @@ QtAnalyzerWindow::~QtAnalyzerWindow()
     delete ui;
 }
 
-QTreeView* QtAnalyzerWindow::get_tree_view() const
+void QtAnalyzerWindow::set_model(QAbstractItemModel *model)
 {
-    return ui->treeView;
+    ui->treeView->setModel(model);
 }
 
 void QtAnalyzerWindow::set_controller(AnalyzerController *controller)

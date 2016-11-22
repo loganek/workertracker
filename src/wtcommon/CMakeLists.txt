@@ -14,6 +14,7 @@ add_library(wtcommon
     itracksuspendable.h
     configuration.cc
     registrable.h
+    datetimeutils.cc
     ${SYSTEM_SPECIFIC_SOURCES})
 
 if(DEFINED BUILD_FLAGS)

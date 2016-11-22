@@ -7,16 +7,20 @@
 
 class QTreeView;
 class QLabel;
+class QAbstractItemModel;
 
 namespace Ui {
 class QtAnalyzerWindow;
 }
 
-struct PredefinedDateTime
+class QtAnalyzerWindow : public QMainWindow, public IMainWindow
 {
-    static QStringList values;
+    Q_OBJECT
 
-    enum Type
+    QLabel *total_label;
+    Ui::QtAnalyzerWindow *ui;
+
+    enum PredefinedDateTime
     {
         TODAY = 0,
         YESTERDAY,
@@ -24,36 +28,25 @@ struct PredefinedDateTime
         LAST_MONTH,
         CUSTOM
     };
-};
 
-class QtAnalyzerWindow : public QMainWindow, public IMainWindow
-{
-    Q_OBJECT
-
-    QLabel *total_label;
-
+    void connect_signals();
     void perform_search();
     void load_data_file();
-    void update_total_time();
+    void update_total_time(const std::chrono::seconds& seconds) override;
 
-    std::atomic_bool set_datetime_transaction;
-    void set_current_datetime();
-    void set_to_predefined_datetime(PredefinedDateTime::Type type);
+    bool set_datetime_lock;
+    void set_period();
+    void set_to_predefined_datetime(PredefinedDateTime type);
 
 public:
     explicit QtAnalyzerWindow(QWidget *parent = 0);
     ~QtAnalyzerWindow();
 
+    void set_model(QAbstractItemModel *model);
+
     void print_error(const std::string &) override;
-
-    QTreeView *get_tree_view() const;
-
     void update_for_new_model() override;
-
     void set_controller(AnalyzerController *controller) override;
-
-private:
-    Ui::QtAnalyzerWindow *ui;
 };
 
 #endif // QTANALYZERWINDOW_H

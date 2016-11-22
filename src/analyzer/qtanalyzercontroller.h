@@ -15,16 +15,14 @@ class QtAnalyzerController : public AnalyzerController
 
     static RegistrarSingle<QtAnalyzerController> registrar;
 
-    void load_model_to_view(const WT::DataContainer &container) override;
-    void apply_filter() override;
+    void load_model(const WT::DataContainer &container) override;
+    void apply_filter(const std::string &search_text, bool case_sensitive) override;
     IMainWindow* construct_window() override;
 
     static QList<QStandardItem*> create_model_item(const std::string &name, qlonglong time);
 
 public:
     int run(int argc, char **argv) override;
-
-    std::chrono::seconds get_total_time() override { return std::chrono::seconds(proxy_model.get_total_time()); }
 };
 
 #endif // QTANALYZERCONTROLLER_H

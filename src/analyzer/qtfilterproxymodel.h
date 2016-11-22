@@ -2,9 +2,11 @@
 #define QTFILTERPROXYMODEL_H
 
 #include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 #include <boost/optional.hpp>
 
+#include <chrono>
 #include <regex>
 
 class QTFilterProxyModel : public QSortFilterProxyModel
@@ -15,6 +17,7 @@ class QTFilterProxyModel : public QSortFilterProxyModel
     qlonglong total_time;
 
     void update_parents_values();
+    void setSourceModel(QAbstractItemModel *sourceModel) Q_DECL_OVERRIDE { QSortFilterProxyModel::setSourceModel(sourceModel); }
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
@@ -22,8 +25,11 @@ protected:
 
 public:
     QTFilterProxyModel(QObject *parent = 0);
+
     void setFilterRegExp(const boost::optional<std::regex> &filter);
-    qlonglong get_total_time() const { return total_time; }
+
+    std::chrono::seconds get_total_time() const { return std::chrono::seconds(total_time); }
+    QStandardItemModel* get_source_model() const { return static_cast<QStandardItemModel*>(sourceModel()); }
 };
 
 #endif // QTFILTERPROXYMODEL_H

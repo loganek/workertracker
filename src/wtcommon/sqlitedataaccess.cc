@@ -3,10 +3,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <fstream>
-#include <functional>
-#include <stdexcept>
-
 namespace WT {
 
 SQLiteDataAccess::SQLiteDataAccess(const std::string &filename)
@@ -37,42 +33,31 @@ int SQLiteDataAccess::db_created_callback(void *data_access, int argc, char **ar
 
 void SQLiteDataAccess::open(bool readonly)
 {
-    create_db = false;
-
-    if (!boost::filesystem::exists(filename))
+    if (boost::filesystem::exists(filename))
     {
-        create_db = true;
-    }
-
-    if (!create_db)
-    {
-        int rc = sqlite3_open(filename.c_str(), &db);
-        if (rc)
+        if (sqlite3_open(filename.c_str(), &db) != SQLITE_OK)
         {
-            WT_LOG(LogLevel::DEBUG) << "unable to open database: " << sqlite3_errmsg(db);
-            create_db = true;
+            WT_LOG_W << "unable to open database: " << sqlite3_errmsg(db);
         }
         else
         {
             create_db = true;
             execute_query("SELECT name FROM sqlite_master WHERE name='" + table_name + "'", &SQLiteDataAccess::db_created_callback);
-            if (create_db)
+            if (!create_db)
             {
-                sqlite3_close(db);
+                return;
             }
+            sqlite3_close(db);
         }
     }
 
-    if (create_db)
+    if (readonly)
     {
-        if (readonly)
-        {
-            throw std::runtime_error("Cannot open database!");
-        }
-        else
-        {
-            create_database();
-        }
+        throw std::runtime_error("Cannot open database!");
+    }
+    else
+    {
+        create_database();
     }
 }
 
@@ -85,12 +70,12 @@ int SQLiteDataAccess::execute_query(const std::string &sql, sqlite3_callback cal
 {
     char *err_msg = nullptr;
 
-    WT_LOG(LogLevel::DEBUG) << "Executing query " << sql;
+    WT_LOG_D << "Executing query " << sql;
     int rc = sqlite3_exec(db, sql.c_str(), callback, this, &err_msg);
 
     if (rc != SQLITE_OK)
     {
-        WT_LOG(LogLevel::ERROR) << "Cannot execute query " << sql << ": " << err_msg;
+        WT_LOG_ERR << "Cannot execute query " << sql << ": " << err_msg;
         sqlite3_free(err_msg);
     }
 
@@ -99,27 +84,22 @@ int SQLiteDataAccess::execute_query(const std::string &sql, sqlite3_callback cal
 
 void SQLiteDataAccess::create_database()
 {
-    WT_LOG(LogLevel::INFO) << "Database doesn't exist. Create database...";
+    WT_LOG_I << "Database doesn't exist. Create database...";
 
     if (boost::filesystem::exists(filename))
     {
-        auto rawtime = std::time(nullptr);
-        auto timeinfo = std::localtime(&rawtime);
-        char buf[32];
-        strftime(buf, 32, ".%F_%H-%M-%S.bak", timeinfo);
-        WT_LOG(LogLevel::DEBUG) << "Move file " << filename << " to " << filename + buf;
-        boost::filesystem::rename(filename, filename + buf);
+        backup_existing_db();
+    }
+    else
+    {
+        boost::filesystem::create_directories(boost::filesystem::path(filename).parent_path());
     }
 
-    std::ofstream fs;
-    fs.open(filename);
-    fs.close();
-
-    int rc = sqlite3_open(filename.c_str(), &db);
-    if (rc)
+    if (sqlite3_open(filename.c_str(), &db) != SQLITE_OK)
     {
         throw std::runtime_error("Unable to open database: " + std::string(sqlite3_errmsg(db)));
     }
+
     auto sql = "CREATE TABLE " + table_name + "(" \
                       "TIME_START   INTEGER PRIMARY KEY  NOT NULL," \
                       "TIME_END     INTEGER," \
@@ -131,7 +111,17 @@ void SQLiteDataAccess::create_database()
         throw std::runtime_error("Cannot create database!");
     }
 
-    WT_LOG(LogLevel::INFO) << "Database succesfully created!";
+    WT_LOG_I << "Database succesfully created: " << filename;
+}
+
+void SQLiteDataAccess::backup_existing_db()
+{
+    auto rawtime = std::time(nullptr);
+    auto timeinfo = std::localtime(&rawtime);
+    char buf[32];
+    strftime(buf, 32, ".%F_%H-%M-%S.bak", timeinfo);
+    WT_LOG_I << "Move file from " << filename << " to " << filename + buf;
+    boost::filesystem::rename(filename, filename + buf);
 }
 
 static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)

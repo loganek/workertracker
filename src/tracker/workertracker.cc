@@ -113,16 +113,16 @@ int WorkerTracker::run(int argc, char **argv)
 
 void WorkerTracker::load_configuration()
 {
-    boost::filesystem::path config_path = Configuration::get_default_config_path();
+    std::string config_path = Configuration::get_default_config_path();
 
-    // TODO might throw exception
-    if (!boost::filesystem::exists(config_path.parent_path()))
+    try
     {
-        boost::filesystem::create_directories(config_path.parent_path());
+        configuration = std::make_shared<WT::Configuration>(config_path);
     }
-
-    WT_LOG_I  << "Load configuration from " << config_path;
-    configuration = std::make_shared<WT::Configuration>(config_path.string());
+    catch (const std::exception& ex)
+    {
+        WT_LOG_ERR << "Can't load configuration: " << config_path << ": " << ex.what();
+    }
 }
 
 }

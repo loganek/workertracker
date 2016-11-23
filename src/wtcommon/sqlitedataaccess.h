@@ -31,6 +31,7 @@ class SQLiteDataAccess : public DataAccess
     int execute_query(const std::string &sql, sqlite3_callback callback = nullptr);
     void on_database_created();
     void create_database();
+    void backup_existing_db();
 
 public:
     SQLiteDataAccess(const std::string &filename);

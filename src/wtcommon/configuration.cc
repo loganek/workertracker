@@ -14,10 +14,14 @@ const std::string Configuration::project_name = "workertracker";
 Configuration::Configuration(const std::string &path)
     : path(path)
 {
-    // TODO error handling
     if (boost::filesystem::exists(path))
     {
         boost::property_tree::json_parser::read_json(path, prop_tree);
+        WT_LOG_I  << "Loaded configuration from " << path;
+    }
+    else
+    {
+        WT_LOG_I << "Configuration file " << path << " doesn't exist";
     }
 
     init_default();

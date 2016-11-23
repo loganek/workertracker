@@ -17,7 +17,7 @@ class WorkerTracker
     std::string pid_file_name;
     boost::program_options::variables_map vm;
 
-    bool process_parameters(int argc, char **argv);
+    int pre_process_parameters(int argc, char **argv);
     void load_configuration();
 
     static std::shared_ptr<BackgroundRunner> get_bg_runner();

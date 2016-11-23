@@ -18,7 +18,7 @@ WorkerTracker::WorkerTracker()
     load_configuration();
 }
 
-bool WorkerTracker::process_parameters(int argc, char **argv)
+int WorkerTracker::pre_process_parameters(int argc, char **argv)
 {
     namespace po = boost::program_options;
 
@@ -40,7 +40,13 @@ bool WorkerTracker::process_parameters(int argc, char **argv)
     if (vm.count("help"))
     {
         std::cout << desc << std::endl;
-        return false;
+        return 0;
+    }
+
+    if (vm.count("daemon") && vm.count("stop"))
+    {
+        WT_LOG_EMG << "Can't use 'daemon' and 'stop' parameters at the same time!";
+        return -1;
     }
 
     if (vm.count("save-period"))
@@ -52,7 +58,7 @@ bool WorkerTracker::process_parameters(int argc, char **argv)
         configuration->set_general_param("read-period", read_period);
     }
 
-    return true;
+    return 1;
 }
 
 std::shared_ptr<BackgroundRunner> WorkerTracker::get_bg_runner()
@@ -69,12 +75,12 @@ std::shared_ptr<BackgroundRunner> WorkerTracker::get_bg_runner()
 
 int WorkerTracker::run(int argc, char **argv)
 {
-    if (!process_parameters(argc, argv))
-    {
-        return 0;
-    }
+    int ret = pre_process_parameters(argc, argv);
 
-    int ret = 1;
+    if (ret != 0)
+    {
+        return ret;
+    }
 
     if (vm.count("daemon"))
     {
@@ -87,7 +93,7 @@ int WorkerTracker::run(int argc, char **argv)
             ret = bg_runner->move_to_background();
         }
     }
-    else if (vm.count("stop")) // TODO enum parameter in boost::optional? daemon|stop
+    else if (vm.count("stop"))
     {
         if (auto bg_runner = get_bg_runner())
         {

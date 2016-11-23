@@ -9,25 +9,28 @@ namespace WT {
 
 TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
     : period(configuration->get_general_param<int>("read-period").get()),
-      store_cnt(configuration->get_general_param<int>("save-period").get()),
       suspendable(configuration)
 {
+    data_access = std::make_shared<SQLiteDataAccess>(configuration->get_general_param("data-path").get());
+    data_access->open(false);
+
     window_info_provider = WindowInfoProvider::registry();
 
     if (!window_info_provider)
     {
-        WT_LOG(LogLevel::EMERGENCY) << "Window info provider not found!";
+        WT_LOG_EMG << "Window info provider not found!";
         stop();
     }
 
-    data_access = std::make_shared<SQLiteDataAccess>(configuration->get_general_param("data-path").get());
-
-    data_access->open(false);
+    if (!window_info_provider->initialize(configuration))
+    {
+        WT_LOG_EMG << "Window info provider initialization failed!";
+        stop();
+    }
 }
 
 void TrackerJob::read_window_info()
 {
-    int counter = 0;
     auto locked = std::unique_lock<std::mutex>(mutex);
 
     DataEntry entry;
@@ -66,17 +69,8 @@ void TrackerJob::read_window_info()
             persist_result.get();
         }
 
-        persist_result = std::future<void>(std::async([this, entry, &counter] {
+        persist_result = std::future<void>(std::async([this, entry] {
             data_access->save_entry(entry);
-
-            // TODO move this to data access, so the interface will have only
-            // save_entry() method.
-            if (++counter % store_cnt == 0)
-            {
-                WT_LOG_D << "Persisiting records";
-                data_access->persist_records();
-                counter = 0;
-            }
         }));
     }
 }
@@ -99,8 +93,6 @@ void TrackerJob::run()
     {
         th.join();
     }
-
-    data_access->persist_records();
 }
 
 }

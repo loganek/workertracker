@@ -38,7 +38,8 @@ void Configuration::init_default()
         {"save-period", "12"},
         {"read-period", "5"},
         {"data-path", (boost::filesystem::path(path).parent_path() / "data.dat").string()},
-        {"plugins-path", (boost::filesystem::path(path).parent_path() / "plugins").string()}
+        {"plugins-path", (boost::filesystem::path(path).parent_path() / "plugins").string()},
+        {"x11-display-name", ""} // actually, it's not general. I need more advanced property tree. In the future.
     };
 
     auto& general = prop_tree.get_child(general_name);

@@ -1,103 +1,93 @@
 #include "x11windowinfoprovider.h"
 
-#include <X11/Xutil.h>
+#include "wtcommon/logger.h"
 
 namespace WT {
 
 X11WindowInfoProvider::RegistrarSingle<X11WindowInfoProvider> X11WindowInfoProvider::registrar;
 
-X11WindowInfoProvider::X11WindowInfoProvider(const char *display_name)
+bool X11WindowInfoProvider::initialize(const std::shared_ptr<Configuration> &configuration)
 {
+    auto maybe_display_name = configuration->get_general_param("x11-display-name");
+    const char *display_name = maybe_display_name ? maybe_display_name.get().c_str() : nullptr;
     display = XOpenDisplay(display_name);
+
+    if (display == nullptr)
+    {
+        WT_LOG_EMG << "Cannot open display :" << XDisplayName(display_name);
+        return false;
+    }
+
+    screen = XDefaultScreen(display);
+
+    return true;
 }
 
 X11WindowInfoProvider::~X11WindowInfoProvider()
 {
-    XCloseDisplay(display);
+    // TODO:
+    // Since display is a smart pointer, it can't be easily shared across the
+    // processes. I need to figure out how to pass X11WindowInfoProvider
+    // to another process. Raw pointers?
+    // XCloseDisplay(display);
+}
+
+unsigned char* X11WindowInfoProvider::get_window_property(Window win, const char *property_name)
+{
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+    constexpr long MAX_LEN = 1024;
+    unsigned char *property_value = nullptr;
+
+    Atom filter_atom = XInternAtom(display, property_name, True);
+    int status = XGetWindowProperty(display, win, filter_atom, 0, MAX_LEN, False, AnyPropertyType,
+                    &actual_type, &actual_format, &nitems, &bytes_after, &property_value);
+
+    if (status == BadWindow)
+    {
+        WT_LOG_ERR << "Window " << win << " doesn't exist";
+    }
+    else if (status != Success)
+    {
+        WT_LOG_ERR << "XGetWindowProperty() error: " << status;
+    }
+
+    return property_value;
+}
+
+
+std::string X11WindowInfoProvider::get_string_property(Window win, const char *property_name)
+{
+    char *window_title = reinterpret_cast<char*>(get_window_property(win, property_name));
+
+    std::string ret;
+    if (window_title)
+    {
+        ret = window_title;
+        XFree(window_title);
+    }
+
+    return ret;
 }
 
 std::string X11WindowInfoProvider::get_window_title(Window win)
 {
-    std::string ret;
-
-    Window root = -1, *children = nullptr;
-    unsigned int children_cnt;
-    int status;
-
-    do {
-        char *name;
-        status = XFetchName(display, win, &name);
-        if (status)
-        {
-            ret = name;
-            XFree(name);
-            if (!ret.empty()) break;
-        }
-
-        XTextProperty text;
-        status = XGetWMName(display, win, &text);
-
-        if (status && text.nitems > 0)
-        {
-            ret = reinterpret_cast<char*>(text.value);
-            XFree(text.value);
-        }
-
-        XFree(children);
-    } while (ret.empty() && win != root && (status = XQueryTree(display, win, &root, &win, &children, &children_cnt)));
-
-    XFree(children);
-
-    return ret;
+    return get_string_property(win, "_NET_WM_NAME");
 }
 
 std::string X11WindowInfoProvider::get_app_name(Window win)
 {
-    int status;
-    XClassHint clh;
-    Window root = -1;
-
-    while (!(status = XGetClassHint(display, win, &clh)) && root != win)
-    {
-        Window *children;
-        unsigned int children_cnt;
-
-        status = XQueryTree(display, win, &root, &win, &children, &children_cnt);
-        XFree(children);
-
-        if (!status)
-        {
-            break;
-        }
-    }
-
-    std::string ret;
-
-    if (!status)
-    {
-        return ret;
-    }
-
-    ret = clh.res_name;
-    if (ret.empty())
-    {
-        ret = clh.res_class;
-    }
-
-    XFree(clh.res_name);
-    XFree(clh.res_class);
-
-    return ret;
+    return get_string_property(win, "WM_CLASS");
 }
 
 X11WindowInfoProvider::Info X11WindowInfoProvider::get_current_window_info()
 {
-    Window window;
-    int rev;
+    Window window = XRootWindow(display, screen);
+    unsigned char* net_active_wnd = get_window_property(window, "_NET_ACTIVE_WINDOW");
+    window = net_active_wnd[0] + (net_active_wnd[1] << 8) + (net_active_wnd[2] << 16) + (net_active_wnd[3] << 24);
 
-    XGetInputFocus(display, &window, &rev);
-
-    return window ? Info(get_window_title(window), get_app_name(window)) : Info();
+    return window ? Info(get_app_name(window), get_window_title(window)) : Info();
 }
 
 }

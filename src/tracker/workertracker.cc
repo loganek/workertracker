@@ -87,8 +87,7 @@ int WorkerTracker::run(int argc, char **argv)
             ret = bg_runner->move_to_background();
         }
     }
-
-    if (vm.count("stop"))
+    else if (vm.count("stop")) // TODO enum parameter in boost::optional? daemon|stop
     {
         if (auto bg_runner = get_bg_runner())
         {

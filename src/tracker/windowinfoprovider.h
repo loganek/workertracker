@@ -2,6 +2,7 @@
 #define WINDOWINFOPROVIDER_H
 
 #include "wtcommon/registrable.h"
+#include "wtcommon/configuration.h"
 
 #include <string>
 #include <algorithm>
@@ -15,19 +16,12 @@ class WindowInfoProvider : public RegistrableSingle<WindowInfoProvider>
 public:
     struct Info
     {
-        static void strip_non_printable(std::string &str)
-        {
-            str.erase(std::remove_if(str.begin(),str.end(), [](char c) { return !::isprint(c);}), str.end());
-        }
-
         std::string app_name;
         std::string window_title;
 
         Info(const std::string& app_name, const std::string &window_title)
             : app_name(app_name), window_title(window_title)
         {
-            strip_non_printable(this->app_name), strip_non_printable(this->window_title);
-
         }
 
         Info() : app_name(unknown_value), window_title(unknown_value) {}
@@ -35,6 +29,7 @@ public:
 
     virtual ~WindowInfoProvider() {}
 
+    virtual bool initialize(const std::shared_ptr<Configuration> &configuration) = 0;
     virtual Info get_current_window_info() = 0;
 };
 

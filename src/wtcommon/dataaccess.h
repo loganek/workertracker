@@ -29,7 +29,6 @@ public:
 
     virtual void open(bool readonly) = 0;
     virtual void save_entry(const DataEntry &entry) = 0;
-    virtual void persist_records() = 0;
     virtual DataContainer get_tree(DateRange period = DateRange()) = 0;
 };
 

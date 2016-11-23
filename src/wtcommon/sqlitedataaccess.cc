@@ -6,7 +6,9 @@
 namespace WT {
 
 SQLiteDataAccess::SQLiteDataAccess(const std::string &filename)
-    : filename(filename)
+    // TODO store_cnt from configuration!
+    : store_cnt(5),
+      filename(filename)
 {
 }
 
@@ -33,6 +35,8 @@ int SQLiteDataAccess::db_created_callback(void *data_access, int argc, char **ar
 
 void SQLiteDataAccess::open(bool readonly)
 {
+    this->readonly = readonly; // TODO use this flag for opening database
+
     if (boost::filesystem::exists(filename))
     {
         if (sqlite3_open(filename.c_str(), &db) != SQLITE_OK)
@@ -47,8 +51,10 @@ void SQLiteDataAccess::open(bool readonly)
             {
                 return;
             }
-            sqlite3_close(db);
         }
+
+        sqlite3_close(db);
+        db = nullptr;
     }
 
     if (readonly)
@@ -63,7 +69,11 @@ void SQLiteDataAccess::open(bool readonly)
 
 SQLiteDataAccess::~SQLiteDataAccess()
 {
-    sqlite3_close(db);
+    if (db)
+    {
+        persist_records();
+        sqlite3_close(db);
+    }
 }
 
 int SQLiteDataAccess::execute_query(const std::string &sql, sqlite3_callback callback)
@@ -141,14 +151,23 @@ void SQLiteDataAccess::save_entry(const DataEntry &entry)
     {
         entries.push_back(entry);
     }
+
+    if (++saved_entry_counter % store_cnt == 0)
+    {
+        persist_records();
+        saved_entry_counter = 0;
+    }
 }
 
 void SQLiteDataAccess::persist_records()
 {
     if (entries.empty())
     {
+        WT_LOG_D << "Nothing to persist";
         return;
     }
+
+    WT_LOG_D << "Persisiting records";
 
     // TODO transactions
     std::ostringstream sql_s;

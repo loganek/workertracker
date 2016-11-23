@@ -17,11 +17,14 @@ class SQLiteDataAccess : public DataAccess
     const std::string table_name = "WT_ENTRIES";
 
     DataEntry last_entry;
+    int saved_entry_counter = 0;
+    const int store_cnt;
 
     std::vector<DataEntry> entries;
     sqlite3 *db = nullptr;
     std::string filename;
     bool create_db;
+    bool readonly = true; // TODO not sure if I need this
 
     DataContainer container;
 
@@ -32,16 +35,15 @@ class SQLiteDataAccess : public DataAccess
     void on_database_created();
     void create_database();
     void backup_existing_db();
+    void persist_records();
 
 public:
     SQLiteDataAccess(const std::string &filename);
+    virtual ~SQLiteDataAccess();
 
     void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
-    void persist_records() override;
     DataContainer get_tree(DateRange period = DateRange()) override;
-
-    virtual ~SQLiteDataAccess();
 };
 
 }

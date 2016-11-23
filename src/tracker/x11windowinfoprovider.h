@@ -11,9 +11,8 @@ namespace WT {
 
 class X11WindowInfoProvider : public WindowInfoProvider
 {
-    Display *display;
+    Display *display = nullptr;
     int screen;
-    Info window_info;
 
     std::string get_window_title(Window win);
     std::string get_app_name(Window win);

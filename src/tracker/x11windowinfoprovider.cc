@@ -25,11 +25,10 @@ bool X11WindowInfoProvider::initialize(const std::shared_ptr<Configuration> &con
 
 X11WindowInfoProvider::~X11WindowInfoProvider()
 {
-    // TODO:
-    // Since display is a smart pointer, it can't be easily shared across the
-    // processes. I need to figure out how to pass X11WindowInfoProvider
-    // to another process. Raw pointers?
-    // XCloseDisplay(display);
+    if (display != nullptr)
+    {
+        XCloseDisplay(display);
+    }
 }
 
 unsigned char* X11WindowInfoProvider::get_window_property(Window win, const char *property_name)

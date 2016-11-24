@@ -42,11 +42,10 @@ int SQLiteDataAccess::db_created_callback(void *data_access, int argc, char **ar
 
 void SQLiteDataAccess::open(bool readonly)
 {
-    this->readonly = readonly; // TODO use this flag for opening database
-
     if (boost::filesystem::exists(filename))
     {
-        if (sqlite3_open(filename.c_str(), &db) != SQLITE_OK)
+        int open_flags = readonly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+        if (sqlite3_open_v2(filename.c_str(), &db, open_flags, nullptr) != SQLITE_OK)
         {
             WT_LOG_W << "unable to open database: " << sqlite3_errmsg(db);
         }

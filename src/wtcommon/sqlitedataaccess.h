@@ -33,7 +33,6 @@ class SQLiteDataAccess : public DataAccess
     sqlite3 *db = nullptr;
     std::string filename;
     bool create_db;
-    bool readonly = true; // TODO not sure if I need this
 
     DataContainer container;
 

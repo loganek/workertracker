@@ -32,3 +32,7 @@ target_link_libraries(workertracker
     ${Boost_SYSTEM_LIBRARY}
     ${SYSTEM_SPECIFIC_LIBRARIES})
 
+install(TARGETS workertracker
+  RUNTIME
+  DESTINATION bin
+  COMPONENT applications)

@@ -18,3 +18,8 @@ target_link_libraries(workertracker-analyzer
     ${Qt5Charts_LIBRARIES})
 
 set_property(TARGET workertracker-analyzer PROPERTY CXX_STANDARD 14)
+
+install(TARGETS workertracker-analyzer
+  RUNTIME
+  DESTINATION bin
+  COMPONENT application)

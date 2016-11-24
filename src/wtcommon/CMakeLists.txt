@@ -25,3 +25,7 @@ target_link_libraries(wtcommon
     sqlite3
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY})
+
+install(FILES itracksuspendable.h
+  DESTINATION include
+  COMPONENT headers)

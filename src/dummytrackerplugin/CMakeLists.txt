@@ -4,3 +4,12 @@ add_library(dummytrackerplugin
 
 target_link_libraries(dummytrackerplugin
     wtcommon)
+
+install(TARGETS dummytrackerplugin
+  RUNTIME
+  DESTINATION bin/plugins
+  LIBRARY
+  DESTINATION bin/plugins
+  ARCHIVE
+  DESTINATION lib
+  COMPONENT applications)

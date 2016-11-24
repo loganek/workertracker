@@ -75,10 +75,29 @@ std::shared_ptr<BackgroundRunner> WorkerTracker::get_bg_runner()
 
     if (!bg_runner)
     {
-        WT_LOG(LogLevel::WARNING) << "Background runner has not been registered in the system!";
+        WT_LOG_W << "Background runner has not been registered in the system!";
     }
 
     return bg_runner;
+}
+
+bool WorkerTracker::lock_app_instance()
+{
+    auto app_locker = SingleAppLocker::registry();
+
+    if (app_locker)
+    {
+        if (!app_locker->lock())
+        {
+            WT_LOG_EMG << "Cannot lock application. Probably one instance of this program is already running on the system!";
+            return false;
+        }
+    }
+    else
+    {
+        WT_LOG_W << "SingleAppLocker not registred in the system!";
+    }
+    return true;
 }
 
 int WorkerTracker::run(int argc, char **argv)
@@ -116,6 +135,11 @@ int WorkerTracker::run(int argc, char **argv)
     if (ret != 1)
     {
         return ret;
+    }
+
+    if (!lock_app_instance())
+    {
+        return -1;
     }
 
     job = std::make_shared<TrackerJob>(configuration);

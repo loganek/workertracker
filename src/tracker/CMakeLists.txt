@@ -2,6 +2,7 @@ if (UNIX)
     set(SYSTEM_SPECIFIC_SOURCES
         x11windowinfoprovider.cc
         gnomescreensaver.cc
+        posixsingleapplocker.cc
         daemonizer.cc)
 
     set(SYSTEM_SPECIFIC_LIBRARIES
@@ -22,6 +23,7 @@ add_executable(workertracker
     suspendableloader.cc
     windowinfoprovider.h
     backgroundrunner.h
+    singleapplocker.h
     ${SYSTEM_SPECIFIC_SOURCES})
 
 target_link_libraries(workertracker

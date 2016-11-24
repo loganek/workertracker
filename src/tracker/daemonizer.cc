@@ -7,28 +7,22 @@
  * ----------------------------------------------------------------------------
  */
 #include "daemonizer.h"
+#include "posixsingleapplocker.h"
 
 #include "wtcommon/unixsyslogloggermethod.h"
 
-#include <unistd.h>
-#include <fcntl.h>
 #include <csignal>
 #include <fstream>
 #include <cstring>
+#include <unistd.h>
 
 namespace WT {
 
 Daemonizer::RegistrarSingle<Daemonizer> Daemonizer::registrar(std::string(WT_PROJECT_NAME));
 
 Daemonizer::Daemonizer(const std::string &daemon_name)
-    : daemon_name(daemon_name),
-      pid_file_name("/tmp/daemon-" + std::string(daemon_name) + ".pid")
+    : daemon_name(daemon_name)
 {
-}
-
-Daemonizer::~Daemonizer()
-{
-    close(pid_file_handle);
 }
 
 int Daemonizer::move_to_background()
@@ -66,28 +60,12 @@ int Daemonizer::move_to_background()
     UNIXSysLogLoggerMethod::init_log(daemon_name);
     MethodOutput::set_method(UNIXSysLogLoggerMethod::output);
 
-    pid_file_handle = open(pid_file_name.c_str(), O_RDWR|O_CREAT, 0600);
-
-    if (pid_file_handle == -1)
-    {
-        WT_LOG_ERR << "Could not open PID lock file " << pid_file_name << ", exiting.";
-        return -1;
-    }
-
-    if (lockf(pid_file_handle, F_TLOCK, 0) == -1)
-    {
-        WT_LOG_W << "Could not lock PID lock file " << pid_file_name << ", exiting";
-        return -1;
-    }
-
-    std::string pid_s = std::to_string(getpid());
-    write(pid_file_handle, pid_s.c_str(), pid_s.length());
-
     return 1;
 }
 
 int Daemonizer::kill_process()
 {
+    auto pid_file_name = PosixSingleAppLocker::get_lock_file();
     std::ifstream pid_file(pid_file_name);
 
     if (!pid_file.is_open())
@@ -107,6 +85,7 @@ int Daemonizer::kill_process()
         return -1;
     }
     WT_LOG(LogLevel::INFO) << "Sending signal successfully completed!";
+
     return 0;
 }
 

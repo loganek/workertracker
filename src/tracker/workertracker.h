@@ -11,6 +11,7 @@
 
 #include "trackerjob.h"
 #include "backgroundrunner.h"
+#include "singleapplocker.h"
 
 #include "wtcommon/configuration.h"
 
@@ -29,6 +30,7 @@ class WorkerTracker
     void load_configuration();
 
     static std::shared_ptr<BackgroundRunner> get_bg_runner();
+    bool lock_app_instance();
 
     WorkerTracker(WorkerTracker const&) = delete;
     WorkerTracker(WorkerTracker&&) = delete;

@@ -17,15 +17,12 @@ namespace WT {
 
 class Daemonizer : public BackgroundRunner
 {
-    int pid_file_handle;
     std::string daemon_name;
-    std::string pid_file_name;
 
     static RegistrarSingle<Daemonizer> registrar;
 
 public:
     Daemonizer(const std::string &daemon_name);
-    virtual ~Daemonizer();
 
     int move_to_background() override;
     int kill_process() override;

@@ -18,7 +18,8 @@
 #include <boost/date_time.hpp>
 
 AnalyzerController::AnalyzerController(int argc, char **argv)
-    : app(argc, argv)
+    : app(argc, argv),
+      config(std::make_shared<WT::Configuration>())
 {
 }
 
@@ -27,9 +28,7 @@ int AnalyzerController::run()
     main_window = std::make_shared<QtAnalyzerWindow>();
     main_window->set_controller(this);
 
-    WT::Configuration config(WT::Configuration::get_default_config_path());
-
-    load_from_file(config.get_general_param("data-path").get());
+    load_from_file(config->get_general_param("data-path").get());
 
     main_window->show_window();
 
@@ -61,7 +60,8 @@ void AnalyzerController::load_from_file(const std::string &filename)
 {
     try
     {
-        data_access = std::make_shared<WT::SQLiteDataAccess>(filename);
+        config->set_general_param("data-path", filename);
+        data_access = std::make_shared<WT::SQLiteDataAccess>(config);
         data_access->open(true);
         load_model(data_access->get_tree(period));
     }

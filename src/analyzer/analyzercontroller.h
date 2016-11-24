@@ -13,6 +13,7 @@
 #include "qtfilterproxymodel.h"
 
 #include "wtcommon/dataaccess.h"
+#include "wtcommon/configuration.h"
 
 #include <QStandardItemModel>
 #include <QApplication>
@@ -33,6 +34,8 @@ class AnalyzerController
 
     QList<QStandardItem*> create_model_item(const std::string &name, qlonglong time);
     void load_model(const WT::DataContainer &container);
+
+    std::shared_ptr<WT::Configuration> config;
 
 public:
     AnalyzerController(int argc, char **argv);

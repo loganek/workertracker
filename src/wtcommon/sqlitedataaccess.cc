@@ -13,10 +13,9 @@
 
 namespace WT {
 
-SQLiteDataAccess::SQLiteDataAccess(const std::string &filename)
-    // TODO store_cnt from configuration!
-    : store_cnt(5),
-      filename(filename)
+SQLiteDataAccess::SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration)
+    : store_cnt(std::stoi(configuration->get_general_param("save-period").get())),
+      filename(configuration->get_general_param("data-path").get())
 {
 }
 

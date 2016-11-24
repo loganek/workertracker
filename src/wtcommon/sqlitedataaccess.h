@@ -10,6 +10,7 @@
 #define SQLITEDATAACCESS_H
 
 #include "dataaccess.h"
+#include "configuration.h"
 
 #include "sqlite3/sqlite3.h"
 
@@ -46,7 +47,7 @@ class SQLiteDataAccess : public DataAccess
     void persist_records();
 
 public:
-    SQLiteDataAccess(const std::string &filename);
+    SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration);
     virtual ~SQLiteDataAccess();
 
     void open(bool readonly) override;

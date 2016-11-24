@@ -25,7 +25,7 @@ class Configuration
     boost::optional<std::string> get_config_node(const std::string &category, const std::string &parameter) const;
 
 public:
-    Configuration(const std::string &path);
+    Configuration(const std::string &path = WT::Configuration::get_default_config_path());
 
     void save_configuration();
 

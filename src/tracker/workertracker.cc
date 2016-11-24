@@ -77,7 +77,7 @@ int WorkerTracker::run(int argc, char **argv)
 {
     int ret = pre_process_parameters(argc, argv);
 
-    if (ret != 0)
+    if (ret != 1)
     {
         return ret;
     }

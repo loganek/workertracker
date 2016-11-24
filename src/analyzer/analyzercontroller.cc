@@ -11,19 +11,29 @@
 #include "wtcommon/sqlitedataaccess.h"
 #include "wtcommon/logger.h"
 #include "wtcommon/configuration.h"
+#include "wtcommon/datetimeutils.h"
+
+#include "qtanalyzerwindow.h"
 
 #include <boost/date_time.hpp>
 
-int AnalyzerController::run(int, char **)
+AnalyzerController::AnalyzerController(int argc, char **argv)
+    : app(argc, argv)
 {
-    main_window = construct_window();
+}
+
+int AnalyzerController::run()
+{
+    main_window = std::make_shared<QtAnalyzerWindow>();
     main_window->set_controller(this);
 
     WT::Configuration config(WT::Configuration::get_default_config_path());
 
     load_from_file(config.get_general_param("data-path").get());
 
-    return 0;
+    main_window->show_window();
+
+    return app.exec();
 }
 
 void AnalyzerController::apply_filter(const std::string &search_text, bool case_sensitive)
@@ -42,6 +52,9 @@ void AnalyzerController::apply_filter(const std::string &search_text, bool case_
         WT_LOG(WT::LogLevel::WARNING) << ex.what();
         filter_pattern = boost::none;
     }
+
+    proxy_model.setFilterRegExp(filter_pattern);
+    main_window->update_total_time(proxy_model.get_total_time());
 }
 
 void AnalyzerController::load_from_file(const std::string &filename)
@@ -65,4 +78,48 @@ void AnalyzerController::set_period(const WT::DateRange &period)
     {
         load_model(data_access->get_tree(period));
     }
+}
+
+
+QList<QStandardItem*> AnalyzerController::create_model_item(const std::string &name, qlonglong time)
+{
+    QList<QStandardItem *> rowItems;
+
+    rowItems << new QStandardItem(QString::fromStdString(WT::time_to_display(std::chrono::seconds(time))));
+    rowItems << new QStandardItem(QString::fromStdString(name));
+
+    auto item = new QStandardItem();
+    item->setData(QVariant(time), Qt::DisplayRole);
+    rowItems << item;
+
+    return rowItems;
+}
+
+void AnalyzerController::load_model(const WT::DataContainer &container)
+{
+    auto standard_model = proxy_model.get_source_model();
+    standard_model->clear();
+
+    for (auto app : container.get_keys())
+    {
+        QList<QStandardItem *> app_row = create_model_item(app, 0);
+        qlonglong total_time = 0;
+        for (auto details : container.get_values(app))
+        {
+            auto duration = container.get_duration(app, details).count();
+            app_row.first()->appendRow(create_model_item(details, duration));
+
+            total_time += duration;
+        }
+
+        app_row[0]->setData(QString::fromStdString(WT::time_to_display(std::chrono::seconds(total_time))), Qt::DisplayRole);
+        app_row[2]->setData(total_time, Qt::DisplayRole);
+        standard_model->invisibleRootItem()->appendRow(app_row);
+    }
+
+    std::dynamic_pointer_cast<QtAnalyzerWindow>(main_window)->set_model(&proxy_model);
+
+    main_window->update_for_new_model();
+    proxy_model.setFilterRegExp(filter_pattern);
+    main_window->update_total_time(proxy_model.get_total_time());
 }

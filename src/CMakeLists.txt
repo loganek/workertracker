@@ -5,4 +5,4 @@ add_subdirectory(dummytrackerplugin)
 
 if (WITH_QT)
     add_subdirectory(analyzer)
-endif()
+endif(WITH_QT)

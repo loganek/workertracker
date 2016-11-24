@@ -55,6 +55,7 @@ public:
     void print_error(const std::string &) override;
     void update_for_new_model() override;
     void set_controller(AnalyzerController *controller) override;
+    void show_window() override { this->show(); }
 };
 
 #endif // QTANALYZERWINDOW_H

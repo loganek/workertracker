@@ -5,7 +5,6 @@ add_executable(workertracker-analyzer
     main.cc
     analyzercontroller.cc
     imainwindow.h
-    qtanalyzercontroller.cc
     qtanalyzerwindow.cc
     qtfilterproxymodel.cc
     ${WTANALYZER_UI_MOC})

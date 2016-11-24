@@ -10,35 +10,38 @@
 #define ANALYZERCONTROLLER_H
 
 #include "imainwindow.h"
+#include "qtfilterproxymodel.h"
 
 #include "wtcommon/dataaccess.h"
-#include "wtcommon/registrable.h"
+
+#include <QStandardItemModel>
+#include <QApplication>
 
 #include <boost/optional.hpp>
 
 #include <memory>
 
-class AnalyzerController : public WT::RegistrableSingle<AnalyzerController>
+class AnalyzerController
 {
     WT::DateRange period;
+    QApplication app;
+    QTFilterProxyModel proxy_model;
 
-protected:
     boost::optional<std::regex> filter_pattern = boost::none;
-    IMainWindow *main_window = nullptr;
+    std::shared_ptr<IMainWindow> main_window;
     std::shared_ptr<WT::DataAccess> data_access;
 
-    virtual void load_model(const WT::DataContainer &container) = 0;
-    virtual IMainWindow* construct_window() = 0;
+    QList<QStandardItem*> create_model_item(const std::string &name, qlonglong time);
+    void load_model(const WT::DataContainer &container);
 
 public:
+    AnalyzerController(int argc, char **argv);
     virtual ~AnalyzerController() {}
 
-    virtual int run(int argc, char **argv);
-
-    virtual void apply_filter(const std::string &search_text, bool case_sensitive);
+    int run();
     void load_from_file(const std::string &filename);
-
     void set_period(const WT::DateRange &period);
+    void apply_filter(const std::string &search_text, bool case_sensitive);
 };
 
 #endif // ANALYZERCONTROLLER_H

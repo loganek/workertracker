@@ -8,7 +8,7 @@ namespace WT {
 
 std::string time_to_display(std::chrono::seconds sec);
 
-std::time_t seconds_from_epoch(const std::string& s);
+std::chrono::seconds seconds_from_epoch(const std::string& s);
 
 }
 

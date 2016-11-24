@@ -19,6 +19,7 @@ public:
 	virtual ~MSWindowsWindowInfoProvider() {}
 
 	Info get_current_window_info() override;
+	bool initialize(const std::shared_ptr<Configuration> &) override { return true;  }
 };
 
 }

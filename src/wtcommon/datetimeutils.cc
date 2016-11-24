@@ -28,7 +28,7 @@ std::string time_to_display(std::chrono::seconds sec)
     return ss.str();
 }
 
-std::time_t seconds_from_epoch(const std::string& s)
+std::chrono::seconds seconds_from_epoch(const std::string& s)
 {
     namespace bt = boost::posix_time;
     std::locale format(std::locale::classic(), new bt::time_input_facet("%Y/%m/%d %H:%M:%S"));
@@ -40,7 +40,7 @@ std::time_t seconds_from_epoch(const std::string& s)
     bt::ptime timet_start(boost::gregorian::date(1970,1,1));
     bt::time_duration diff = pt - timet_start;
 
-    return diff.ticks() / bt::time_duration::rep_type::ticks_per_second;
+    return std::chrono::seconds(diff.ticks() / bt::time_duration::rep_type::ticks_per_second);
 }
 
 }

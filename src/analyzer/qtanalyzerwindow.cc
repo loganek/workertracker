@@ -79,7 +79,10 @@ void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime type)
 
 void QtAnalyzerWindow::set_period()
 {
-    controller->set_period({ui->fromDateTimeEdit->dateTime().toTime_t(), ui->toDateTimeEdit->dateTime().toTime_t()});
+	WT::DateRange range;
+	range.from = ui->fromDateTimeEdit->dateTime().toTime_t();
+	range.to = ui->toDateTimeEdit->dateTime().toTime_t();
+    controller->set_period(range);
 }
 
 void QtAnalyzerWindow::perform_search()

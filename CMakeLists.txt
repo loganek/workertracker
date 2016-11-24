@@ -16,26 +16,13 @@ elseif(WIN32)
 
 endif(UNIX)
 
-if (NOT DEFINED WITH_GTK AND NOT DEFINED WITH_QT)
-    if (UNIX)
-        set(WITH_GTK ON)
-    elseif(WIN32)
-        set(WITH_QT ON)
-    endif()
-endif()
-
-if(WITH_GTK AND WITH_QT)
-    message(FATAL_ERROR "Cannot use QT and GTK+ framework at the same time. Select only one!")
+if (NOT DEFINED WITH_QT)
+    set(WITH_QT ON)
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -std=c++1y")
 
-if (WITH_GTK)
-    message(STATUS "Use GTK+ framework")
-    pkg_check_modules (GTKMM3 REQUIRED gtkmm-3.0)
-    include_directories (${GTKMM3_INCLUDE_DIRS})
-    link_directories (${GTKMM3_LIBRARY_DIRS})
-elseif(WITH_QT)
+if(WITH_QT)
     message(STATUS "Use QT framework")
     find_package(Qt5Widgets)
     include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -44,7 +31,7 @@ elseif(WITH_QT)
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 else()
     message(WARNING "No UI library has been selected!")
-endif(WITH_GTK)
+endif(WITH_QT)
 
 
 set(PROJECT_SOURCE_DIR "${workertracker_SOURCE_DIR}/src")

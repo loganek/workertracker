@@ -1,5 +1,8 @@
 add_subdirectory(sqlite3)
 add_subdirectory(wtcommon)
 add_subdirectory(tracker)
-add_subdirectory(analyzer)
 add_subdirectory(dummytrackerplugin)
+
+if (WITH_QT)
+    add_subdirectory(analyzer)
+endif()

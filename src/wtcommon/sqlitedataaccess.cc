@@ -31,13 +31,37 @@ int SQLiteDataAccess::query_container_callback(void *data_access, int argc, char
    return 0;
 }
 
-int SQLiteDataAccess::db_created_callback(void *data_access, int argc, char **argv, char ** /*col_name*/)
+bool SQLiteDataAccess::table_exists()
 {
-    SQLiteDataAccess* this_ = reinterpret_cast<SQLiteDataAccess*>(data_access);
+    auto sql = "SELECT name FROM sqlite_master WHERE name='" + table_name + "'";
+    sqlite3_stmt *stmt = nullptr;
 
-    this_->create_db = (argc == 0 || argv[0] != this_->table_name);
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        WT_LOG_ERR << "Can't prepare sql statement";
+        return false;
+    }
 
-   return 0;
+    bool table_exists = sqlite3_step(stmt) == SQLITE_ROW;
+    sqlite3_finalize(stmt);
+    WT_LOG_D << "Does table " << table_name << " exists? : " << table_exists;
+    return true;
+}
+
+void SQLiteDataAccess::prepare_statements()
+{
+    auto insert_sql = "INSERT INTO " + table_name + "(TIME_START, TIME_END, PROC_NAME, DESCRIPTION) VALUES(?, ?, ?, ?);";
+    if (sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &insert_stmt, nullptr) != SQLITE_OK)
+    {
+        throw std::runtime_error("Can't prepare insert statement");
+    }
+    WT_LOG_D << sqlite3_bind_parameter_count(insert_stmt);
+
+    auto update_sql = "UPDATE " + table_name + " set TIME_END = ? WHERE TIME_END = ?;";
+    if (sqlite3_prepare_v2(db, update_sql.c_str(), -1, &update_stmt, nullptr) != SQLITE_OK)
+    {
+        throw std::runtime_error("Can't prepare update statement");
+    }
 }
 
 void SQLiteDataAccess::open(bool readonly)
@@ -49,14 +73,10 @@ void SQLiteDataAccess::open(bool readonly)
         {
             WT_LOG_W << "unable to open database: " << sqlite3_errmsg(db);
         }
-        else
+        else if (table_exists())
         {
-            create_db = true;
-            execute_query("SELECT name FROM sqlite_master WHERE name='" + table_name + "'", &SQLiteDataAccess::db_created_callback);
-            if (!create_db)
-            {
-                return;
-            }
+            prepare_statements();
+            return;
         }
 
         sqlite3_close(db);
@@ -71,6 +91,7 @@ void SQLiteDataAccess::open(bool readonly)
     {
         create_database();
     }
+    prepare_statements();
 }
 
 SQLiteDataAccess::~SQLiteDataAccess()
@@ -165,6 +186,20 @@ void SQLiteDataAccess::save_entry(const DataEntry &entry)
     }
 }
 
+static void execute_statement(bool binding_result, sqlite3_stmt *statement)
+{
+    if (!binding_result)
+    {
+        WT_LOG_ERR << "Can't bind parameters for update!";
+    }
+    else if (sqlite3_step(statement) != SQLITE_DONE)
+    {
+        WT_LOG_D << "Unexpected status of sqlite3_step()";
+    }
+    sqlite3_clear_bindings(statement);
+    sqlite3_reset(statement);
+}
+
 void SQLiteDataAccess::persist_records()
 {
     if (entries.empty())
@@ -175,26 +210,28 @@ void SQLiteDataAccess::persist_records()
 
     WT_LOG_D << "Persisiting records";
 
-    // TODO transactions
-    std::ostringstream sql_s;
     std::size_t i = 0;
 
     if (is_continuous_entry(last_entry, entries.front()))
     {
-        sql_s << "UPDATE " << table_name<< " set TIME_END = "
-              << entries.front().time_end << " WHERE TIME_END = " << entries.front().time_start << "; ";
+        WT_LOG_D << "Updating entry";
+        bool ret = sqlite3_bind_int64(update_stmt, 1, entries.front().time_end) == SQLITE_OK;
+        ret &= sqlite3_bind_int64(update_stmt, 2, entries.front().time_start) == SQLITE_OK;
+
+        execute_statement(ret, update_stmt);
         i++;
-        WT_LOG(LogLevel::DEBUG) << "Updating entry";
     }
 
+    WT_LOG_D << "Persisting " << entries.size() << " records in sqlite data base";
     for (; i < entries.size(); i++)
     {
-        sql_s << "INSERT INTO " << table_name << "(TIME_START, TIME_END, PROC_NAME, DESCRIPTION) VALUES("
-              << entries[i].time_start << ", " << entries[i].time_end << ", '" << entries[i].proc_name << "', '" << entries[i].description << "');";
-    }
+        bool ret = sqlite3_bind_int64(insert_stmt, 1, entries.back().time_end) == SQLITE_OK;
+        ret &= sqlite3_bind_int64(insert_stmt, 2, entries.back().time_end) == SQLITE_OK;
+        ret &= sqlite3_bind_text(insert_stmt, 3, entries[i].proc_name.c_str(), -1, nullptr) == SQLITE_OK;
+        ret &= sqlite3_bind_text(insert_stmt, 4, entries[i].description.c_str(), -1, nullptr) == SQLITE_OK;
 
-    WT_LOG(LogLevel::DEBUG) << "Persisting " << entries.size() << " records in sqlite data base";
-    execute_query(sql_s.str().c_str());
+        execute_statement(ret, insert_stmt);
+    }
 
     last_entry = entries.back();
     entries.clear();

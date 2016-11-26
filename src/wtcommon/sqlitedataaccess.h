@@ -32,18 +32,20 @@ class SQLiteDataAccess : public DataAccess
     std::vector<DataEntry> entries;
     sqlite3 *db = nullptr;
     std::string filename;
-    bool create_db;
+    sqlite3_stmt *insert_stmt = nullptr;
+    sqlite3_stmt *update_stmt = nullptr;
 
     DataContainer container;
 
-    static int db_created_callback(void *data_access, int argc, char **argv, char **col_name);
     static int query_container_callback(void *data_access, int argc, char **argv, char **col_name);
 
+    bool table_exists();
     int execute_query(const std::string &sql, sqlite3_callback callback = nullptr);
     void on_database_created();
     void create_database();
     void backup_existing_db();
     void persist_records();
+    void prepare_statements();
 
 public:
     SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration);

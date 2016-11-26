@@ -1,5 +1,5 @@
 qt5_wrap_cpp(WTANALYZER_HDR_MOC qtanalyzerwindow.h graphdialog.h)
-qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui graphdialog.ui)
+qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui graphdialog.ui aboutdialog.ui)
 
 add_executable(workertracker-analyzer
     main.cc

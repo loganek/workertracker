@@ -8,6 +8,7 @@
  */
 #include "qtanalyzerwindow.h"
 #include "ui_qtanalyzerwindow.h"
+#include "ui_aboutdialog.h"
 #include "analyzercontroller.h"
 #include "graphdialog.h"
 
@@ -16,6 +17,7 @@
 #include <QErrorMessage>
 #include <QFileDialog>
 #include <QLabel>
+#include <QMessageBox>
 
 QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,6 +54,12 @@ void QtAnalyzerWindow::connect_signals()
     connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
     connect(ui->visualizeCurrentViewAction, &QAction::triggered, this, [this] (bool) {
         auto dialog = new GraphDialog(&controller->proxy_model, this);
+        dialog->show();
+    });
+    connect(ui->aboutAction, &QAction::triggered, this, [this] (bool) {
+        auto dialog = new QDialog();
+        Ui::AboutDialog about_dialog;
+        about_dialog.setupUi(dialog); about_dialog.headLabel->setText(WT_PROJECT_NAME_AND_VERSION);
         dialog->show();
     });
 }

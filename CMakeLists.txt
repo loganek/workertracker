@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 2.8.7)
 
-project(workertracker)
+set(WT_PROJECT_NAME WorkerTracker)
+string(TOLOWER ${WT_PROJECT_NAME} WT_CMAKE_PROJECT_NAME)
 
+project(${WT_CMAKE_PROJECT_NAME})
+
+set(WT_VERSION_MAJOR 0)
+set(WT_VERSION_MINOR 1)
+set(WT_VERSION_PATCH 0)
+
+add_definitions(-DWT_PROJECT_NAME_AND_VERSION="${WT_PROJECT_NAME} v${WT_VERSION_MAJOR}.${WT_VERSION_MINOR}.${WT_VERSION_PATCH}")
 add_definitions(-DWT_PROJECT_NAME="${PROJECT_NAME}")
 
 find_package(Boost 1.61 COMPONENTS system filesystem program_options REQUIRED)

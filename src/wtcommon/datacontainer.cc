@@ -37,22 +37,6 @@ std::chrono::seconds DataContainer::get_duration(const std::string &key, const s
     return values.at(key).at(value);
 }
 
-std::chrono::seconds DataContainer::get_duration(const std::string &key, boost::optional<std::regex> pattern) const
-{
-    const std::unordered_map<std::string, std::chrono::seconds>& c = values.at(key);
-    std::chrono::seconds total = std::chrono::seconds(0);
-
-    for (const auto& entry : c)
-    {
-        if (!pattern || std::regex_search(entry.first, pattern.get()))
-        {
-            total += entry.second;
-        }
-    }
-
-    return total;
-}
-
 std::vector<std::string> DataContainer::get_keys() const
 {
     std::vector<std::string> keys;

@@ -26,6 +26,7 @@ class AnalyzerController
 {
     WT::DateRange period;
     QApplication app;
+public:
     QTFilterProxyModel proxy_model;
 
     boost::optional<std::regex> filter_pattern = boost::none;

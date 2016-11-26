@@ -9,6 +9,7 @@
 #include "qtanalyzerwindow.h"
 #include "ui_qtanalyzerwindow.h"
 #include "analyzercontroller.h"
+#include "graphdialog.h"
 
 #include "wtcommon/datetimeutils.h"
 
@@ -49,6 +50,10 @@ void QtAnalyzerWindow::connect_signals()
     };
     connect(ui->fromDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
     connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
+    connect(ui->visualizeCurrentViewAction, &QAction::triggered, this, [this] (bool) {
+        auto dialog = new GraphDialog(&controller->proxy_model, this);
+        dialog->show();
+    });
 }
 
 void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime type)

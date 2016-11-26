@@ -80,7 +80,6 @@ void AnalyzerController::set_period(const WT::DateRange &period)
     }
 }
 
-
 QList<QStandardItem*> AnalyzerController::create_model_item(const std::string &name, qlonglong time)
 {
     QList<QStandardItem *> rowItems;

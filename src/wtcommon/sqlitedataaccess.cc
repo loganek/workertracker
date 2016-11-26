@@ -182,7 +182,7 @@ void SQLiteDataAccess::persist_records()
     if (is_continuous_entry(last_entry, entries.front()))
     {
         sql_s << "UPDATE " << table_name<< " set TIME_END = "
-              << entries.back().time_end << " WHERE TIME_END = " << entries.back().time_start << "; ";
+              << entries.front().time_end << " WHERE TIME_END = " << entries.front().time_start << "; ";
         i++;
         WT_LOG(LogLevel::DEBUG) << "Updating entry";
     }

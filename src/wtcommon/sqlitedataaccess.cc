@@ -192,9 +192,11 @@ static void execute_statement(bool binding_result, sqlite3_stmt *statement)
     {
         WT_LOG_ERR << "Can't bind parameters for update!";
     }
-    else if (sqlite3_step(statement) != SQLITE_DONE)
+
+    auto status = sqlite3_step(statement);
+    if (status != SQLITE_DONE)
     {
-        WT_LOG_D << "Unexpected status of sqlite3_step()";
+        WT_LOG_D << "Unexpected status of sqlite3_step(): " << status;
     }
     sqlite3_clear_bindings(statement);
     sqlite3_reset(statement);
@@ -222,11 +224,11 @@ void SQLiteDataAccess::persist_records()
         i++;
     }
 
-    WT_LOG_D << "Persisting " << entries.size() << " records in sqlite data base";
+    WT_LOG_D << "Inserting " << (entries.size() - i) << " records in sqlite data base";
     for (; i < entries.size(); i++)
     {
-        bool ret = sqlite3_bind_int64(insert_stmt, 1, entries.back().time_end) == SQLITE_OK;
-        ret &= sqlite3_bind_int64(insert_stmt, 2, entries.back().time_end) == SQLITE_OK;
+        bool ret = sqlite3_bind_int64(insert_stmt, 1, entries[i].time_start) == SQLITE_OK;
+        ret &= sqlite3_bind_int64(insert_stmt, 2, entries[i].time_end) == SQLITE_OK;
         ret &= sqlite3_bind_text(insert_stmt, 3, entries[i].proc_name.c_str(), -1, nullptr) == SQLITE_OK;
         ret &= sqlite3_bind_text(insert_stmt, 4, entries[i].description.c_str(), -1, nullptr) == SQLITE_OK;
 

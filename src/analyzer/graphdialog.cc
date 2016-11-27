@@ -17,6 +17,8 @@
 #include <QtCharts/QPieLegendMarker>
 #include <QtCharts/QPieSlice>
 
+#include <array>
+
 QT_CHARTS_USE_NAMESPACE
 
 GraphDialog::GraphDialog(QTFilterProxyModel *model, QWidget *parent) :

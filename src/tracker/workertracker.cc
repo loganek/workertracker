@@ -7,7 +7,6 @@
  * ----------------------------------------------------------------------------
  */
 #include "workertracker.h"
-#include "gnomescreensaver.h"
 
 #include "wtcommon/logger.h"
 

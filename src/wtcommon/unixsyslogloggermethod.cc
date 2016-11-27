@@ -17,16 +17,16 @@ void UNIXSysLogLoggerMethod::output(const std::string &str, LogLevel level)
     int sys_level;
     switch (level)
     {
-    case LogLevel::EMERGENCY:
+    case LogLevel::Emergency:
         sys_level = LOG_EMERG;
         break;
-    case LogLevel::ERROR:
+    case LogLevel::Error:
         sys_level = LOG_ERR;
         break;
-    case LogLevel::WARNING:
+    case LogLevel::Warning:
         sys_level = LOG_WARNING;
         break;
-    case LogLevel::INFO:
+    case LogLevel::Info:
         sys_level = LOG_INFO;
         break;
     default:

@@ -70,7 +70,7 @@ int Daemonizer::kill_process()
 
     if (!pid_file.is_open())
     {
-        WT_LOG(LogLevel::ERROR) << "Could not open PID lock file " << pid_file_name;
+        WT_LOG_ERR << "Could not open PID lock file " << pid_file_name;
         return -1;
     }
 
@@ -78,13 +78,13 @@ int Daemonizer::kill_process()
     pid_file >> pid_value;
     pid_file.close();
 
-    WT_LOG(LogLevel::INFO) << "Sending signal to process " << pid_value << "...";
+    WT_LOG_I << "Sending signal to process " << pid_value << "...";
     if (kill(pid_value, SIGINT) < 0)
     {
-        WT_LOG(LogLevel::ERROR) << "Sending signal failed: " << std::strerror(errno);
+        WT_LOG_ERR << "Sending signal failed: " << std::strerror(errno);
         return -1;
     }
-    WT_LOG(LogLevel::INFO) << "Sending signal successfully completed!";
+    WT_LOG_I << "Sending signal successfully completed!";
 
     return 0;
 }

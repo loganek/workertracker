@@ -27,16 +27,17 @@ public:
         std::string app_name;
         std::string window_title;
 
-        const std::string & const get_value(const std::string &value) const { return value.empty() ? unknown_value : value; }
+        const std::string & get_value(const std::string &value) const { return value.empty() ? unknown_value : value; }
 
      public:
         Info(const std::string& app_name, const std::string &window_title)
             : app_name(app_name), window_title(window_title)
         {
         }
+        Info() {}
 
-        const std::string & const get_app_name() const { return get_value(app_name); }
-        const std::string & const get_window_title() const { return get_value(window_title); }
+        const std::string & get_app_name() const { return get_value(app_name); }
+        const std::string & get_window_title() const { return get_value(window_title); }
     };
 
     virtual ~WindowInfoProvider() {}

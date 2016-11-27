@@ -116,7 +116,7 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
         standard_model->invisibleRootItem()->appendRow(app_row);
     }
 
-    std::dynamic_pointer_cast<QtAnalyzerWindow>(main_window)->set_model(&proxy_model);
+    main_window->set_model(&proxy_model);
 
     main_window->update_for_new_model();
     proxy_model.setFilterRegExp(filter_pattern);

@@ -15,6 +15,7 @@
 QT_CHARTS_BEGIN_NAMESPACE
 class QChart;
 class QPieSlice;
+class QPieSeries;
 QT_CHARTS_END_NAMESPACE
 
 class QTFilterProxyModel;
@@ -38,7 +39,8 @@ private:
     QTFilterProxyModel *model;
 
     void change_mode(bool v = true);
-
+    void add_detailed_series(QPieSeries *detailed_series, int row);
+    bool isFullMode() const;
     void handleSliceClicked(QPieSlice *slice);
 };
 

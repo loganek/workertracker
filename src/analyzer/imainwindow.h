@@ -13,6 +13,7 @@
 #include <chrono>
 
 class AnalyzerController;
+class QAbstractItemModel;
 
 class IMainWindow
 {
@@ -27,6 +28,7 @@ public:
     virtual void update_for_new_model() {}
     virtual void update_total_time(const std::chrono::seconds& seconds) = 0;
     virtual void show_window() = 0;
+    virtual void set_model(QAbstractItemModel *model) = 0;
 };
 
 #endif // IMAINWINDOW_H

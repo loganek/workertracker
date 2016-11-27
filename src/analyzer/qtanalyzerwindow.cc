@@ -100,9 +100,9 @@ void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime type)
 
 void QtAnalyzerWindow::set_period()
 {
-	WT::DateRange range;
-	range.from = ui->fromDateTimeEdit->dateTime().toTime_t();
-	range.to = ui->toDateTimeEdit->dateTime().toTime_t();
+    WT::DateRange range;
+    range.from = ui->fromDateTimeEdit->dateTime().toTime_t();
+    range.to = ui->toDateTimeEdit->dateTime().toTime_t();
     controller->set_period(range);
 }
 
@@ -157,4 +157,9 @@ void QtAnalyzerWindow::print_error(const std::string &message)
 {
     QErrorMessage msg;
     msg.showMessage(QString::fromStdString(message));
+}
+
+void QtAnalyzerWindow::on_exitAction_triggered(bool)
+{
+    QApplication::quit();
 }

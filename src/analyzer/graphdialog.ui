@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>WorkerTracker Analyzer -Charts</string>
+   <string>WorkerTracker Analyzer - Charts</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

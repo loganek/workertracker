@@ -50,12 +50,14 @@ public:
     explicit QtAnalyzerWindow(QWidget *parent = 0);
     ~QtAnalyzerWindow();
 
-    void set_model(QAbstractItemModel *model);
-
+    void set_model(QAbstractItemModel *model) override;
     void print_error(const std::string &) override;
     void update_for_new_model() override;
     void set_controller(AnalyzerController *controller) override;
     void show_window() override { this->show(); }
+
+private slots:
+    void on_exitAction_triggered(bool);
 };
 
 #endif // QTANALYZERWINDOW_H

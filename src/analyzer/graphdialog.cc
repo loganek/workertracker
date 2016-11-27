@@ -46,13 +46,49 @@ GraphDialog::~GraphDialog()
     delete ui;
 }
 
+void GraphDialog::add_detailed_series(QPieSeries *series, int row)
+{
+    static std::array<Qt::GlobalColor, 8> colors = { Qt::red, Qt::yellow, Qt::cyan, Qt::black, Qt::magenta, Qt::blue, Qt::gray, Qt::green };
+    QPieSeries *detailed_series = isFullMode() ? series : new QPieSeries(this);
+    QColor color;
+
+    if (isFullMode())
+    {
+        color = colors[row % colors.size()];
+    }
+    else
+    {
+        detailed_series->setName(model->data(model->index(row, 1)).toString());
+        QObject::connect(detailed_series, &QPieSeries::clicked, this, &GraphDialog::handleSliceClicked);
+    }
+
+    int light = 100;
+    auto parent_index = model->index(row, 0);
+    for (int child_row = 0; child_row < model->rowCount(parent_index); child_row++)
+    {
+        qlonglong value = model->data(model->index(child_row, 2, parent_index)).toLongLong();
+        if (!value)
+        {
+            continue;
+        }
+        auto slice = new DrilldownSlice(value, model->data(model->index(child_row, 1, parent_index)).toString(), series);
+        if (isFullMode())
+        {
+            slice->setColor(color.lighter(200-light));
+            light = std::max(20.0, light * 0.90);
+        }
+        *detailed_series << slice;
+    }
+
+    if (!isFullScreen())
+    {
+        *series << new DrilldownSlice(detailed_series->sum(), model->data(model->index(row, 1)).toString(), detailed_series);
+    }
+}
+
 void GraphDialog::change_mode(bool)
 {
-    bool isFullMode = ui->fullModeRadioButton->isChecked();
-
     QPieSeries *series = new QPieSeries(this);
-    std::array<Qt::GlobalColor, 8> colors = { Qt::red, Qt::yellow, Qt::cyan, Qt::black, Qt::magenta, Qt::blue, Qt::gray, Qt::green };
-    int color_number = 0;
 
     for (int r = 0; r < model->rowCount(); r++)
     {
@@ -61,46 +97,20 @@ void GraphDialog::change_mode(bool)
             continue;
         }
 
-        QPieSeries *detailed_series = isFullMode ? series : new QPieSeries(this);
-        if (!isFullMode) detailed_series->setName(model->data(model->index(r, 1)).toString());
-
-        auto parent_index = model->index(r, 0);
-
-        QColor color = colors[color_number];
-        int light = 100;
-        for (int child_row = 0; child_row < model->rowCount(parent_index); child_row++)
-        {
-            qlonglong value = model->data(model->index(child_row, 2, parent_index)).toLongLong();
-            if (value > 0)
-            {
-                auto slice = new DrilldownSlice(value, model->data(model->index(child_row, 1, parent_index)).toString(), series);
-                if (isFullMode)
-                {
-                    slice->setColor(color.lighter(200-light));
-                    light = std::max(20.0, light * 0.90);
-                }
-                *detailed_series << slice;
-
-            }
-        }
-
-        if (!isFullMode)
-        {
-            QObject::connect(detailed_series, &QPieSeries::clicked, this, &GraphDialog::handleSliceClicked);
-            *series << new DrilldownSlice(detailed_series->sum(), model->data(model->index(r, 1)).toString(), detailed_series);
-        }
-        else
-        {
-            color_number = (color_number + 1) % colors.size();
-        }
+        add_detailed_series(series, r);
     }
 
     chart->changeSeries(series);
 
-    if (!isFullMode)
+    if (!isFullMode())
     {
         QObject::connect(series, &QPieSeries::clicked, this, &GraphDialog::handleSliceClicked);
     }
+}
+
+bool GraphDialog::isFullMode() const
+{
+    return ui->fullModeRadioButton->isChecked();
 }
 
 void GraphDialog::handleSliceClicked(QPieSlice *slice)

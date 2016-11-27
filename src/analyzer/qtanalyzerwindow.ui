@@ -177,7 +177,14 @@
      </widget>
     </item>
     <item>
-     <widget class="QTreeView" name="treeView"/>
+     <widget class="QTreeView" name="treeView">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="textElideMode">
+       <enum>Qt::ElideLeft</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -195,10 +202,12 @@
      <string>File</string>
     </property>
     <addaction name="loadDataFileAction"/>
+    <addaction name="separator"/>
+    <addaction name="exitAction"/>
    </widget>
-   <widget class="QMenu" name="menuVisualisations">
+   <widget class="QMenu" name="menuVisualizations">
     <property name="title">
-     <string>Visualisations</string>
+     <string>Visualizations</string>
     </property>
     <addaction name="visualizeCurrentViewAction"/>
    </widget>
@@ -209,15 +218,10 @@
     <addaction name="aboutAction"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuVisualisations"/>
+   <addaction name="menuVisualizations"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionConfiguration">
-   <property name="text">
-    <string>Configuration...</string>
-   </property>
-  </action>
   <action name="loadDataFileAction">
    <property name="text">
     <string>Load data file...</string>
@@ -240,6 +244,14 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
+   </property>
+  </action>
+  <action name="exitAction">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>

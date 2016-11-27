@@ -80,7 +80,7 @@ void GraphDialog::add_detailed_series(QPieSeries *series, int row)
         *detailed_series << slice;
     }
 
-    if (!isFullScreen())
+    if (!isFullMode())
     {
         *series << new DrilldownSlice(detailed_series->sum(), model->data(model->index(row, 1)).toString(), detailed_series);
     }

@@ -28,6 +28,7 @@ class QTFilterProxyModel : public QSortFilterProxyModel
     void setSourceModel(QAbstractItemModel *sourceModel) Q_DECL_OVERRIDE { QSortFilterProxyModel::setSourceModel(sourceModel); }
 
 protected:
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 

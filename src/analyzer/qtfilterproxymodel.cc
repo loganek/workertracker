@@ -20,8 +20,23 @@ QTFilterProxyModel::QTFilterProxyModel(QObject *parent)
     this->setSourceModel(new QStandardItemModel());
 }
 
+QVariant QTFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole)
+    {
+        switch (section)
+        {
+        case 0:
+            return tr("Time");
+        case 1:
+            return tr("Activity");
+        }
+    }
+    return QSortFilterProxyModel::headerData(section, orientation, role);
+}
+
 bool QTFilterProxyModel::filterAcceptsRow(int sourceRow,
-        const QModelIndex &sourceParent) const
+                                          const QModelIndex &sourceParent) const
 {
     auto this_index = sourceModel()->index(sourceRow, 1, sourceParent);
     auto parent_index = sourceModel()->index(this_index.parent().row(), 1);
@@ -52,7 +67,7 @@ void QTFilterProxyModel::setFilterRegExp(const boost::optional<std::regex> &filt
 {
     filter_pattern = filter;
 
-    invalidateFilter();
+    invalidate();
 
     update_parents_values();
 }
@@ -60,6 +75,7 @@ void QTFilterProxyModel::setFilterRegExp(const boost::optional<std::regex> &filt
 
 void QTFilterProxyModel::update_parents_values()
 {
+    setDynamicSortFilter(false);
     total_time = 0;
     for (int r = 0; r < rowCount(); r++)
     {
@@ -77,4 +93,5 @@ void QTFilterProxyModel::update_parents_values()
         setData(index(r, 2), QVariant(total));
         setData(index(r, 0), QVariant(QString::fromStdString(WT::time_to_display(std::chrono::seconds(total)))));
     }
+    setDynamicSortFilter(true);
 }

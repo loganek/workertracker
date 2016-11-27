@@ -35,4 +35,4 @@ target_link_libraries(workertracker
 install(TARGETS workertracker
   RUNTIME
   DESTINATION bin
-  COMPONENT applications)
+  COMPONENT tracker)

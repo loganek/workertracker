@@ -8,11 +8,15 @@
  */
 #include "workertracker.h"
 
+#include <clocale>
+
 #ifndef WT_PROJECT_NAME
     #error WT_PROJECT_NAME macro has not been defined!
 #endif
 
 int main(int argc, char** argv)
 {
+    std::setlocale(LC_ALL, "");
+
     return WT::WorkerTracker::instance().run(argc, argv);
 }

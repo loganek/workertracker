@@ -19,20 +19,24 @@ namespace WT {
 
 class WindowInfoProvider : public RegistrableSingle<WindowInfoProvider>
 {
-    static constexpr char const* unknown_value = "(unknown)";
-
 public:
-    struct Info
+    class Info
     {
+        const std::string unknown_value = "(unknown)";
+
         std::string app_name;
         std::string window_title;
 
+        const std::string & const get_value(const std::string &value) const { return value.empty() ? unknown_value : value; }
+
+     public:
         Info(const std::string& app_name, const std::string &window_title)
             : app_name(app_name), window_title(window_title)
         {
         }
 
-        Info() : app_name(unknown_value), window_title(unknown_value) {}
+        const std::string & const get_app_name() const { return get_value(app_name); }
+        const std::string & const get_window_title() const { return get_value(window_title); }
     };
 
     virtual ~WindowInfoProvider() {}

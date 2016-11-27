@@ -16,7 +16,7 @@ MSWindowsWindowInfoProvider::RegistrarSingle<MSWindowsWindowInfoProvider> MSWind
 
 std::string MSWindowsWindowInfoProvider::read_process_name(DWORD pid)
 {
-	std::string process_name = "(unknown)";
+	std::string process_name;
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, pid);
 	if (hSnapshot)
 	{
@@ -35,8 +35,7 @@ std::string MSWindowsWindowInfoProvider::read_process_name(DWORD pid)
 		}
 		if (found)
 		{
-			std::wstring ws(peInfo.szExeFile);
-			process_name = std::string(ws.begin(), ws.end());
+			process_name = wchar_to_stdstring(peInfo.szExeFile);
 		}
 		CloseHandle(hSnapshot);
 	}
@@ -44,26 +43,35 @@ std::string MSWindowsWindowInfoProvider::read_process_name(DWORD pid)
 	return process_name;
 }
 
+std::string MSWindowsWindowInfoProvider::wchar_to_stdstring(const wchar_t* wstr)
+{
+	std::mbstate_t state = std::mbstate_t();
+	int len = 1 + std::wcsrtombs(nullptr, &wstr, 0, &state);
+	std::vector<char> mbstr(len);
+	std::wcsrtombs(&mbstr[0], &wstr, mbstr.size(), &state);
+	return &mbstr[0];
+}
+
 std::string MSWindowsWindowInfoProvider::read_window_title(HWND winHandle)
 {
-	char buf[2048];
-	int ret = GetWindowTextA(winHandle, buf, 2048);
-	// TODO duplicate "(unknown) (see X provider)"
-	return !ret ? "(unknown)" : buf;
+	wchar_t buf[2048];
+	int ret = GetWindowTextW(winHandle, buf, 2048);
+	std::string value = wchar_to_stdstring(buf);
+	return !ret ? "" : value;
 }
+
+
 
 WindowInfoProvider::Info MSWindowsWindowInfoProvider::get_current_window_info()
 {
-	Info info;
-
 	HWND winHandle = GetForegroundWindow();
-	info.window_title = read_window_title(winHandle);
+	auto window_title = read_window_title(winHandle);
 
 	DWORD pid;
 	GetWindowThreadProcessId(winHandle, &pid);
-	info.app_name = read_process_name(pid);
+	auto app_name = read_process_name(pid);
 
-	return info;
+	return Info(app_name, window_title);
 }
 
 }

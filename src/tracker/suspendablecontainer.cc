@@ -55,7 +55,7 @@ bool SuspendableContainer::suspend_tracking(const WindowInfoProvider::Info &wind
 
     if (foreach_suspendable([&window_info](const std::shared_ptr<ITrackSuspendable> &susp)
     {
-        return susp->suspend_tracking(window_info.app_name.c_str(), window_info.window_title.c_str());
+        return susp->suspend_tracking(window_info.get_app_name().c_str(), window_info.get_window_title().c_str());
     }))
     {
         return true;

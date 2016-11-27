@@ -22,6 +22,8 @@ class MSWindowsWindowInfoProvider : public WindowInfoProvider
 
 	static RegistrarSingle<MSWindowsWindowInfoProvider> registrar;
 
+	static std::string wchar_to_stdstring(const wchar_t* wstr);
+
 public:
 
 	virtual ~MSWindowsWindowInfoProvider() {}

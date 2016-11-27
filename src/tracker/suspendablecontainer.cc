@@ -10,10 +10,13 @@
 
 #include "wtcommon/logger.h"
 
+#include <boost/filesystem.hpp>
+
 namespace WT {
 
 SuspendableContainer::SuspendableContainer(const std::shared_ptr<Configuration> &configuration)
-    : loader(configuration->get_general_param("plugins-path").get())
+    : loader({configuration->get_general_param("plugins-path").get(),
+              (boost::filesystem::system_complete(configuration->get_general_param("current-program-path").get()).parent_path() / "plugins").string()})
 {
     load_configuration_to_plugins(configuration);
 }

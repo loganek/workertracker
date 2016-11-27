@@ -66,6 +66,8 @@ int WorkerTracker::pre_process_parameters(int argc, char **argv)
         configuration->set_general_param("read-period", read_period);
     }
 
+    configuration->set_general_param("current-program-path", std::string(argv[0]));
+
     return 1;
 }
 

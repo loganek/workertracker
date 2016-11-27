@@ -65,11 +65,12 @@ void SuspendableLoader::try_load_plugin(const std::string &path)
         WT_LOG_D << "Trying to load plugin: " << pt;
         auto handle = std::make_shared<boost::dll::shared_library>(pt);
 
-        typedef WT::ITrackSuspendable* (suspendable_create_t)();
+        typedef WT::ITrackSuspendable* (WT_APICALL suspendable_create_t)();
         auto create = handle->get<suspendable_create_t>("create_suspendable");
 
         handlers.push_back(handle);
-        suspendable.push_back(std::shared_ptr<ITrackSuspendable>(create()));
+        auto obj = create();
+        suspendable.push_back(std::shared_ptr<ITrackSuspendable>(obj, std::mem_fn(&WT::ITrackSuspendable::destroy)));
 
         WT_LOG_I << "Added pluign " << suspendable.back()->get_name();
     }

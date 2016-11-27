@@ -91,6 +91,7 @@ void TrackerJob::stop()
     }
 
     terminate.notify_one();
+
  }
 
 void TrackerJob::run()

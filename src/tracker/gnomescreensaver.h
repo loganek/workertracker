@@ -38,6 +38,7 @@ public:
     void load_configuration(const char **/*config*/[2], int /*size*/) override {}
 
     const char* get_name() override { return "gnomescreensaver"; }
+    void destroy() override { delete this; }
 
     static RegistrarCollection<GNOMEScreenSaver> registrar;
 };

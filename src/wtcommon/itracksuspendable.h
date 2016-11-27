@@ -11,26 +11,29 @@
 
 #include "wtcommon/registrable.h"
 
+#ifdef WIN32
+# define WT_PLUGIN_EXPORT __declspec(dllexport)
+# define WT_APICALL __cdecl
+#else
+# define WT_APICALL
+# define WT_PLUGIN_EXPORT // empty
+#endif
+
 namespace WT {
 
 class ITrackSuspendable : public RegistrableCollection<ITrackSuspendable>
 {
 public:
-    virtual ~ITrackSuspendable() {}
+    virtual bool WT_APICALL suspend_tracking(const char *app_name, const char *window_title) = 0;
 
-    virtual bool suspend_tracking(const char *app_name, const char *window_title) = 0;
+    virtual void WT_APICALL load_configuration(const char **config[2], int size) = 0;
 
-    virtual void load_configuration(const char **config[2], int size) = 0;
+    virtual const char* WT_APICALL get_name() = 0;
 
-    virtual const char* get_name() = 0;
+    virtual void WT_APICALL destroy() = 0;
 };
 
 }
 
-#ifdef WIN32
-# define WT_PLUGIN_EXPORT __declspec(dllexport)
-#else
-# define WT_PLUGIN_EXPORT // empty
-#endif
 
 #endif // ITRACKSUSPENDABLE_H

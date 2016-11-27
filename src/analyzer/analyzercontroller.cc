@@ -48,7 +48,7 @@ void AnalyzerController::apply_filter(const std::string &search_text, bool case_
     }
     catch (const std::regex_error &ex)
     {
-        WT_LOG(WT::LogLevel::WARNING) << ex.what();
+        WT_LOG_W << ex.what();
         filter_pattern = boost::none;
     }
 

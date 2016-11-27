@@ -16,11 +16,11 @@ namespace WT {
 
 enum class LogLevel
 {
-    EMERGENCY = 0,
-    ERROR = 1,
-    WARNING = 2,
-    INFO = 3,
-    DEBUG = 4,
+    Emergency = 0,
+    Error = 1,
+    Warning = 2,
+    Info = 3,
+    Debug = 4,
 };
 
 std::ostringstream& prepare_stream(std::ostringstream& os, LogLevel level);
@@ -50,7 +50,7 @@ public:
     Logger& operator =(const Logger&) = delete;
     Logger& operator =(Logger&&) = delete;
 
-    std::ostringstream& get(LogLevel level = LogLevel::INFO);
+    std::ostringstream& get(LogLevel level = LogLevel::Info);
 
     static LogLevel& reporting_level();
 };
@@ -76,9 +76,9 @@ LogLevel& Logger<TOutputPolicy>::reporting_level()
 {
     static LogLevel reportingLevel =
 #if !defined(NDEBUG)
-            LogLevel::DEBUG;
+            LogLevel::Debug;
 #else
-            LogLevel::INFO;
+            LogLevel::Info;
 #endif
     return reportingLevel;
 }
@@ -101,11 +101,11 @@ public:
 
 #define WT_LOG(level) WT_IF_LOG(WT::Logger<WT::MethodOutput>, level)
 
-#define WT_LOG_D WT_LOG(WT::LogLevel::DEBUG)
-#define WT_LOG_EMG WT_LOG(WT::LogLevel::EMERGENCY)
-#define WT_LOG_ERR WT_LOG(WT::LogLevel::ERROR)
-#define WT_LOG_I WT_LOG(WT::LogLevel::INFO)
-#define WT_LOG_W WT_LOG(WT::LogLevel::WARNING)
+#define WT_LOG_D WT_LOG(WT::LogLevel::Debug)
+#define WT_LOG_EMG WT_LOG(WT::LogLevel::Emergency)
+#define WT_LOG_ERR WT_LOG(WT::LogLevel::Error)
+#define WT_LOG_I WT_LOG(WT::LogLevel::Info)
+#define WT_LOG_W WT_LOG(WT::LogLevel::Warning)
 }
 
 #endif // LOGGER_H

@@ -20,11 +20,12 @@ protected:
     virtual ~DummyTrackerPlugin() {}
 
 public:
-    bool WT_APICALL suspend_tracking(const char *, const char *) override
+    bool WT_APICALL suspend_tracking(const char *app, const char *title) override
     {
         if (!silent)
         {
             WT_LOG_D << "I'm not suspending, I'm just dummy plugin";
+            WT_LOG_D << "APP: " << app << ", Title: " << title;
         }
 
         return false;

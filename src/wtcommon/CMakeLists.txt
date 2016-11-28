@@ -15,6 +15,7 @@ add_library(wtcommon
     configuration.cc
     registrable.h
     datetimeutils.cc
+    fileloggermethod.cc
     ${SYSTEM_SPECIFIC_SOURCES})
 
 if(DEFINED BUILD_FLAGS)

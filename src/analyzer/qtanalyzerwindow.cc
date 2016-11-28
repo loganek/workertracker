@@ -131,6 +131,7 @@ void QtAnalyzerWindow::update_for_new_model()
 {
     ui->treeView->expandAll();
     ui->treeView->resizeColumnToContents(0);
+    ui->treeView->resizeColumnToContents(1);
     ui->treeView->hideColumn(2);
 }
 

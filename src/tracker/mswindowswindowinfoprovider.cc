@@ -10,6 +10,8 @@
 
 #include <tlhelp32.h>
 
+#include <algorithm>
+
 namespace WT {
 
 MSWindowsWindowInfoProvider::RegistrarSingle<MSWindowsWindowInfoProvider> MSWindowsWindowInfoProvider::registrar;
@@ -46,10 +48,20 @@ std::string MSWindowsWindowInfoProvider::read_process_name(DWORD pid)
 std::string MSWindowsWindowInfoProvider::wchar_to_stdstring(const wchar_t* wstr)
 {
 	std::mbstate_t state = std::mbstate_t();
+	std::wstring ws(wstr);
+	ws.erase(std::remove_if(ws.begin(), ws.end(), iswcntrl));
+	wstr = ws.c_str();
 	int len = 1 + std::wcsrtombs(nullptr, &wstr, 0, &state);
-	std::vector<char> mbstr(len);
-	std::wcsrtombs(&mbstr[0], &wstr, mbstr.size(), &state);
-	return &mbstr[0];
+	if (len)
+	{
+		std::vector<char> mbstr(len);
+		std::wcsrtombs(&mbstr[0], &wstr, mbstr.size(), &state);
+		return &mbstr[0];
+	}
+	else
+	{
+		return "";
+	}
 }
 
 std::string MSWindowsWindowInfoProvider::read_window_title(HWND winHandle)

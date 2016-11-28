@@ -12,6 +12,7 @@
 #include <iostream>
 #include <chrono>
 #include <iomanip>
+#include <fstream>
 
 namespace WT {
 
@@ -36,7 +37,15 @@ std::ostringstream& prepare_stream(std::ostringstream& os, LogLevel level)
 
 void MethodOutput::output(const std::string& msg, LogLevel level)
 {
-    out_method(msg, level);
+
+	static std::ofstream of;
+	if (!of.is_open())
+	{
+		of.open("C:\\users\\makolny\\.workertracker\\log.txt");
+	}
+	of << msg << std::endl << std::flush;
+
+    //out_method(msg, level);
 }
 
 MethodOutput::method_t MethodOutput::out_method = [](const std::string& str, LogLevel) { std::cout << str << std::flush; };

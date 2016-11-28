@@ -27,7 +27,7 @@ if(WIN32)
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR} 
         COMMENT "Deploy qt5 files")
 endif(WIN32)
-
-install(DIRECTORY $<TARGET_FILE_DIR:workertracker-analyzer>/
+install(TARGETS workertracker-analyzer
+  RUNTIME
     DESTINATION bin
     COMPONENT analyzer)

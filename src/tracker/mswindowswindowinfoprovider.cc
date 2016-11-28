@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------------
  */
 #include "mswindowswindowinfoprovider.h"
-
+#include "wtcommon/logger.h"
 #include <tlhelp32.h>
 
 #include <algorithm>
@@ -78,7 +78,7 @@ WindowInfoProvider::Info MSWindowsWindowInfoProvider::get_current_window_info()
 {
 	HWND winHandle = GetForegroundWindow();
 	auto window_title = read_window_title(winHandle);
-
+	WT_LOG_D << "HAndle: " << winHandle;
 	DWORD pid;
 	GetWindowThreadProcessId(winHandle, &pid);
 	auto app_name = read_process_name(pid);

@@ -10,6 +10,7 @@
 #define SINGLEAPPLOCKER_H
 
 #include "wtcommon/registrable.h"
+#include "wtcommon/logger.h"
 
 namespace WT {
 
@@ -20,6 +21,23 @@ public:
 
     virtual bool lock() = 0;
     virtual void unlock() = 0;
+
+    static bool lock_app_instance()
+    {
+        if (auto app_locker = SingleAppLocker::registry())
+        {
+            if (!app_locker->lock())
+            {
+                WT_LOG_EMG << "Cannot lock application. Probably one instance of this program is already running on the system!";
+                return false;
+            }
+        }
+        else
+        {
+            WT_LOG_W << "SingleAppLocker not registred in the system!";
+        }
+        return true;
+    }
 };
 
 }

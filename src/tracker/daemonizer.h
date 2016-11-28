@@ -24,7 +24,7 @@ class Daemonizer : public BackgroundRunner
 public:
     Daemonizer(const std::string &daemon_name);
 
-    int move_to_background() override;
+    int run_in_background(std::function<int()> callback) override;
     int kill_process() override;
     void register_kill_method(void(*handler)(int)) override;
 };

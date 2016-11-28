@@ -7,6 +7,7 @@
  * ----------------------------------------------------------------------------
  */
 #include "workertracker.h"
+#include "singleapplocker.h"
 
 #include "wtcommon/logger.h"
 
@@ -82,25 +83,6 @@ std::shared_ptr<BackgroundRunner> WorkerTracker::get_bg_runner()
     return bg_runner;
 }
 
-bool WorkerTracker::lock_app_instance()
-{
-    auto app_locker = SingleAppLocker::registry();
-
-    if (app_locker)
-    {
-        if (!app_locker->lock())
-        {
-            WT_LOG_EMG << "Cannot lock application. Probably one instance of this program is already running on the system!";
-            return false;
-        }
-    }
-    else
-    {
-        WT_LOG_W << "SingleAppLocker not registred in the system!";
-    }
-    return true;
-}
-
 int WorkerTracker::run(int argc, char **argv)
 {
     int ret = pre_process_parameters(argc, argv);
@@ -110,6 +92,30 @@ int WorkerTracker::run(int argc, char **argv)
         return ret;
     }
 
+    if (vm.count("stop"))
+    {
+        if (auto bg_runner = get_bg_runner())
+        {
+            return bg_runner->kill_process();
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    auto run_callback = [this] {
+        if (!SingleAppLocker::lock_app_instance()) // Daemon is responsible for locking the application
+        {
+            return -1;
+        }
+
+        job = std::make_shared<TrackerJob>(configuration);
+        job->run();
+
+        return 0;
+    };
+
     if (vm.count("daemon"))
     {
         if (auto bg_runner = get_bg_runner())
@@ -117,36 +123,15 @@ int WorkerTracker::run(int argc, char **argv)
             bg_runner->register_kill_method([] (int) {
                 WT::WorkerTracker::instance().job->stop();
             });
-
-            ret = bg_runner->move_to_background();
-        }
-    }
-    else if (vm.count("stop"))
-    {
-        if (auto bg_runner = get_bg_runner())
-        {
-            ret = bg_runner->kill_process();
+            return bg_runner->run_in_background(run_callback);
         }
         else
         {
-            ret = -1;
+            WT_LOG_ERR << "Cannot run application in background";
         }
     }
 
-    if (ret != 1)
-    {
-        return ret;
-    }
-
-    if (!lock_app_instance())
-    {
-        return -1;
-    }
-
-    job = std::make_shared<TrackerJob>(configuration);
-    job->run();
-
-    return 0;
+    return run_callback();
 }
 
 void WorkerTracker::load_configuration()

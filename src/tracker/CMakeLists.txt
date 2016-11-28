@@ -12,6 +12,9 @@ if (UNIX)
         pthread)
 elseif(WIN32)
     set(SYSTEM_SPECIFIC_SOURCES
+        mswindowsservice.cc
+        mswindowsservicebase.cc
+        threadpool.h
         mswindowssingleapplocker.cc
         mswindowswindowinfoprovider.cc)
 endif(UNIX)

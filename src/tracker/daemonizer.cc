@@ -25,7 +25,7 @@ Daemonizer::Daemonizer(const std::string &daemon_name)
 {
 }
 
-int Daemonizer::move_to_background()
+int Daemonizer::run_in_background(std::function<int()> callback)
 {
     pid_t pid;
 
@@ -60,7 +60,7 @@ int Daemonizer::move_to_background()
     UNIXSysLogLoggerMethod::init_log(daemon_name);
     MethodOutput::set_method(UNIXSysLogLoggerMethod::output);
 
-    return 1;
+    return callback();
 }
 
 int Daemonizer::kill_process()

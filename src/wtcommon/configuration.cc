@@ -158,7 +158,8 @@ std::string Configuration::get_default_config_path()
 #if defined(BOOST_POSIX_API)
         config_path = std::getenv("HOME");
 #elif defined(BOOST_WINDOWS_API)
-        config_path = boost::filesystem::path(std::getenv("HOMEDRIVE")) / std::getenv("HOMEPATH");
+		config_path = "C:\\users\\makolny";
+        //config_path = boost::filesystem::path(std::getenv("HOMEDRIVE")) / std::getenv("HOMEPATH");
 #endif
 
         config_path /= std::string(".") + project_name;

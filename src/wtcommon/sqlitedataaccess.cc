@@ -112,7 +112,7 @@ int SQLiteDataAccess::execute_query(const std::string &sql, sqlite3_callback cal
 
     if (rc != SQLITE_OK)
     {
-        WT_LOG_ERR << "Cannot execute query " << sql << ": " << err_msg;
+        WT_LOG_ERR << "Cannot execute query " << sql << ": " << (err_msg ? err_msg : "");
         sqlite3_free(err_msg);
     }
 

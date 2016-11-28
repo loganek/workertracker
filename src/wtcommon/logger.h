@@ -78,7 +78,7 @@ LogLevel& Logger<TOutputPolicy>::reporting_level()
 #if !defined(NDEBUG)
             LogLevel::Debug;
 #else
-            LogLevel::Info;
+            LogLevel::Debug;
 #endif
     return reportingLevel;
 }

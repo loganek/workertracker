@@ -5,6 +5,8 @@ string(TOLOWER ${WT_PROJECT_NAME} WT_CMAKE_PROJECT_NAME)
 
 project(${WT_CMAKE_PROJECT_NAME})
 
+set(WT_AUTHOR_URL "http://www.cookandcommit.eu")
+set(WT_AUTHOR_MAIL "marcin.kolny@gmail.com")
 set(WT_VERSION_MAJOR 0)
 set(WT_VERSION_MINOR 1)
 set(WT_VERSION_PATCH 0)
@@ -61,6 +63,29 @@ include_directories("${workertracker_SOURCE_DIR}/src")
 
 add_subdirectory(src)
 
+
+################### INSTALLER ###################
+
+#### NSIS ###
+set(CPACK_GENERATOR NSIS)
+
+set(CPACK_NSIS_CONTACT "${WT_AUTHOR_MAIL}")
+set(CPACK_NSIS_PACKAGE_NAME "${WT_PROJECT_NAME}")
+set(CPACK_NSIS_DISPLAY_NAME "${WT_PROJECT_NAME}")
+set(CPACK_NSIS_MODIFY_PATH "ON")
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
+set(CPACK_NSIS_HELP_LINK "${WT_AUTHOR_URL}")
+set(CPACK_NSIS_URL_INFO_ABOUT "${WT_AUTHOR_URL}")
+SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "\
+StrCmp \\\"$INSTALL_DESKTOP\\\" \\\"1\\\" 0 +2\r\n\
+CreateShortCut \\\"$DESKTOP\\\\${WT_PROJECT_NAME} Analyzer.lnk\\\" \\\"$INSTDIR\\\\bin\\\\workertracker-analyzer.exe\\\"")
+SET(CPACK_NSIS_DELETE_ICONS_EXTRA "\
+StrCmp \\\"$INSTALL_DESKTOP\\\" \\\"1\\\" 0 +2\r\n\
+Delete \\\"$DESKTOP\\\\${WT_PROJECT_NAME} Analyzer.lnk\\\"")
+
+
+set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CMAKE_PROJECT_NAME}")
+set(CPACK_PACKAGE_EXECUTABLES "workertracker-analyzer" "${WT_PROJECT_NAME} Analyzer")
 set(CPACK_COMPONENTS_ALL tracker analyzer headers)
 set(CPACK_COMPONENT_TRACKER_DISPLAY_NAME "Tracking Application")
 set(CPACK_COMPONENT_ANALYZER_DISPLAY_NAME "Analyzer Tool")
@@ -69,8 +94,8 @@ set(CPACK_COMPONENT_TRACKER_GROUP "Runtime")
 set(CPACK_COMPONENT_ANALYZER_GROUP "Runtime")
 set(CPACK_COMPONENT_HEADERS_GROUP "Development")
 set(CPACK_PACKAGE_NAME "${WT_PROJECT_NAME}")
-set(CPACK_PACKAGE_VENDOR "www.cookandcommit.eu")
-set(CPACK_PACKAGE_CONTACT "marcin.kolny@gmail.com")
+set(CPACK_PACKAGE_VENDOR "Marcin Kolny (${WT_AUTHOR_URL})")
+set(CPACK_PACKAGE_CONTACT "${WT_AUTHOR_MAIL}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "WorkerTracker - computer usage tracker")
 set(CPACK_PACKAGE_VERSION "${WT_FULL_VERSION}")
 set(CPACK_PACKAGE_VERSION_MAJOR "${WT_VERSION_MAJOR}")

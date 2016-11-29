@@ -10,6 +10,7 @@ add_executable(workertracker-analyzer
     graphdialog.cc
     drilldownslice.cc
     drilldownchart.cc
+    smartpieseries.cc
     ${WTANALYZER_UI_MOC})
 
 target_link_libraries(workertracker-analyzer

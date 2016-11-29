@@ -33,25 +33,15 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-DrilldownSlice::DrilldownSlice(qreal value, QString prefix, QAbstractSeries *drilldownSeries)
-    : m_drilldownSeries(drilldownSeries),
-      m_prefix(prefix)
+DrilldownSlice::DrilldownSlice(qreal value, QString prefix, int row)
+    : m_prefix(prefix),
+      row(row)
 {
     setValue(value);
     updateLabel();
     setLabelFont(QFont("Arial", 8));
     connect(this, SIGNAL(percentageChanged()), this, SLOT(updateLabel()));
     connect(this, SIGNAL(hovered(bool)), this, SLOT(showHighlight(bool)));
-}
-
-DrilldownSlice::~DrilldownSlice()
-{
-
-}
-
-QAbstractSeries *DrilldownSlice::drilldownSeries() const
-{
-    return m_drilldownSeries;
 }
 
 void DrilldownSlice::updateLabel()

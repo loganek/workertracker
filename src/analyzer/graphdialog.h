@@ -11,12 +11,7 @@
 
 #include "drilldownchart.h"
 #include <QDialog>
-
-QT_CHARTS_BEGIN_NAMESPACE
-class QChart;
-class QPieSlice;
-class QPieSeries;
-QT_CHARTS_END_NAMESPACE
+#include <QChartView>
 
 class QTFilterProxyModel;
 
@@ -32,16 +27,14 @@ public:
     explicit GraphDialog(QTFilterProxyModel *model, QWidget *parent = 0);
 
     ~GraphDialog();
-
 private:
+    QChartView chartView;
     Ui::GraphDialog *ui;
     DrilldownChart *chart;
-    QTFilterProxyModel *model;
 
-    void change_mode(bool v = true);
-    void add_detailed_series(QPieSeries *detailed_series, int row);
-    bool isFullMode() const;
-    void handleSliceClicked(QPieSlice *slice);
+    void policy_updated(bool = true);
+    bool is_full_mode() const;
+    std::shared_ptr<PieSeriesPolicy> update_policy();
 };
 
 #endif // GRAPHDIALOG_H

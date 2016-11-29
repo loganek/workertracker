@@ -1,41 +1,30 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the Qt Charts module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:GPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 or (at your option) any later version
-** approved by the KDE Free Qt Foundation. The licenses are as published by
-** the Free Software Foundation and appearing in the file LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <marcin.kolny@gmail.com> wrote this file. As long as you retain this notice you
+ * can do whatever you want with this stuff. If we meet some day, and you think
+ * this stuff is worth it, you can buy me a beer in return.       Marcin Kolny
+ * ----------------------------------------------------------------------------
+ */
 #include "drilldownchart.h"
 #include "drilldownslice.h"
+#include "qtfilterproxymodel.h"
+#include "smartpieseries.h"
+
+#include <QPieSeries>
 
 QT_CHARTS_USE_NAMESPACE
 
-DrilldownChart::DrilldownChart(QGraphicsItem *parent, Qt::WindowFlags wFlags)
+DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, QTFilterProxyModel *model, QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QChart(QChart::ChartTypeCartesian, parent, wFlags),
-      m_currentSeries(0)
+      model(model),
+      m_currentSeries(0),
+      policy(policy)
 {
+    QSmartPieSeries *series = get_series();
+    change_series(series);
 
+    setTheme(QChart::ChartThemeBlueCerulean);
 }
 
 DrilldownChart::~DrilldownChart()
@@ -43,12 +32,91 @@ DrilldownChart::~DrilldownChart()
 
 }
 
-void DrilldownChart::changeSeries(QAbstractSeries *series)
+void DrilldownChart::set_model_type(bool is_full)
 {
-    // NOTE: if the series is owned by the chart it will be deleted
-    // here the "window" owns the series...
+    this->is_full = is_full;
+    change_series(get_series());
+}
+
+void DrilldownChart::set_policy(const std::shared_ptr<PieSeriesPolicy>& policy)
+{
+    this->policy = policy;
+    change_series(get_series());
+}
+
+QSmartPieSeries* DrilldownChart::get_series(const QModelIndex &parent_index)
+{
+    auto val = model->data(model->index(parent_index.row(), 1)).toString();
+    QSmartPieSeries *&series = is_full ? cache_root_full :
+                                         (parent_index.isValid() ? cache[val] : cache_root);
+
+    if (series && series->get_policy() == policy)
+    {
+        return series;
+    }
+
+    qlonglong total_count = parent_index.isValid() ? model->data(model->index(parent_index.row(), 2)).toLongLong() : model->get_total_time().count();
+    QVariant variant; variant.setValue(total_count);
+
+    series = new QSmartPieSeries(policy->make_new(variant));
+
+    series->setName(val);
+
+    std::vector<DrilldownSlice*> slices;
+
+    for (int row = 0; row < model->rowCount(parent_index); row++)
+    {
+        qlonglong value = model->data(model->index(row, 2, parent_index)).toLongLong();
+        if (value == 0)
+        {
+            continue;
+        }
+
+        if (!is_full)
+        {
+            slices.push_back(new DrilldownSlice(value, model->data(model->index(row, 1, parent_index)).toString(), parent_index.isValid() ? -1 : row));
+            continue;
+        }
+        auto idx = model->index(row, 0);
+        for (int child_row = 0; child_row < model->rowCount(idx); child_row++)
+        {
+            value = model->data(model->index(child_row, 2, idx)).toLongLong();
+            if (value == 0)
+            {
+                continue;
+            }
+            slices.push_back(new DrilldownSlice(value, model->data(model->index(child_row, 1, idx)).toString(), -1));
+        }
+    }
+
+    if (is_full)
+    {
+        std::sort(slices.begin(), slices.end(), [](DrilldownSlice* left, DrilldownSlice* right) { return left->value() > right->value(); });
+    }
+
+    for (auto slice : slices)
+    {
+        series->smart_add(slice);
+    }
+
+    series->finalize();
+
+    connect(series, &QPieSeries::clicked, this, &DrilldownChart::handleSliceClicked);
+
+    return series;
+}
+
+void DrilldownChart::change_series(QSmartPieSeries *series)
+{
+    if (series == m_currentSeries && m_currentSeries->get_policy() == policy)
+    {
+        return;
+    }
+
     if (m_currentSeries)
+    {
         removeSeries(m_currentSeries);
+    }
     m_currentSeries = series;
     addSeries(series);
     setTitle(series->name());
@@ -56,8 +124,12 @@ void DrilldownChart::changeSeries(QAbstractSeries *series)
 
 void DrilldownChart::handleSliceClicked(QPieSlice *slice)
 {
+    if (is_full)
+        return;
+
     DrilldownSlice *drilldownSlice = static_cast<DrilldownSlice *>(slice);
-    changeSeries(drilldownSlice->drilldownSeries());
+    auto index = drilldownSlice->get_row() == -1 ? QModelIndex() : model->index(drilldownSlice->get_row(), 0);
+    change_series(get_series(index));
 }
 
 #include "moc_drilldownchart.cpp"

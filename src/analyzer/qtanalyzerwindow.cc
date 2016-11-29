@@ -54,6 +54,7 @@ void QtAnalyzerWindow::connect_signals()
     connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
     connect(ui->visualizeCurrentViewAction, &QAction::triggered, this, [this] (bool) {
         auto dialog = new GraphDialog(&controller->proxy_model, this);
+        dialog->setAttribute( Qt::WA_DeleteOnClose );
         dialog->show();
     });
     connect(ui->aboutAction, &QAction::triggered, this, [this] (bool) {

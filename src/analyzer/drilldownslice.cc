@@ -56,12 +56,12 @@ QAbstractSeries *DrilldownSlice::drilldownSeries() const
 
 void DrilldownSlice::updateLabel()
 {
-    QString label = m_prefix;
+    QString label = QString::fromStdString(WT::time_to_display(std::chrono::seconds(qlonglong(this->value()))));
     label += " ";
     label += QString::number(this->percentage() * 100, 'f', 1);
     label += "%";
     label += ", ";
-    label += QString::fromStdString(WT::time_to_display(std::chrono::seconds(qlonglong(this->value()))));
+    label += m_prefix;
     setLabel(label);
 }
 

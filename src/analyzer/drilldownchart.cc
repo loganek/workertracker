@@ -11,6 +11,8 @@
 #include "qtfilterproxymodel.h"
 #include "smartpieseries.h"
 
+#include "wtcommon/datetimeutils.h"
+
 #include <QPieSeries>
 
 QT_CHARTS_USE_NAMESPACE
@@ -119,7 +121,9 @@ void DrilldownChart::change_series(QSmartPieSeries *series)
     }
     m_currentSeries = series;
     addSeries(series);
-    setTitle(series->name());
+    setTitle(QString("%1 %2")
+             .arg(series->name())
+             .arg(WT::time_to_display(std::chrono::seconds((qlonglong)series->sum())).c_str()));
 }
 
 void DrilldownChart::handleSliceClicked(QPieSlice *slice)

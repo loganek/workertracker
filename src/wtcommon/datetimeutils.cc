@@ -27,12 +27,15 @@ std::string time_to_display(std::chrono::seconds sec)
         ss << h.count() << "h ";
     }
     auto m = duration_cast<minutes>(sec);
-    if (m > 0min || h > 0h)
+    if (m > 0min)
     {
         sec -= m;
         ss << m.count() << "min ";
     }
-    ss << sec.count() << "s";
+    if (sec.count() > 0)
+    {
+        ss << sec.count() << "s";
+    }
     return ss.str();
 }
 

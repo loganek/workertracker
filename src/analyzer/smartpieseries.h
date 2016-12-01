@@ -64,7 +64,9 @@ public:
     explicit QSmartPieSeries(std::shared_ptr<PieSeriesPolicy> policy, QObject *parent = Q_NULLPTR);
     void smart_add(QPieSlice *slice);
     void finalize();
+
     std::shared_ptr<PieSeriesPolicy> get_policy() const { return policy; }
+    void set_policy(const std::shared_ptr<PieSeriesPolicy>& policy) { this->policy = policy; }
 };
 
 

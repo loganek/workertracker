@@ -28,7 +28,6 @@ public:
 
     ~GraphDialog();
 private:
-    QChartView chartView;
     Ui::GraphDialog *ui;
     DrilldownChart *chart;
 

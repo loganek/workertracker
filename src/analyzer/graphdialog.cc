@@ -25,9 +25,9 @@ GraphDialog::GraphDialog(QTFilterProxyModel *model, QWidget *parent) :
     chart->legend()->setAlignment(Qt::AlignRight);
     chart->setAnimationOptions(QChart::AllAnimations);
 
-    chartView.setChart(chart);
-    chartView.setRenderHint(QPainter::Antialiasing);
-    ui->verticalLayout->addWidget(&chartView);
+    auto chartView = new QChartView(chart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+    ui->verticalLayout->addWidget(chartView);
 
     connect(ui->overviewModeRadioButton, &QRadioButton::clicked, this, [this] (bool) { chart->set_model_type(is_full_mode());});
     connect(ui->fullModeRadioButton, &QRadioButton::clicked, this, [this] (bool) { chart->set_model_type(is_full_mode());});

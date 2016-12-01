@@ -31,7 +31,7 @@ DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, Q
 
 DrilldownChart::~DrilldownChart()
 {
-
+    remove_current_series();
 }
 
 void DrilldownChart::set_model_type(bool is_full)
@@ -49,18 +49,11 @@ void DrilldownChart::set_policy(const std::shared_ptr<PieSeriesPolicy>& policy)
 QSmartPieSeries* DrilldownChart::get_series(const QModelIndex &parent_index)
 {
     auto val = model->data(model->index(parent_index.row(), 1)).toString();
-    QSmartPieSeries *&series = is_full ? cache_root_full :
-                                         (parent_index.isValid() ? cache[val] : cache_root);
-
-    if (series && series->get_policy() == policy)
-    {
-        return series;
-    }
 
     qlonglong total_count = parent_index.isValid() ? model->data(model->index(parent_index.row(), 2)).toLongLong() : model->get_total_time().count();
     QVariant variant; variant.setValue(total_count);
 
-    series = new QSmartPieSeries(policy->make_new(variant));
+    auto series = new QSmartPieSeries(policy->make_new(variant));
 
     series->setName(val);
 
@@ -110,20 +103,28 @@ QSmartPieSeries* DrilldownChart::get_series(const QModelIndex &parent_index)
 
 void DrilldownChart::change_series(QSmartPieSeries *series)
 {
-    if (series == m_currentSeries && m_currentSeries->get_policy() == policy)
+    if (series == m_currentSeries)
     {
         return;
     }
 
-    if (m_currentSeries)
-    {
-        removeSeries(m_currentSeries);
-    }
+    remove_current_series();
+
     m_currentSeries = series;
     addSeries(series);
     setTitle(QString("%1 %2")
              .arg(series->name())
              .arg(WT::time_to_display(std::chrono::seconds((qlonglong)series->sum())).c_str()));
+}
+
+void DrilldownChart::remove_current_series()
+{
+    if (m_currentSeries)
+    {
+        m_currentSeries->clear();
+        removeSeries(m_currentSeries);
+        delete m_currentSeries;
+    }
 }
 
 void DrilldownChart::handleSliceClicked(QPieSlice *slice)

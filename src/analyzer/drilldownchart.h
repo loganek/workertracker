@@ -30,14 +30,12 @@ class DrilldownChart : public QChart
     Q_OBJECT
     QTFilterProxyModel *model;
 
-    std::map<QString, QSmartPieSeries*> cache;
-    QSmartPieSeries* cache_root = nullptr;
-    QSmartPieSeries* cache_root_full = nullptr;
     bool is_full = false;
-    QSmartPieSeries *m_currentSeries;
+    QSmartPieSeries *m_currentSeries = nullptr;
     std::shared_ptr<PieSeriesPolicy> policy;
 
     QSmartPieSeries* get_series(const QModelIndex &parent_index = QModelIndex());
+    void remove_current_series();
 
 public:
     explicit DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, QTFilterProxyModel *model, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);

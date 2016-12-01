@@ -46,12 +46,10 @@ DrilldownSlice::DrilldownSlice(qreal value, QString prefix, int row)
 
 void DrilldownSlice::updateLabel()
 {
-    QString label = QString::fromStdString(WT::time_to_display(std::chrono::seconds(qlonglong(this->value()))));
-    label += " ";
-    label += QString::number(this->percentage() * 100, 'f', 1);
-    label += "%";
-    label += ", ";
+    QString label = QString::number(this->percentage() * 100, 'f', 1);
+    label += "% ";
     label += m_prefix;
+    label += " " + QString::fromStdString(WT::time_to_display(std::chrono::seconds(qlonglong(this->value()))));
     setLabel(label);
 }
 

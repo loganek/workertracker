@@ -33,6 +33,7 @@ protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
 public:
+    virtual ~QTFilterProxyModel();
     QTFilterProxyModel(QObject *parent = 0);
 
     void setFilterRegExp(const boost::optional<std::regex> &filter);

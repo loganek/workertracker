@@ -20,6 +20,11 @@ QTFilterProxyModel::QTFilterProxyModel(QObject *parent)
     this->setSourceModel(new QStandardItemModel());
 }
 
+QTFilterProxyModel::~QTFilterProxyModel()
+{
+    delete sourceModel();
+}
+
 QVariant QTFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole)

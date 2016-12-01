@@ -99,7 +99,9 @@ SQLiteDataAccess::~SQLiteDataAccess()
     if (db)
     {
         persist_records();
-        sqlite3_close(db);
+        sqlite3_finalize(insert_stmt);
+        sqlite3_finalize(update_stmt);
+        sqlite3_close_v2(db);
     }
 }
 
@@ -132,7 +134,7 @@ void SQLiteDataAccess::create_database()
         boost::filesystem::create_directories(boost::filesystem::path(filename).parent_path());
     }
 
-    if (sqlite3_open(filename.c_str(), &db) != SQLITE_OK)
+    if (sqlite3_open_v2(filename.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr) != SQLITE_OK)
     {
         throw std::runtime_error("Unable to open database: " + std::string(sqlite3_errmsg(db)));
     }

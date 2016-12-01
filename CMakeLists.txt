@@ -80,6 +80,7 @@ if(WIN32)
   set(CPACK_NSIS_TRACKER "workertracker")
 endif(WIN32)
 
+set(CPACK_SOURCE_IGNORE_FILES "build")
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_EXECUTABLES "workertracker-analyzer" "${WT_PROJECT_NAME} Analyzer")
 set(CPACK_COMPONENTS_ALL tracker analyzer headers)

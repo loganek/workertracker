@@ -21,14 +21,20 @@ target_link_libraries(workertracker-analyzer
 set_property(TARGET workertracker-analyzer PROPERTY CXX_STANDARD 14)
 
 if(WIN32)
-    add_custom_command(
-        TARGET workertracker-analyzer
-        POST_BUILD
-        COMMAND windeployqt.exe $<TARGET_FILE:workertracker-analyzer>
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR} 
-        COMMENT "Deploy qt5 files")
-endif(WIN32)
+  add_custom_command(
+    TARGET workertracker-analyzer
+    POST_BUILD
+    COMMAND windeployqt.exe $<TARGET_FILE:workertracker-analyzer>
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR} 
+    COMMENT "Deploy qt5 files")
 
-install(DIRECTORY $<TARGET_FILE_DIR:workertracker-analyzer>/
+  install(DIRECTORY $<TARGET_FILE_DIR:workertracker-analyzer>/
     DESTINATION bin
     COMPONENT analyzer)
+else()
+  install(TARGETS workertracker-analyzer
+    RUNTIME
+    DESTINATION bin
+    COMPONENT analyzer)
+endif(WIN32)
+

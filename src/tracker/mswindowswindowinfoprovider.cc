@@ -14,7 +14,22 @@
 
 namespace WT {
 
+struct PIDHierarchyInfo
+{
+	DWORD ownerpid;
+	DWORD childpid;
+};
+
 MSWindowsWindowInfoProvider::RegistrarSingle<MSWindowsWindowInfoProvider> MSWindowsWindowInfoProvider::registrar;
+
+BOOL CALLBACK MSWindowsWindowInfoProvider::enum_chind_windows_callback(HWND hWnd, LPARAM lp)
+{
+	PIDHierarchyInfo* info = (PIDHierarchyInfo*)lp;
+	DWORD pid = 0;
+	GetWindowThreadProcessId(hWnd, &pid);
+	if (pid != info->ownerpid) info->childpid = pid;
+	return TRUE;
+}
 
 std::string MSWindowsWindowInfoProvider::read_process_name(DWORD pid)
 {
@@ -72,16 +87,33 @@ std::string MSWindowsWindowInfoProvider::read_window_title(HWND winHandle)
 	return !ret ? "" : value;
 }
 
+DWORD get_window_pid(HWND winHandle)
+{
+	DWORD pid;
+	
+	GetWindowThreadProcessId(winHandle, &pid);
+	
+	char winClassName[MAX_CLASS_NAME];
+	int ret = GetClassName(winHandle, winClassName, 1024);
+	
+	if (!ret || strcmp(winClassName, "ApplicationFrameWindow") != 0)
+	{
+		return pid;
+	}
 
+	PIDHierarchyInfo info = { 0 };
+	info.ownerpid = pid;
+	info.childpid = info.ownerpid;
+	EnumChildWindows(winHandle, &MSWindowsWindowInfoProvider::enum_chind_windows_callback, (LPARAM)&info);
+	return info.childpid;
+}
 
 WindowInfoProvider::Info MSWindowsWindowInfoProvider::get_current_window_info()
 {
 	HWND winHandle = GetForegroundWindow();
 	auto window_title = read_window_title(winHandle);
 
-	DWORD pid;
-	GetWindowThreadProcessId(winHandle, &pid);
-	auto app_name = read_process_name(pid);
+	auto app_name = read_process_name(get_window_pid(winHandle));
 
 	return Info(app_name, window_title);
 }

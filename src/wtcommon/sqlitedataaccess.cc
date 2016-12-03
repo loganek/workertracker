@@ -55,7 +55,6 @@ void SQLiteDataAccess::prepare_statements()
     {
         throw std::runtime_error("Can't prepare insert statement");
     }
-    WT_LOG_D << sqlite3_bind_parameter_count(insert_stmt);
 
     auto update_sql = "UPDATE " + table_name + " set TIME_END = ? WHERE TIME_END = ?;";
     if (sqlite3_prepare_v2(db, update_sql.c_str(), -1, &update_stmt, nullptr) != SQLITE_OK)

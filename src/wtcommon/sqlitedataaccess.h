@@ -46,6 +46,8 @@ class SQLiteDataAccess : public DataAccess
     void backup_existing_db();
     void persist_records();
     void prepare_statements();
+    void create_regexp_function();
+    void init_sqlite3();
 
 public:
     SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration);

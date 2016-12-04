@@ -11,6 +11,26 @@
 
 #include <boost/filesystem.hpp>
 
+extern "C" {
+
+static void sqlite3_ext_regexp(sqlite3_context *ctx, int, sqlite3_value **argv)
+{
+    auto regexp = (const char *) sqlite3_value_text(argv[0]);
+    auto value = (const char *) sqlite3_value_text(argv[1]);
+
+    try
+    {
+        auto res = std::regex_search(value, std::regex(regexp));
+        sqlite3_result_int(ctx, res);
+    }
+    catch(const std::exception& e)
+    {
+        sqlite3_result_error(ctx, e.what(), -1);
+    }
+}
+
+}
+
 namespace WT {
 
 SQLiteDataAccess::SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration)
@@ -48,6 +68,18 @@ bool SQLiteDataAccess::table_exists()
     return true;
 }
 
+void SQLiteDataAccess::init_sqlite3()
+{
+    prepare_statements();
+    create_regexp_function();
+}
+
+void SQLiteDataAccess::create_regexp_function()
+{
+    sqlite3_create_function_v2(db, "regexp", 2, SQLITE_UTF8, nullptr,
+                               sqlite3_ext_regexp, nullptr, nullptr, nullptr);
+}
+
 void SQLiteDataAccess::prepare_statements()
 {
     auto insert_sql = "INSERT INTO " + table_name + "(TIME_START, TIME_END, PROC_NAME, DESCRIPTION) VALUES(?, ?, ?, ?);";
@@ -74,7 +106,7 @@ void SQLiteDataAccess::open(bool readonly)
         }
         else if (table_exists())
         {
-            prepare_statements();
+            init_sqlite3();
             return;
         }
 
@@ -90,7 +122,7 @@ void SQLiteDataAccess::open(bool readonly)
     {
         create_database();
     }
-    prepare_statements();
+    init_sqlite3();
 }
 
 SQLiteDataAccess::~SQLiteDataAccess()

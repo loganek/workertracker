@@ -33,10 +33,15 @@ static void sqlite3_ext_regexp(sqlite3_context *ctx, int, sqlite3_value **argv)
 
 namespace WT {
 
-SQLiteDataAccess::SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration)
+SQLiteDataAccess::SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<Configuration> &configuration)
     : store_cnt(std::stoi(configuration->get_general_param("save-period").get())),
-      filename(configuration->get_general_param("data-path").get())
+      filename(data_file)
 {
+}
+
+std::string SQLiteDataAccess::default_data_file()
+{
+    return (boost::filesystem::path(WT::Configuration::get_default_config_path()).parent_path() / "data.dat").string();
 }
 
 int SQLiteDataAccess::query_container_callback(void *data_access, int argc, char **argv, char ** /*col_name*/)

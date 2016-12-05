@@ -19,7 +19,7 @@ TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
     : period(configuration->get_general_param<int>("read-period").get()),
       suspendable(configuration)
 {
-    data_access = std::make_shared<SQLiteDataAccess>(configuration);
+    data_access = std::make_shared<SQLiteDataAccess>(SQLiteDataAccess::default_data_file(), configuration);
     data_access->open(false);
 
     window_info_provider = WindowInfoProvider::registry();

@@ -28,7 +28,7 @@ int AnalyzerController::run()
     main_window = std::make_shared<QtAnalyzerWindow>();
     main_window->set_controller(this);
 
-    load_from_file(config->get_general_param("data-path").get());
+    load_from_file(WT::SQLiteDataAccess::default_data_file());
 
     main_window->show_window();
 
@@ -60,8 +60,7 @@ void AnalyzerController::load_from_file(const std::string &filename)
 {
     try
     {
-        config->set_general_param("data-path", filename);
-        data_access = std::make_shared<WT::SQLiteDataAccess>(config);
+        data_access = std::make_shared<WT::SQLiteDataAccess>(filename, config);
         data_access->open(true);
         load_model(data_access->get_tree(period));
     }

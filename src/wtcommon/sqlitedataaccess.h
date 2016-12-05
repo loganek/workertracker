@@ -50,12 +50,14 @@ class SQLiteDataAccess : public DataAccess
     void init_sqlite3();
 
 public:
-    SQLiteDataAccess(const std::shared_ptr<Configuration> &configuration);
+    SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<Configuration> &configuration);
     virtual ~SQLiteDataAccess();
 
     void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
     DataContainer get_tree(DateRange period = DateRange()) override;
+
+    static std::string default_data_file();
 };
 
 }

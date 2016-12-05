@@ -21,15 +21,13 @@ WorkerTracker::WorkerTracker()
     WT::MethodOutput::set_method([](const std::string& str, LogLevel) {
         std::cout << str << std::flush;
     });
-
-    load_configuration();
 }
 
 int WorkerTracker::pre_process_parameters(int argc, char **argv)
 {
     namespace po = boost::program_options;
 
-    int save_period, read_period;
+    std::string config_path;
 
     // Declare the supported options.
     po::options_description desc("Allowed options");
@@ -37,8 +35,7 @@ int WorkerTracker::pre_process_parameters(int argc, char **argv)
         ("help,h", "Print help")
         ("daemon,d", "Run as daemon")
         ("stop,s", "Stop daemon")
-            ("save-period", po::value<int>(&save_period), "Save period (value * read period)")
-        ("read-period", po::value<int>(&read_period), "Read period (in seconds)")
+        ("config-file,f", po::value<std::string>(&config_path)->default_value(Configuration::get_default_config_path()), "Configuration file")
     ;
 
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -56,14 +53,7 @@ int WorkerTracker::pre_process_parameters(int argc, char **argv)
         return -1;
     }
 
-    if (vm.count("save-period"))
-    {
-        configuration->set_general_param("save-period", save_period);
-    }
-    if (vm.count("read-period"))
-    {
-        configuration->set_general_param("read-period", read_period);
-    }
+    load_configuration(config_path);
 
     configuration->set_general_param("current-program-path", std::string(argv[0]));
 
@@ -149,10 +139,8 @@ int WorkerTracker::run(int argc, char **argv)
     return 0;
 }
 
-void WorkerTracker::load_configuration()
+void WorkerTracker::load_configuration(const std::string &config_path)
 {
-    std::string config_path = Configuration::get_default_config_path();
-
     try
     {
         configuration = std::make_shared<WT::Configuration>(config_path);

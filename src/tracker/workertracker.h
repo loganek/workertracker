@@ -27,7 +27,7 @@ class WorkerTracker
     boost::program_options::variables_map vm;
 
     int pre_process_parameters(int argc, char **argv);
-    void load_configuration();
+    void load_configuration(const std::string &config_path);
 
     static std::shared_ptr<BackgroundRunner> get_bg_runner();
     bool lock_app_instance();

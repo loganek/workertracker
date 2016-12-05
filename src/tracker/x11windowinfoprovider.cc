@@ -14,10 +14,11 @@ namespace WT {
 
 X11WindowInfoProvider::RegistrarSingle<X11WindowInfoProvider> X11WindowInfoProvider::registrar;
 
-bool X11WindowInfoProvider::initialize(const std::shared_ptr<Configuration> &configuration)
+bool X11WindowInfoProvider::initialize(const std::shared_ptr<WIProviderConfiguration> &configuration)
 {
-    auto maybe_display_name = configuration->get_general_param("x11-display-name");
-    const char *display_name = maybe_display_name ? maybe_display_name.get().c_str() : nullptr;
+    auto x11_config = std::dynamic_pointer_cast<X11Configuration>(configuration);
+    auto display_name_str = x11_config ? x11_config->get_x11_display_name() : "";
+    const char *display_name = display_name_str.c_str();
     display = XOpenDisplay(display_name);
 
     if (display == nullptr)

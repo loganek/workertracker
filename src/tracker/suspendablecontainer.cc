@@ -14,9 +14,8 @@
 
 namespace WT {
 
-SuspendableContainer::SuspendableContainer(const std::shared_ptr<Configuration> &configuration)
-    : loader({configuration->get_general_param("plugins-path").get(),
-              (boost::filesystem::system_complete(configuration->get_general_param("current-program-path").get()).parent_path() / "plugins").string()})
+SuspendableContainer::SuspendableContainer(const std::shared_ptr<PluginsConfiguration> &configuration)
+    : loader(configuration->get_plugins_paths())
 {
     load_configuration_to_plugins(configuration);
 }
@@ -36,7 +35,7 @@ bool SuspendableContainer::foreach_suspendable(std::function<bool(const std::sha
     return false;
 }
 
-void SuspendableContainer::load_configuration_to_plugins(const std::shared_ptr<Configuration> &configuration)
+void SuspendableContainer::load_configuration_to_plugins(const std::shared_ptr<PluginsConfiguration> &configuration)
 {
     foreach_suspendable([&configuration](const std::shared_ptr<ITrackSuspendable> &susp)
     {

@@ -16,7 +16,7 @@
 namespace WT {
 
 TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
-    : period(configuration->get_general_param<int>("read-period").get()),
+    : period(configuration->get_read_info_interval()),
       suspendable(configuration)
 {
     data_access = std::make_shared<SQLiteDataAccess>(SQLiteDataAccess::default_data_file(), configuration);

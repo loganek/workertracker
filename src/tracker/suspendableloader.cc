@@ -14,7 +14,7 @@
 
 namespace WT {
 
-SuspendableLoader::SuspendableLoader(const std::initializer_list<std::string> &plugin_dir_paths)
+SuspendableLoader::SuspendableLoader(const std::vector<std::string> &plugin_dir_paths)
 {
     for (const auto &path : plugin_dir_paths)
     {

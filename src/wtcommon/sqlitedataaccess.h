@@ -50,7 +50,7 @@ class SQLiteDataAccess : public DataAccess
     void init_sqlite3();
 
 public:
-    SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<Configuration> &configuration);
+    SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<SQLiteDAConfiguration> &configuration);
     virtual ~SQLiteDataAccess();
 
     void open(bool readonly) override;

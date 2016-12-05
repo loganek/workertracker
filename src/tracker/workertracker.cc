@@ -55,7 +55,7 @@ int WorkerTracker::pre_process_parameters(int argc, char **argv)
 
     load_configuration(config_path);
 
-    configuration->set_general_param("current-program-path", std::string(argv[0]));
+    configuration->add_plugins_path(boost::filesystem::system_complete(boost::filesystem::path(argv[0]).parent_path() / "plugins").string());
 
     return 1;
 }

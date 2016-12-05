@@ -42,7 +42,7 @@ public:
 
     virtual ~WindowInfoProvider() {}
 
-    virtual bool initialize(const std::shared_ptr<Configuration> &configuration) = 0;
+    virtual bool initialize(const std::shared_ptr<WIProviderConfiguration> &configuration) = 0;
     virtual Info get_current_window_info() = 0;
 };
 

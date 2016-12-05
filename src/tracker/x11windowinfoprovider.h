@@ -32,7 +32,7 @@ class X11WindowInfoProvider : public WindowInfoProvider
 public:
     ~X11WindowInfoProvider() override;
 
-    bool initialize(const std::shared_ptr<Configuration> &configuration) override;
+    bool initialize(const std::shared_ptr<WIProviderConfiguration> &configuration) override;
     Info get_current_window_info() override;
 };
 

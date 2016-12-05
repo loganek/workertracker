@@ -24,11 +24,11 @@ class SuspendableContainer
     SuspendableLoader loader;
     std::vector<ITrackSuspendable*> suspendable;
 
-    void load_configuration_to_plugins(const std::shared_ptr<Configuration> &configuration);
+    void load_configuration_to_plugins(const std::shared_ptr<PluginsConfiguration> &configuration);
     bool foreach_suspendable(std::function<bool(const std::shared_ptr<ITrackSuspendable>&)> func) const;
 
 public:
-    SuspendableContainer(const std::shared_ptr<Configuration> &configuration);
+    SuspendableContainer(const std::shared_ptr<PluginsConfiguration> &configuration);
 
     bool suspend_tracking(const WindowInfoProvider::Info &window_info) const;
 };

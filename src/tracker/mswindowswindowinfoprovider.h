@@ -28,7 +28,7 @@ public:
 	virtual ~MSWindowsWindowInfoProvider() {}
 
 	Info get_current_window_info() override;
-	bool initialize(const std::shared_ptr<Configuration> &) override { return true;  }
+	bool initialize(const std::shared_ptr<WIProviderConfiguration> &) override { return true;  }
 
 	static BOOL CALLBACK enum_chind_windows_callback(HWND hWnd, LPARAM lp);
 };

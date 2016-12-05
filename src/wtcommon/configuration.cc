@@ -12,12 +12,11 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <map>
 
 namespace WT {
-
-const std::string Configuration::project_name = "workertracker";
 
 Configuration::Configuration(const std::string &path)
     : path(path)
@@ -32,78 +31,44 @@ Configuration::Configuration(const std::string &path)
         WT_LOG_I << "Configuration file " << path << " doesn't exist";
     }
 
-    init_default();
+    add_plugins_path((boost::filesystem::path(path).parent_path() / "plugins").string());
 }
 
-void Configuration::init_default()
+std::vector<std::string> Configuration::get_plugins_paths()
 {
-    if (!prop_tree.get_child_optional(general_name))
-    {
-        prop_tree.add_child(general_name, boost::property_tree::ptree());
-    }
-
-    std::map<std::string, std::string> default_config = {
-        {"save-period", "12"},
-        {"read-period", "5"},
-        {"plugins-path", (boost::filesystem::path(path).parent_path() / "plugins").string()},
-        {"x11-display-name", ""} // actually, it's not general. I need more advanced property tree. In the future.
-    };
-
-    auto& general = prop_tree.get_child(general_name);
-    for (const auto &entry : default_config)
-    {
-        if (!general.get_child_optional(entry.first))
-        {
-            set_general_param(entry.first, entry.second);
-        }
-    }
+    auto values = prop_tree.get("plugins.plugins-paths", "");
+    std::vector<std::string> out;
+    boost::algorithm::split(out, values, [](char c) { return c == ';'; });
+    return out;
 }
 
-void Configuration::save_configuration()
+void Configuration::add_plugins_path(const std::string &plugins_path)
 {
-    try
+    auto current_paths = prop_tree.get("plugins.plugins-paths", "");
+    if (!current_paths.empty())
     {
-        boost::property_tree::json_parser::write_json(path, prop_tree);
+        current_paths += ';';
     }
-    catch (const boost::property_tree::json_parser_error &error)
-    {
-        WT_LOG_ERR << "Cannot save configuration: " << error.what();
-    }
+    current_paths += plugins_path;
+    prop_tree.put("plugins.plugins-paths", current_paths);
 }
 
-boost::optional<std::string> Configuration::get_config_node(const std::string &category, const std::string &parameter) const
+int Configuration::get_read_info_interval()
 {
-    auto general = prop_tree.get_child_optional(category);
-    if (general)
-    {
-        auto child = general.get().get_child_optional(parameter);
-
-        if (child)
-            return child.get().data();
-    }
-
-    return boost::none;
+    return prop_tree.get<int>("general.read-info-interval", 5);
 }
 
-boost::optional<std::string> Configuration::get_general_param(const std::string &param) const
+std::string Configuration::get_x11_display_name()
 {
-    return get_config_node(general_name, param);
+    return prop_tree.get("x11.display-name", "");
 }
 
-void Configuration::set_general_param(const std::string &param, const std::string &value)
+int Configuration::get_persist_frequency()
 {
-    boost::optional<decltype(prop_tree)&> child_node = prop_tree.get_child(general_name).get_child_optional(param);
-    if (child_node)
-    {
-        child_node.get().data() = value;
-    }
-    else
-    {
-        prop_tree.get_child(general_name).push_back(boost::property_tree::ptree::value_type(std::make_pair(param, value)));
-    }
+    return prop_tree.get<int>("sqliteda.persist-frequency", 12);
 }
 
-std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name) const
+std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name)
 {
     char*** config = new char**[2] {nullptr, nullptr};
 
@@ -140,14 +105,6 @@ void Configuration::free_configuration(const std::pair<char***, int> &config)
     delete [] config.first[1];
 }
 
-template<>
-boost::optional<int> Configuration::get_general_param(const std::string &param) const
-{
-    auto v = get_general_param(param);
-
-    return v ? boost::make_optional(std::stoi(v.get())) : boost::none;
-}
-
 std::string Configuration::get_default_config_path()
 {
     static boost::filesystem::path config_path;
@@ -160,7 +117,8 @@ std::string Configuration::get_default_config_path()
         config_path = boost::filesystem::path(std::getenv("HOMEDRIVE")) / std::getenv("HOMEPATH");
 #endif
 
-        config_path /= std::string(".") + project_name;
+        std::string project_name(WT_PROJECT_NAME);
+        config_path /= "." + project_name;
         config_path /= project_name + ".config";
     }
 

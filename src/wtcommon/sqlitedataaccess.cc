@@ -33,8 +33,8 @@ static void sqlite3_ext_regexp(sqlite3_context *ctx, int, sqlite3_value **argv)
 
 namespace WT {
 
-SQLiteDataAccess::SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<Configuration> &configuration)
-    : store_cnt(std::stoi(configuration->get_general_param("save-period").get())),
+SQLiteDataAccess::SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<SQLiteDAConfiguration> &configuration)
+    : store_cnt(configuration->get_persist_frequency()),
       filename(data_file)
 {
 }

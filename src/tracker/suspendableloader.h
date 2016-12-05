@@ -27,7 +27,7 @@ class SuspendableLoader
     void load_handlers(const std::string &plugin_dir_path);
 
 public:
-    SuspendableLoader(const std::initializer_list<std::string> &plugin_dir_paths);
+    SuspendableLoader(const std::vector<std::string> &plugin_dir_paths);
     virtual ~SuspendableLoader();
 
     std::vector<std::shared_ptr<ITrackSuspendable>> get_suspendable() const;

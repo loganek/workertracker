@@ -10,6 +10,8 @@
 
 #include "wtcommon/logger.h"
 
+#include <boost/filesystem.hpp>
+
 namespace WT {
 
 X11WindowInfoProvider::RegistrarSingle<X11WindowInfoProvider> X11WindowInfoProvider::registrar;
@@ -50,7 +52,7 @@ unsigned char* X11WindowInfoProvider::get_window_property(Window win, const char
 
     Atom filter_atom = XInternAtom(display, property_name, True);
     int status = XGetWindowProperty(display, win, filter_atom, 0, MAX_LEN, False, AnyPropertyType,
-                    &actual_type, &actual_format, &nitems, &bytes_after, &property_value);
+                                    &actual_type, &actual_format, &nitems, &bytes_after, &property_value);
 
     if (status == BadWindow)
     {
@@ -84,9 +86,42 @@ std::string X11WindowInfoProvider::get_window_title(Window win)
     return get_string_property(win, "_NET_WM_NAME");
 }
 
+std::string X11WindowInfoProvider::read_app_from_pid(Window win)
+{
+    auto pid_p = get_window_property(win, "_NET_WM_PID");
+    unsigned long pid = pid_p[0] + (pid_p[1]<<8) + (pid_p[2]<<16) + (pid_p[3]<<24);
+
+    if (!pid) return "";
+
+    boost::filesystem::path cmd("/proc");
+    cmd /= std::to_string(pid);
+    cmd /= "cmdline";
+
+    std::string proc;
+    if (boost::filesystem::exists(cmd))
+    {
+        std::ifstream file(cmd.string(), std::ios::binary);
+        std::streambuf* raw_buffer = file.rdbuf();
+        char c;
+        do {
+            c = raw_buffer->sgetc();
+                proc += c;
+        } while (c != 0 && raw_buffer->snextc() != EOF);
+    }
+
+    return boost::filesystem::path(proc).filename().string();
+}
+
 std::string X11WindowInfoProvider::get_app_name(Window win)
 {
-    return get_string_property(win, "WM_CLASS");
+    std::string app_name = get_string_property(win, "WM_CLASS");
+
+    if (app_name.empty())
+    {
+        app_name = read_app_from_pid(win);
+    }
+
+    return app_name;
 }
 
 X11WindowInfoProvider::Info X11WindowInfoProvider::get_current_window_info()

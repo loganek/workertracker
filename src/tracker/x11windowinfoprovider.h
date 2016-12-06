@@ -22,6 +22,7 @@ class X11WindowInfoProvider : public WindowInfoProvider
     Display *display = nullptr;
     int screen;
 
+    std::string read_app_from_pid(Window win);
     std::string get_window_title(Window win);
     std::string get_app_name(Window win);
     std::string get_string_property(Window win, const char *property_name);

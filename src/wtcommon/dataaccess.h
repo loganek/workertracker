@@ -22,6 +22,11 @@ struct DataEntry
     std::time_t time_end = 0;
     std::string proc_name;
     std::string description;
+
+    DataEntry() {}
+    DataEntry(std::time_t time_start, std::time_t time_end, const std::string &proc_name, const std::string &description)
+        : time_start(time_start), time_end(time_end), proc_name(proc_name), description(description)
+    {}
 };
 
 struct DateRange

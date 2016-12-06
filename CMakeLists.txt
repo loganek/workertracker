@@ -61,7 +61,10 @@ include_directories("${Boost_INCLUDE_DIRS}")
 
 include_directories("${workertracker_SOURCE_DIR}/src")
 
+enable_testing()
+
 add_subdirectory(src)
+add_subdirectory(tests)
 
 
 ################### INSTALLER ###################

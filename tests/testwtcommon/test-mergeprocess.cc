@@ -1,4 +1,4 @@
-#include "wtcommon/mergeprocess.h"
+#include "wtcommon/mergealgorithm.h"
 
 #include "gtest/gtest.h"
 
@@ -25,7 +25,8 @@ TEST(MergeProcess, AdditionalNotInRange_ShouldNotIncludeIt)
         WT::DataEntry(23, 47, "1", "")
     };
 
-    auto output = WT::MergeProcess().merge(base, additional);
+    std::vector<WT::DataEntry> output;
+    WT::MergeAlgorithm::merge(base, additional, output);
     assert_output(base, output);
 }
 
@@ -43,7 +44,8 @@ TEST(MergeProcess, AdditionalSurroundsRange_ShouldGetAdditional)
         WT::DataEntry(5, 17, "1", "")
     };
 
-    auto output = WT::MergeProcess().merge(base, additional);
+    std::vector<WT::DataEntry> output;
+    WT::MergeAlgorithm::merge(base, additional, output);
     assert_output(expected, output);
 }
 
@@ -62,7 +64,8 @@ TEST(MergeProcess, AdditionalOverlapsBaseFromLeft)
         WT::DataEntry(12, 17, "A", "")
     };
 
-    auto output = WT::MergeProcess().merge(base, additional);
+    std::vector<WT::DataEntry> output;
+    WT::MergeAlgorithm::merge(base, additional, output);
     assert_output(expected, output);
 }
 
@@ -81,7 +84,8 @@ TEST(MergeProcess, AdditionalOverlapsBaseFromRight)
         WT::DataEntry(12, 17, "1", "")
     };
 
-    auto output = WT::MergeProcess().merge(base, additional);
+    std::vector<WT::DataEntry> output;
+    WT::MergeAlgorithm::merge(base, additional, output);
     assert_output(expected, output);
 }
 
@@ -101,7 +105,8 @@ TEST(MergeProcess, AdditionalInTheMiddleOfBase)
         WT::DataEntry(14, 17, "A", "")
     };
 
-    auto output = WT::MergeProcess().merge(base, additional);
+    std::vector<WT::DataEntry> output;
+    WT::MergeAlgorithm::merge(base, additional, output);
     assert_output(expected, output);
 }
 
@@ -136,7 +141,7 @@ TEST(MergeProcess, MultipleEntries)
         WT::DataEntry(150, 170, "6", "")
     };
 
-    auto output = WT::MergeProcess().merge(base, additional);
-
+    std::vector<WT::DataEntry> output;
+    WT::MergeAlgorithm::merge(base, additional, output);
     assert_output(expected, output);
 }

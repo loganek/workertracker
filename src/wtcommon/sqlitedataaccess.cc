@@ -277,12 +277,9 @@ void SQLiteDataAccess::persist_records()
     entries.clear();
 }
 
-DataContainer SQLiteDataAccess::get_tree(DateRange period)
+std::string SQLiteDataAccess::get_sql_filter_from_period(DateRange period)
 {
-    container.clear();
     std::ostringstream sql_s;
-
-    sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " ";
 
     if (period.from > 0 && period.to > 0)
     {
@@ -297,10 +294,50 @@ DataContainer SQLiteDataAccess::get_tree(DateRange period)
         sql_s << "WHERE TIME_END <= " << period.from << " ";
     }
 
+    return sql_s.str();
+}
+
+DataContainer SQLiteDataAccess::get_tree(DateRange period)
+{
+    container.clear();
+    std::ostringstream sql_s;
+
+    sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " ";
+
+    sql_s << get_sql_filter_from_period(period);
+
     sql_s << "GROUP BY PROC_NAME, DESCRIPTION;";
     execute_query(sql_s.str(), query_container_callback);
 
     return container;
+}
+
+std::vector<DataEntry> SQLiteDataAccess::get_entries(DateRange period)
+{
+    std::ostringstream sql_s;
+    sql_s << "SELECT TIME_START, TIME_END, PROC_NAME, DESCRIPTION FROM " << table_name << " ";
+    sql_s << get_sql_filter_from_period(period);
+    sql_s << "ORDER BY TIME_START;";
+
+    sqlite3_stmt *select_stmt;
+    if (sqlite3_prepare_v2(db, sql_s.str().c_str(), -1, &select_stmt, nullptr) != SQLITE_OK)
+    {
+        throw std::runtime_error("Can't prepare select statement");
+    }
+
+    std::vector<DataEntry> output;
+    int rc;
+    while ((rc = sqlite3_step(select_stmt)) == SQLITE_ROW)
+    {
+        output.emplace_back(sqlite3_column_int64(select_stmt, 0),
+                            sqlite3_column_int64(select_stmt, 1),
+                            (const char*)sqlite3_column_text(select_stmt, 2),
+                            (const char*)sqlite3_column_text(select_stmt, 3));
+    }
+
+    sqlite3_finalize(select_stmt);
+
+    return output;
 }
 
 }

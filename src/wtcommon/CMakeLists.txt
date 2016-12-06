@@ -12,6 +12,7 @@ add_library(wtcommon
     sqlitedataaccess.cc
     logger.cc
     itracksuspendable.h
+    mergealgorithm.cc
     configuration.cc
     registrable.h
     datetimeutils.cc

@@ -59,6 +59,8 @@ public:
         return get_operand_value(left->get_value(), right->get_value(), op);
     }
 
+    bool get_result() { return boost::get<bool>(get_value()); }
+
     static int get_operator_precedence(char op);
 };
 

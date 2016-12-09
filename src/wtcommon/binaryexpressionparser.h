@@ -33,6 +33,17 @@ class BinaryExpressionParser
 
     void make_binary_expression();
 
+    template<typename T>
+    static T top_pop(std::stack<T>& stack)
+    {
+        if (stack.empty())
+            throw std::runtime_error("unexpected empty stack!");
+
+        auto val = stack.top();
+        stack.pop();
+        return val;
+    }
+
 public:
     BinaryExpressionParser(const std::string &expression_str);
 

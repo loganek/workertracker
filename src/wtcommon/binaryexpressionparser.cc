@@ -48,7 +48,7 @@ void BinaryExpressionParser::read_identifier()
 
     if (!is_eof())
     {
-        if (peek() != ')' && !is_operator(peek()))
+        if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
             throw unexpected_character();
         back();
     }
@@ -66,7 +66,7 @@ void BinaryExpressionParser::read_number()
 
     if (!is_eof())
     {
-        if (peek() != ')' && !is_operator(peek()))
+        if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
             throw unexpected_character();
         back();
     }
@@ -86,9 +86,13 @@ void BinaryExpressionParser::read_string()
         throw unexpected_eof();
     else
     {
-        if (peek() != ')' && !is_operator(peek()))
-            throw unexpected_character();
-        back();
+        move_next();
+        if (!is_eof())
+        {
+            if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
+                throw unexpected_character();
+            back();
+        }
     }
 
     operands.push(std::make_shared<ValueOperand>(value));
@@ -117,10 +121,9 @@ void BinaryExpressionParser::read_operator()
 
 void BinaryExpressionParser::make_binary_expression()
 {
-    auto right = operands.top(); operands.pop();
-    auto left = operands.top(); operands.pop();
-    operands.push(std::make_shared<BinaryExpression>(left, right, operators.top()));
-    operators.pop();
+    auto right = top_pop(operands);
+    auto left = top_pop(operands);
+    operands.push(std::make_shared<BinaryExpression>(left, right, top_pop(operators)));
 }
 
 std::shared_ptr<BinaryExpression> BinaryExpressionParser::parse()
@@ -129,6 +132,8 @@ std::shared_ptr<BinaryExpression> BinaryExpressionParser::parse()
 
     while (move_next())
     {
+        if (isspace(peek())) continue;
+
         if (isalpha(peek())) { read_identifier(); }
         else if (isdigit(peek())) { read_number(); }
         else if (is_operator(peek())) { read_operator(); }

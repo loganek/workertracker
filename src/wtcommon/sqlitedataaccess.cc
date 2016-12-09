@@ -277,27 +277,53 @@ void SQLiteDataAccess::persist_records()
     entries.clear();
 }
 
-DataContainer SQLiteDataAccess::get_tree(DateRange period)
+std::string SQLiteDataAccess::translate_operator(char op)
+{
+    switch (op)
+    {
+    case '|': return "OR";
+    case '&': return "AND";
+    case '=': return "==";
+    case '!': return "!=";
+    case '~': return "regexp";
+    default: return std::string(1, op);
+    }
+}
+
+void SQLiteDataAccess::load_expression_condition(std::shared_ptr<Operand> op, std::ostream& stream)
+{
+    if (auto bin_expr = std::dynamic_pointer_cast<BinaryExpression>(op))
+    {
+        stream << "(";
+        load_expression_condition(bin_expr->get_left_operand(), stream);
+        stream << translate_operator(bin_expr->get_operator());
+        load_expression_condition(bin_expr->get_right_operand(), stream);
+        stream << ")";
+    }
+    else if (auto variable = std::dynamic_pointer_cast<VariableOperand>(op))
+    {
+        stream << variable->get_name();
+    }
+    else
+    {
+        stream << op->get_value();
+    }
+}
+
+DataContainer SQLiteDataAccess::get_tree(const std::shared_ptr<BinaryExpression>& expression)
 {
     container.clear();
     std::ostringstream sql_s;
 
     sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " ";
 
-    if (period.from > 0 && period.to > 0)
+    if (expression)
     {
-        sql_s << "WHERE TIME_START >= " << period.from << " AND TIME_END <=" << period.to << " ";
-    }
-    else if (period.from > 0)
-    {
-        sql_s << "WHERE TIME_START >= " << period.from << " ";
-    }
-    else if (period.to > 0)
-    {
-        sql_s << "WHERE TIME_END <= " << period.from << " ";
+        sql_s << "WHERE ";
+        load_expression_condition(expression, sql_s);
     }
 
-    sql_s << "GROUP BY PROC_NAME, DESCRIPTION;";
+    sql_s << " GROUP BY PROC_NAME, DESCRIPTION;";
     execute_query(sql_s.str(), query_container_callback);
 
     return container;

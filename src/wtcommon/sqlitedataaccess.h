@@ -38,6 +38,8 @@ class SQLiteDataAccess : public DataAccess
     DataContainer container;
 
     static int query_container_callback(void *data_access, int argc, char **argv, char **col_name);
+    static std::string translate_operator(char op);
+    void load_expression_condition(std::shared_ptr<Operand> op, std::ostream& stream);
 
     bool table_exists();
     int execute_query(const std::string &sql, sqlite3_callback callback = nullptr);
@@ -55,7 +57,7 @@ public:
 
     void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
-    DataContainer get_tree(DateRange period = DateRange()) override;
+    DataContainer get_tree(const std::shared_ptr<BinaryExpression>& expression) override;
 
     static std::string default_data_file();
 };

@@ -10,6 +10,7 @@
 #define DATAACCESS_H
 
 #include "datacontainer.h"
+#include "binaryexpressiontree.h"
 
 #include <ctime>
 #include <string>
@@ -37,7 +38,7 @@ public:
 
     virtual void open(bool readonly) = 0;
     virtual void save_entry(const DataEntry &entry) = 0;
-    virtual DataContainer get_tree(DateRange period = DateRange()) = 0;
+    virtual DataContainer get_tree(const std::shared_ptr<BinaryExpression>& expression) = 0;
 };
 
 }

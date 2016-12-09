@@ -35,6 +35,7 @@ class VariableOperand : public Operand
 public:
     VariableOperand(const std::string &name) : name(name) {}
     operand_value_t get_value() override { return 1L; } // TODO
+    std::string get_name() const { return name; }
 };
 
 class BinaryExpression : public Operand

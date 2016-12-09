@@ -14,6 +14,7 @@ add_library(wtcommon
     itracksuspendable.h
     configuration.cc
     binaryexpressiontree.cc
+    binaryexpressionparser.cc
     registrable.h
     datetimeutils.cc
     fileloggermethod.cc

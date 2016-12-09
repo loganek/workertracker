@@ -56,13 +56,27 @@ void AnalyzerController::apply_filter(const std::string &search_text, bool case_
     main_window->update_total_time(proxy_model.get_total_time());
 }
 
+std::shared_ptr<WT::BinaryExpression> AnalyzerController::build_expression_from_period(WT::DateRange period)
+{
+    auto left = std::make_shared<WT::BinaryExpression>(
+        std::make_shared<WT::ValueOperand>(period.from),
+        std::make_shared<WT::VariableOperand>("TIME_START"),
+        '<');
+    auto right = std::make_shared<WT::BinaryExpression>(
+        std::make_shared<WT::ValueOperand>(period.to),
+        std::make_shared<WT::VariableOperand>("TIME_END"),
+        '>');
+    return std::make_shared<WT::BinaryExpression>(left, right, '&');
+}
+
 void AnalyzerController::load_from_file(const std::string &filename)
 {
     try
     {
         data_access = std::make_shared<WT::SQLiteDataAccess>(filename, config);
         data_access->open(true);
-        load_model(data_access->get_tree(period));
+
+        load_model(data_access->get_tree(build_expression_from_period(period)));
     }
     catch (const std::runtime_error &ex)
     {
@@ -75,7 +89,7 @@ void AnalyzerController::set_period(const WT::DateRange &period)
     this->period = period;
     if (data_access)
     {
-        load_model(data_access->get_tree(period));
+        load_model(data_access->get_tree(build_expression_from_period(period)));
     }
 }
 

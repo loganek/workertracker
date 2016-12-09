@@ -17,7 +17,7 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, QTFilterProxyModel *model, QGraphicsItem *parent, Qt::WindowFlags wFlags)
+DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const QTFilterProxyModel *model, QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QChart(QChart::ChartTypeCartesian, parent, wFlags),
       model(model),
       m_currentSeries(0),

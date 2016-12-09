@@ -26,7 +26,7 @@ class AnalyzerController
 {
     WT::DateRange period;
     QApplication app;
-public:
+    std::shared_ptr<WT::Configuration> config;
     QTFilterProxyModel proxy_model;
 
     boost::optional<std::regex> filter_pattern = boost::none;
@@ -35,8 +35,7 @@ public:
 
     QList<QStandardItem*> create_model_item(const std::string &name, qlonglong time);
     void load_model(const WT::DataContainer &container);
-
-    std::shared_ptr<WT::Configuration> config;
+    std::shared_ptr<WT::BinaryExpression> build_expression_from_period(WT::DateRange period);
 
 public:
     AnalyzerController(int argc, char **argv);
@@ -46,6 +45,7 @@ public:
     void load_from_file(const std::string &filename);
     void set_period(const WT::DateRange &period);
     void apply_filter(const std::string &search_text, bool case_sensitive);
+    const QTFilterProxyModel& get_proxy_model() { return proxy_model; }
 };
 
 #endif // ANALYZERCONTROLLER_H

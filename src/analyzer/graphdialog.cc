@@ -14,7 +14,7 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-GraphDialog::GraphDialog(QTFilterProxyModel *model, QWidget *parent) :
+GraphDialog::GraphDialog(const QTFilterProxyModel *model, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::GraphDialog)
 {

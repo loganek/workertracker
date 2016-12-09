@@ -28,7 +28,7 @@ QT_CHARTS_USE_NAMESPACE
 class DrilldownChart : public QChart
 {
     Q_OBJECT
-    QTFilterProxyModel *model;
+    const QTFilterProxyModel *model;
 
     bool is_full = false;
     QSmartPieSeries *m_currentSeries = nullptr;
@@ -38,7 +38,7 @@ class DrilldownChart : public QChart
     void remove_current_series();
 
 public:
-    explicit DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, QTFilterProxyModel *model, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    explicit DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const QTFilterProxyModel *model, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
     ~DrilldownChart();
     void change_series(QSmartPieSeries *series);
     void set_model_type(bool is_full);

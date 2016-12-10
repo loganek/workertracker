@@ -3,11 +3,13 @@
 
 #include <memory>
 #include <regex>
+#include <ctime>
+
 #include <boost/variant.hpp>
 
 namespace WT {
 
-typedef  boost::variant<std::int64_t, std::string, bool> operand_value_t;
+typedef  boost::variant<std::int64_t, std::string, bool, std::tm> operand_value_t;
 
 class Operand
 {

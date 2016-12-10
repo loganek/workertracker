@@ -6,6 +6,7 @@
  * this stuff is worth it, you can buy me a beer in return.       Marcin Kolny
  * ----------------------------------------------------------------------------
  */
+
 #include "sqlitedataaccess.h"
 #include "logger.h"
 
@@ -290,6 +291,16 @@ std::string SQLiteDataAccess::translate_operator(char op)
     }
 }
 
+struct SQLiteValueVisitor : boost::static_visitor<void>
+{
+    std::ostream &stream;
+    SQLiteValueVisitor(std::ostream& stream) : stream(stream) {}
+
+    void operator()(const std::tm & val) const { stream << std::mktime(const_cast<std::tm*>(&val)); }
+    template <typename T> void operator()(const T& val) const { stream << val; }
+};
+
+
 void SQLiteDataAccess::load_expression_condition(std::shared_ptr<Operand> op, std::ostream& stream)
 {
     if (auto bin_expr = std::dynamic_pointer_cast<BinaryExpression>(op))
@@ -306,7 +317,8 @@ void SQLiteDataAccess::load_expression_condition(std::shared_ptr<Operand> op, st
     }
     else
     {
-        stream << op->get_value();
+        auto v = op->get_value();
+        boost::apply_visitor(SQLiteValueVisitor(stream), v);
     }
 }
 

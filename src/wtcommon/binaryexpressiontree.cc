@@ -74,6 +74,7 @@ bool BinaryExpression::get_operand_value(const operand_value_t& left, const oper
 
 DECLARE_TYPE(std::string)
 DECLARE_TYPE(std::int64_t)
+DECLARE_TYPE(std::tm)
 DECLARE_TYPE(bool)
 
 void OperatorFunctions<std::string>::init_operators()
@@ -86,6 +87,20 @@ void OperatorFunctions<std::string>::init_operators()
 }
 
 void OperatorFunctions<std::int64_t>::init_operators()
+{
+    DEFINE_OPERATOR('=', ==)
+    DEFINE_OPERATOR('>', >)
+    DEFINE_OPERATOR('<', <)
+    DEFINE_OPERATOR('!', !=)
+}
+
+#define TM_OPERATOR(OP) bool operator OP(const std::tm& t1, const std::tm& t2) { return std::mktime(const_cast<std::tm*>(&t1)) OP std::mktime(const_cast<std::tm*>(&t2)); }
+TM_OPERATOR(==)
+TM_OPERATOR(!=)
+TM_OPERATOR(>)
+TM_OPERATOR(<)
+
+void OperatorFunctions<std::tm>::init_operators()
 {
     DEFINE_OPERATOR('=', ==)
     DEFINE_OPERATOR('>', >)

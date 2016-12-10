@@ -9,10 +9,9 @@ static int precedence(char c)
     return BinaryExpression::get_operator_precedence(c);
 }
 
-BinaryExpressionParser::BinaryExpressionParser(const std::string &expression_str)
-    : expression_str(expression_str)
+BinaryExpressionParser::BinaryExpressionParser(const std::string &expression_str, const std::unordered_map<std::string, operand_value_t>& variables)
+    : variables(variables), expression_str(expression_str)
 {
-
 }
 
 bool BinaryExpressionParser::is_eof()
@@ -55,7 +54,11 @@ void BinaryExpressionParser::read_identifier()
         back();
     }
 
-    operands.push(std::make_shared<VariableOperand>(identifier));
+    auto it = variables.find(identifier);
+    if (it == variables.end())
+        throw std::runtime_error("undefined identifier " + identifier);
+
+    operands.push(std::make_shared<VariableOperand>(identifier, it->second));
 }
 
 void BinaryExpressionParser::read_number()

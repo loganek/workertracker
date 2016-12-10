@@ -2,12 +2,16 @@
 #define BINARYEXPRESSIONPARSER_H
 
 #include "binaryexpressiontree.h"
+
+#include <unordered_map>
 #include <stack>
 
 namespace WT {
 
 class BinaryExpressionParser
 {
+    std::unordered_map<std::string, operand_value_t> variables;
+
     std::stack<char> operators;
     std::stack<operand_ptr_t> operands;
 
@@ -47,7 +51,7 @@ class BinaryExpressionParser
     }
 
 public:
-    BinaryExpressionParser(const std::string &expression_str);
+    BinaryExpressionParser(const std::string &expression_str, const std::unordered_map<std::string, operand_value_t>& variables = {});
 
     std::shared_ptr<BinaryExpression> parse();
 };

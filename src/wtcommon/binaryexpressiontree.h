@@ -33,10 +33,11 @@ public:
 class VariableOperand : public Operand
 {
     std::string name;
+    operand_value_t value;
 
 public:
-    VariableOperand(const std::string &name) : name(name) {}
-    operand_value_t get_value() override { return 1L; } // TODO
+    VariableOperand(const std::string &name, const operand_value_t& value) : name(name), value(value) {}
+    operand_value_t get_value() override { return value; }
     std::string get_name() const { return name; }
 };
 

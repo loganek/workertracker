@@ -33,6 +33,8 @@ class BinaryExpressionParser
 
     void make_binary_expression();
 
+    static std::shared_ptr<ValueOperand> get_datetime_from_string(const std::string& str);
+
     template<typename T>
     static T top_pop(std::stack<T>& stack)
     {

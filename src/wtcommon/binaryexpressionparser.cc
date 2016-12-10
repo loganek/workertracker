@@ -1,5 +1,7 @@
 #include "binaryexpressionparser.h"
 
+#include <iomanip>
+
 namespace WT {
 
 static int precedence(char c)
@@ -74,6 +76,20 @@ void BinaryExpressionParser::read_number()
     operands.push(std::make_shared<ValueOperand>(static_cast<std::int64_t>(std::stoll(number))));
 }
 
+std::shared_ptr<ValueOperand> BinaryExpressionParser::get_datetime_from_string(const std::string& str)
+{
+    std::istringstream ss(str);
+    const std::string date_format = "%Y-%m-%d %H:%M:%S";
+    std::tm tm_struct = {};
+    ss >> std::get_time(&tm_struct, date_format.c_str());
+    if (ss.fail())
+    {
+        throw std::runtime_error("invalid date format, expected: " + date_format);
+    }
+
+    return std::make_shared<ValueOperand>(tm_struct);
+}
+
 void BinaryExpressionParser::read_string()
 {
     std::string value;
@@ -84,18 +100,24 @@ void BinaryExpressionParser::read_string()
 
     if (is_eof())
         throw unexpected_eof();
-    else
+
+    move_next();
+
+    std::shared_ptr<ValueOperand> operand;
+
+    if (!is_eof())
     {
-        move_next();
-        if (!is_eof())
-        {
-            if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
-                throw unexpected_character();
+        if (peek() == 'd')
+            operand = get_datetime_from_string(value);
+        else if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
+            throw unexpected_character();
+        else
             back();
-        }
     }
 
-    operands.push(std::make_shared<ValueOperand>(value));
+    if (!operand) operand = std::make_shared<ValueOperand>(value);
+
+    operands.push(operand);
 }
 
 void BinaryExpressionParser::read_operator()

@@ -14,6 +14,7 @@
 
 #include <ctime>
 #include <string>
+#include <unordered_map>
 
 namespace WT {
 
@@ -39,6 +40,8 @@ public:
     virtual void open(bool readonly) = 0;
     virtual void save_entry(const DataEntry &entry) = 0;
     virtual DataContainer get_tree(const std::shared_ptr<BinaryExpression>& expression) = 0;
+
+    static std::unordered_map<std::string, operand_value_t> get_variables();
 };
 
 }

@@ -13,6 +13,7 @@ add_library(wtcommon
     logger.cc
     itracksuspendable.h
     configuration.cc
+    dataaccess.cc
     binaryexpressiontree.cc
     binaryexpressionparser.cc
     registrable.h

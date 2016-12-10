@@ -277,6 +277,19 @@ void SQLiteDataAccess::persist_records()
     last_entry = entries.back();
     entries.clear();
 }
+// select * from WT_ENTRIES where strftime('%H', datetime(time_start, 'unixepoch'))  > 17
+
+std::string SQLiteDataAccess::translate_variable_name(const std::string &var_name)
+{
+    static std::unordered_map<std::string, std::string> var_map = {
+        {"name", "proc_name"},
+        {"description", "description"},
+        {"start", "time_start"},
+        {"end", "time_end"}
+    };
+
+    return var_map[var_name];
+}
 
 std::string SQLiteDataAccess::translate_operator(char op)
 {
@@ -284,7 +297,7 @@ std::string SQLiteDataAccess::translate_operator(char op)
     {
     case '|': return "OR";
     case '&': return "AND";
-    case '=': return "==";
+    case '=': return "=";
     case '!': return "!=";
     case '~': return "regexp";
     default: return std::string(1, op);
@@ -297,6 +310,7 @@ struct SQLiteValueVisitor : boost::static_visitor<void>
     SQLiteValueVisitor(std::ostream& stream) : stream(stream) {}
 
     void operator()(const std::tm & val) const { stream << std::mktime(const_cast<std::tm*>(&val)); }
+    void operator()(const std::string &val) const { stream << "'" << val << "'"; } // TODO escape '
     template <typename T> void operator()(const T& val) const { stream << val; }
 };
 
@@ -307,13 +321,13 @@ void SQLiteDataAccess::load_expression_condition(std::shared_ptr<Operand> op, st
     {
         stream << "(";
         load_expression_condition(bin_expr->get_left_operand(), stream);
-        stream << translate_operator(bin_expr->get_operator());
+        stream << " " << translate_operator(bin_expr->get_operator()) << " ";
         load_expression_condition(bin_expr->get_right_operand(), stream);
         stream << ")";
     }
     else if (auto variable = std::dynamic_pointer_cast<VariableOperand>(op))
     {
-        stream << variable->get_name();
+        stream << translate_variable_name(variable->get_name());
     }
     else
     {

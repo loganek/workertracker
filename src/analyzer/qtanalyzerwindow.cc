@@ -76,7 +76,7 @@ void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime type)
     switch (type)
     {
     case PredefinedDateTime::TODAY:
-        from = (QDateTime)current_date, to = QDateTime::currentDateTime();
+        from = (QDateTime)current_date, to = (QDateTime)QDate::currentDate().addDays(1);
         break;
     case PredefinedDateTime::YESTERDAY:
         from = (QDateTime)current_date.addDays(-1), to = (QDateTime)current_date;

@@ -26,9 +26,9 @@ namespace WT {
 class ValueFunctionsInitializer
 {
 public:
-    static std::map<std::size_t, std::function<bool(const operand_value_t&, const operand_value_t&, char)>> value_functions;
+    static std::map<std::size_t, std::function<bool(const operand_value_t&, const operand_value_t&, Operator)>> value_functions;
 };
-std::map<std::size_t, std::function<bool(const operand_value_t&, const operand_value_t&, char)>> ValueFunctionsInitializer::value_functions;
+std::map<std::size_t, std::function<bool(const operand_value_t&, const operand_value_t&, Operator)>> ValueFunctionsInitializer::value_functions;
 
 template<typename T>
 class OperatorFunctions;
@@ -38,28 +38,28 @@ class OperatorFunctionsBase
 {
 protected:
     typedef T this_type_t;
-    std::map<char, std::function<bool(const T&, const T&)>> functions;
+    std::map<Operator, std::function<bool(const T&, const T&)>> functions;
 
 public:
     OperatorFunctionsBase()
     {
         ValueFunctionsInitializer::value_functions[typeid(T).hash_code()] =
-                [] (const operand_value_t& left, const operand_value_t& right, char op) {
+                [] (const operand_value_t& left, const operand_value_t& right, Operator op) {
                     auto& of = OperatorFunctions<T>::get();
                     if (of.implements_operator(op))
                     {
                         return of.call(boost::get<T>(left), boost::get<T>(right), op);
                     }
 
-                    throw std::runtime_error("invalid operator \"" + std::string(1, op) + "\" for type " + std::string(typeid(T).name()));
+                    throw std::runtime_error("invalid operator \"" + std::to_string((int)op) + "\" for type " + std::string(typeid(T).name()));
                 };
     }
 
-    bool implements_operator(char op) { return functions.find(op) != functions.end(); }
-    bool call(const T& left, const T& right, char op) { return functions.at(op)(left, right); }
+    bool implements_operator(Operator op) { return functions.find(op) != functions.end(); }
+    bool call(const T& left, const T& right, Operator op) { return functions.at(op)(left, right); }
 };
 
-bool BinaryExpression::get_operand_value(const operand_value_t& left, const operand_value_t& right, char op)
+bool BinaryExpression::get_operand_value(const operand_value_t& left, const operand_value_t& right, Operator op)
 {
     if (left.type() != right.type())
     {
@@ -79,43 +79,51 @@ DECLARE_TYPE(bool)
 
 void OperatorFunctions<std::string>::init_operators()
 {
-    DEFINE_OPERATOR('=', ==)
-    DEFINE_OPERATOR('>', >)
-    DEFINE_OPERATOR('<', <)
-    DEFINE_OPERATOR('!', !=)
-    functions['~'] = [](const this_type_t& left, const this_type_t& right) { return std::regex_search(left, std::regex(right)); };
+    DEFINE_OPERATOR(Operator::EQ, ==)
+    DEFINE_OPERATOR(Operator::GT, >)
+    DEFINE_OPERATOR(Operator::GT, >=)
+    DEFINE_OPERATOR(Operator::LT, <)
+    DEFINE_OPERATOR(Operator::LT, <=)
+    DEFINE_OPERATOR(Operator::NEQ, !=)
+    functions[Operator::MATCH] = [](const this_type_t& left, const this_type_t& right) { return std::regex_search(left, std::regex(right)); };
 }
 
 void OperatorFunctions<int>::init_operators()
 {
-    DEFINE_OPERATOR('=', ==)
-    DEFINE_OPERATOR('>', >)
-    DEFINE_OPERATOR('<', <)
-    DEFINE_OPERATOR('!', !=)
+    DEFINE_OPERATOR(Operator::EQ, ==)
+    DEFINE_OPERATOR(Operator::GT, >)
+    DEFINE_OPERATOR(Operator::GE, >=)
+    DEFINE_OPERATOR(Operator::LT, <)
+    DEFINE_OPERATOR(Operator::LE, <=)
+    DEFINE_OPERATOR(Operator::NEQ, !=)
 }
 
 #define TM_OPERATOR(OP) bool operator OP(const std::tm& t1, const std::tm& t2) { return std::mktime(const_cast<std::tm*>(&t1)) OP std::mktime(const_cast<std::tm*>(&t2)); }
 TM_OPERATOR(==)
 TM_OPERATOR(!=)
 TM_OPERATOR(>)
+TM_OPERATOR(>=)
 TM_OPERATOR(<)
+TM_OPERATOR(<=)
 
 void OperatorFunctions<std::tm>::init_operators()
 {
-    DEFINE_OPERATOR('=', ==)
-    DEFINE_OPERATOR('>', >)
-    DEFINE_OPERATOR('<', <)
-    DEFINE_OPERATOR('!', !=)
+    DEFINE_OPERATOR(Operator::EQ, ==)
+    DEFINE_OPERATOR(Operator::GT, >)
+    DEFINE_OPERATOR(Operator::GT, >=)
+    DEFINE_OPERATOR(Operator::LT, <)
+    DEFINE_OPERATOR(Operator::LT, <=)
+    DEFINE_OPERATOR(Operator::NEQ, !=)
 }
 
 void OperatorFunctions<bool>::init_operators()
 {
-    DEFINE_OPERATOR('&', &&)
-    DEFINE_OPERATOR('|', ||)
+    DEFINE_OPERATOR(Operator::AND, &&)
+    DEFINE_OPERATOR(Operator::OR, ||)
 }
 
 
-int BinaryExpression::get_operator_precedence(char op)
+int BinaryExpression::get_operator_precedence(Operator op)
 {
     if (OperatorFunctions<std::string>::get().implements_operator(op)
         || OperatorFunctions<std::tm>::get().implements_operator(op)

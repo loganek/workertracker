@@ -12,7 +12,7 @@ class BinaryExpressionParser
 {
     std::unordered_map<std::string, operand_value_t> variables;
 
-    std::stack<char> operators;
+    std::stack<Operator> operators;
     std::stack<operand_ptr_t> operands;
 
     std::string expression_str;
@@ -30,7 +30,7 @@ class BinaryExpressionParser
     void read_string();
     void read_operator();
 
-    bool is_operator(char c);
+    bool is_operator_beginning();
 
     std::exception unexpected_eof();
     std::exception unexpected_character();

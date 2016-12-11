@@ -1,12 +1,13 @@
 #include "binaryexpressionparser.h"
 
+#include <unordered_map>
 #include <iomanip>
 
 namespace WT {
 
-static int precedence(char c)
+static int precedence(Operator op)
 {
-    return BinaryExpression::get_operator_precedence(c);
+    return BinaryExpression::get_operator_precedence(op);
 }
 
 BinaryExpressionParser::BinaryExpressionParser(const std::string &expression_str, const std::unordered_map<std::string, operand_value_t>& variables)
@@ -35,9 +36,21 @@ char BinaryExpressionParser::peek()
     return expression_str.at(pos);
 }
 
-bool BinaryExpressionParser::is_operator(char c)
+bool BinaryExpressionParser::is_operator_beginning()
 {
-    return precedence(c) > 0;
+    switch (peek())
+    {
+    case '>':
+    case '<':
+    case '=':
+    case '~':
+    case '!':
+    case '&':
+    case '|':
+        return true;
+    default:
+        return false;
+    }
 }
 
 void BinaryExpressionParser::read_identifier()
@@ -49,7 +62,7 @@ void BinaryExpressionParser::read_identifier()
 
     if (!is_eof())
     {
-        if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
+        if (peek() != ')' && !is_operator_beginning() && !isspace(peek()))
             throw unexpected_character();
         back();
     }
@@ -71,7 +84,7 @@ void BinaryExpressionParser::read_number()
 
     if (!is_eof())
     {
-        if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
+        if (peek() != ')' && !is_operator_beginning() && !isspace(peek()))
             throw unexpected_character();
         back();
     }
@@ -112,7 +125,7 @@ void BinaryExpressionParser::read_string()
     {
         if (peek() == 'd')
             operand = get_datetime_from_string(value);
-        else if (peek() != ')' && !is_operator(peek()) && !isspace(peek()))
+        else if (peek() != ')' && !is_operator_beginning() && !isspace(peek()))
             throw unexpected_character();
         else
             back();
@@ -125,13 +138,51 @@ void BinaryExpressionParser::read_string()
 
 void BinaryExpressionParser::read_operator()
 {
-    char op = peek();
+    static std::unordered_map<std::string, Operator> translation = {
+        {"!", Operator::NEQ},
+        {"=", Operator::EQ},
+        {">", Operator::GT},
+        {">=", Operator::GE},
+        {"<", Operator::LT},
+        {"<=", Operator::LE},
+        {"~", Operator::MATCH},
+        {"&", Operator::AND},
+        {"|", Operator::OR}
+    };
+    char expected = 0;
+    switch (peek())
+    {
+    case '<':
+    case '>':
+        expected = '=';
+        break;
+    }
+
+    std::string str(1, peek());
+
+    if (expected > 0)
+    {
+        if (!move_next())
+            throw unexpected_eof();
+        if (peek() != expected && is_operator_beginning())
+            throw unexpected_character();
+        else if (peek() == expected)
+            str += peek();
+        else
+            back();
+    }
 
     if (!move_next())
         throw unexpected_eof();
-    else if (is_operator(peek()))
+
+    if (is_operator_beginning())
         throw unexpected_character();
 
+    auto it = translation.find(str);
+    if (it == translation.end())
+        throw unexpected_character();
+
+    Operator op = it->second;
     back();
 
     int op_precendence = precedence(op);
@@ -161,12 +212,12 @@ std::shared_ptr<BinaryExpression> BinaryExpressionParser::parse()
 
         if (isalpha(peek())) { read_identifier(); }
         else if (isdigit(peek())) { read_number(); }
-        else if (is_operator(peek())) { read_operator(); }
+        else if (is_operator_beginning()) { read_operator(); }
         else if (peek() == '"') { read_string(); }
-        else if (peek() == '(') operators.push(peek());
+        else if (peek() == '(') operators.push(Operator::OPEN_PARENTHESIS);
         else if (peek() == ')')
         {
-            while (!operators.empty() && operators.top() != '(')
+            while (!operators.empty() && operators.top() != Operator::OPEN_PARENTHESIS)
             {
                 make_binary_expression();
             }

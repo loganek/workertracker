@@ -11,6 +11,21 @@ namespace WT {
 
 typedef  boost::variant<int, std::string, bool, std::tm> operand_value_t;
 
+enum class Operator
+{
+    OR,
+    AND,
+    EQ,
+    NEQ,
+    GT,
+    GE,
+    LT,
+    LE,
+    MATCH,
+    OPEN_PARENTHESIS,
+    CLOSE_PARENTHESIS,
+};
+
 class Operand
 {
 public:
@@ -43,18 +58,18 @@ public:
 
 class BinaryExpression : public Operand
 {
-    char op;
+    Operator op;
     std::shared_ptr<Operand> left;
     std::shared_ptr<Operand> right;
 
-    bool get_operand_value(const operand_value_t& left, const operand_value_t& right, char op);
+    bool get_operand_value(const operand_value_t& left, const operand_value_t& right, Operator op);
 
 public:
-    BinaryExpression(const operand_ptr_t& left, const operand_ptr_t& right, char op)
+    BinaryExpression(const operand_ptr_t& left, const operand_ptr_t& right, Operator op)
         : op(op), left(left), right(right)
     {}
 
-    char get_operator() const { return op; }
+    Operator get_operator() const { return op; }
     operand_ptr_t get_left_operand() const { return left; }
     operand_ptr_t get_right_operand() const { return right; }
 
@@ -65,7 +80,7 @@ public:
 
     bool get_result() { return boost::get<bool>(get_value()); }
 
-    static int get_operator_precedence(char op);
+    static int get_operator_precedence(Operator op);
 };
 
 }

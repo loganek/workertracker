@@ -38,7 +38,7 @@ class SQLiteDataAccess : public DataAccess
     DataContainer container;
 
     static int query_container_callback(void *data_access, int argc, char **argv, char **col_name);
-    static std::string translate_operator(char op);
+    static std::string translate_operator(Operator op);
     static std::string translate_variable_name(const std::string &var_name);
     void load_expression_condition(std::shared_ptr<Operand> op, std::ostream& stream);
 

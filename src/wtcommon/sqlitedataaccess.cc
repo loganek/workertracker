@@ -298,16 +298,20 @@ std::string SQLiteDataAccess::translate_variable_name(const std::string &var_nam
     return var_map[var_name];
 }
 
-std::string SQLiteDataAccess::translate_operator(char op)
+std::string SQLiteDataAccess::translate_operator(Operator op)
 {
     switch (op)
     {
-    case '|': return "OR";
-    case '&': return "AND";
-    case '=': return "=";
-    case '!': return "!=";
-    case '~': return "regexp";
-    default: return std::string(1, op);
+    case Operator::OR: return "OR";
+    case Operator::AND: return "AND";
+    case Operator::EQ : return "=";
+    case Operator::NEQ: return "!=";
+    case Operator::MATCH: return "regexp";
+    case Operator::GE: return ">=";
+    case Operator::GT: return ">";
+    case Operator::LE: return "<=";
+    case Operator::LT: return "<";
+    default: throw std::runtime_error("unknown operator");
     }
 }
 

@@ -16,6 +16,7 @@
 class QTreeView;
 class QLabel;
 class QAbstractItemModel;
+class QCheckBox;
 
 namespace Ui {
 class QtAnalyzerWindow;
@@ -27,6 +28,7 @@ class QtAnalyzerWindow : public QMainWindow, public IMainWindow
 
     QLabel *total_label;
     Ui::QtAnalyzerWindow *ui;
+    std::array<QCheckBox*, 7> weekday_checkbox;
 
     enum PredefinedDateTime
     {
@@ -40,10 +42,9 @@ class QtAnalyzerWindow : public QMainWindow, public IMainWindow
     void connect_signals();
     void perform_search();
     void load_data_file();
+    void set_current_range();
     void update_total_time(const std::chrono::seconds& seconds) override;
 
-    bool set_datetime_lock;
-    void set_period();
     void set_to_predefined_datetime(PredefinedDateTime type);
 
 public:
@@ -58,6 +59,7 @@ public:
 
 private slots:
     void on_exitAction_triggered(bool);
+    void on_applyFilterButton_clicked(bool checked = true);
 };
 
 #endif // QTANALYZERWINDOW_H

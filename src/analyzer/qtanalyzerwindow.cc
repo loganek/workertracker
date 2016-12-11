@@ -32,6 +32,15 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     ui->loadDataFileAction->setShortcut(Qt::Key_O | Qt::CTRL);
     ui->dateSelectorComboBox->addItems({tr("Today"), tr("Yesterday"), tr("This month"), tr("Last month"), tr("Custom")});
 
+    std::array<QString, 7> days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    QGridLayout *grid_layout = (QGridLayout*)ui->weekDaysGroupBox->layout();
+    for (std::size_t i = 0; i < days.size(); i++)
+    {
+        weekday_checkbox[i] = new QCheckBox(days[i], this);
+        weekday_checkbox[i]->setChecked(true);
+        grid_layout->addWidget(weekday_checkbox[i], i / 4, i % 4);
+    }
+
     connect_signals();
 }
 
@@ -45,13 +54,6 @@ void QtAnalyzerWindow::connect_signals()
         set_to_predefined_datetime((PredefinedDateTime)index);
     });
 
-    auto on_date_time_changed = [this] (QDateTime) {
-        if (set_datetime_lock) return;
-        ui->dateSelectorComboBox->setCurrentIndex(PredefinedDateTime::CUSTOM);
-        set_period();
-    };
-    connect(ui->fromDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
-    connect(ui->toDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, on_date_time_changed);
     connect(ui->visualizeCurrentViewAction, &QAction::triggered, this, [this] (bool) {
         auto dialog = new GraphDialog(&controller->get_proxy_model(), this);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -92,20 +94,8 @@ void QtAnalyzerWindow::set_to_predefined_datetime(PredefinedDateTime type)
         return;
     }
 
-    set_datetime_lock = true;
     ui->toDateTimeEdit->setDateTime(to);
     ui->fromDateTimeEdit->setDateTime(from);
-    set_datetime_lock = false;
-
-    set_period();
-}
-
-void QtAnalyzerWindow::set_period()
-{
-    WT::DateRange range;
-    range.from = ui->fromDateTimeEdit->dateTime().toTime_t();
-    range.to = ui->toDateTimeEdit->dateTime().toTime_t();
-    controller->set_period(range);
 }
 
 void QtAnalyzerWindow::perform_search()
@@ -154,6 +144,7 @@ void QtAnalyzerWindow::set_controller(AnalyzerController *controller)
     auto date_time = PredefinedDateTime::TODAY;
     ui->dateSelectorComboBox->setCurrentIndex((int)date_time);
     set_to_predefined_datetime(date_time);
+    set_current_range();
 }
 
 void QtAnalyzerWindow::print_error(const std::string &message)
@@ -166,3 +157,19 @@ void QtAnalyzerWindow::on_exitAction_triggered(bool)
 {
     QApplication::quit();
 }
+
+void QtAnalyzerWindow::on_applyFilterButton_clicked(bool)
+{
+    set_current_range();
+}
+
+void QtAnalyzerWindow::set_current_range()
+{
+    std::array<bool, 7> weekdays;
+    for (std::size_t i = 0; i < weekdays.size(); i++) weekdays[i] = weekday_checkbox[i]->isChecked();
+
+    DataRange data_range(weekdays, ui->fromDateTimeEdit->dateTime().toTime_t(), ui->toDateTimeEdit->dateTime().toTime_t(),
+                         ui->fromHourSpinBox->value(), ui->toHourSpinBox->value());
+    controller->set_range(data_range);
+}
+

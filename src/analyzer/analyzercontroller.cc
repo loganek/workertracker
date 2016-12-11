@@ -12,6 +12,7 @@
 #include "wtcommon/logger.h"
 #include "wtcommon/configuration.h"
 #include "wtcommon/datetimeutils.h"
+#include "wtcommon/binaryexpressionparser.h"
 
 #include "qtanalyzerwindow.h"
 
@@ -56,19 +57,6 @@ void AnalyzerController::apply_filter(const std::string &search_text, bool case_
     main_window->update_total_time(proxy_model.get_total_time());
 }
 
-std::shared_ptr<WT::BinaryExpression> AnalyzerController::build_expression_from_period(WT::DateRange period)
-{
-    auto left = std::make_shared<WT::BinaryExpression>(
-        std::make_shared<WT::ValueOperand>(period.from),
-        std::make_shared<WT::VariableOperand>("TIME_START"),
-        '<');
-    auto right = std::make_shared<WT::BinaryExpression>(
-        std::make_shared<WT::ValueOperand>(period.to),
-        std::make_shared<WT::VariableOperand>("TIME_END"),
-        '>');
-    return std::make_shared<WT::BinaryExpression>(left, right, '&');
-}
-
 void AnalyzerController::load_from_file(const std::string &filename)
 {
     try
@@ -76,7 +64,7 @@ void AnalyzerController::load_from_file(const std::string &filename)
         data_access = std::make_shared<WT::SQLiteDataAccess>(filename, config);
         data_access->open(true);
 
-        load_model(data_access->get_tree(build_expression_from_period(period)));
+        load_model(data_access->get_tree(build_expression_from_range()));
     }
     catch (const std::runtime_error &ex)
     {
@@ -84,12 +72,45 @@ void AnalyzerController::load_from_file(const std::string &filename)
     }
 }
 
-void AnalyzerController::set_period(const WT::DateRange &period)
+std::shared_ptr<WT::BinaryExpression> AnalyzerController::build_expression_from_range()
 {
-    this->period = period;
+    // TODO: rewrite to not build the string, but directly the expression
+    std::string str;
+
+    for (std::size_t i = 0; i < data_range.weekdays.size(); i++)
+    {
+        if (data_range.weekdays[i])
+        {
+            str += "(weekday = " + std::to_string(i) + ")|";
+        }
+    }
+    if (!str.empty())
+    {
+        str.erase(str.size()-1);
+        str = "(" + str + ")";
+    }
+
+    if (data_range.from_hour >= 0 && data_range.to_hour >= 0)
+    {
+        if (!str.empty()) str += "&";
+        str += "(hour >= " + std::to_string(data_range.from_hour) + " & hour < " + std::to_string(data_range.to_hour) + ")";
+    }
+
+    if (data_range.from_time && data_range.to_time)
+    {
+        if (!str.empty()) str += "&";
+        str += "(time >= " + std::to_string(data_range.from_time) + " & time < " + std::to_string(data_range.to_time) + ")";
+    }
+
+    return WT::BinaryExpressionParser(str, WT::DataAccess::get_variables()).parse();
+}
+
+void AnalyzerController::set_range(const DataRange& data_range)
+{
+    this->data_range = data_range;
     if (data_access)
     {
-        load_model(data_access->get_tree(build_expression_from_period(period)));
+        load_model(data_access->get_tree(build_expression_from_range()));
     }
 }
 

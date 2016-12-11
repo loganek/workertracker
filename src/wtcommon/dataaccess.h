@@ -26,12 +26,6 @@ struct DataEntry
     std::string description;
 };
 
-struct DateRange
-{
-    std::time_t from = 0;
-    std::time_t to = 0;
-};
-
 class DataAccess
 {
 public:

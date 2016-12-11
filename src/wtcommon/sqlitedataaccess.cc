@@ -284,6 +284,9 @@ std::string SQLiteDataAccess::translate_variable_name(const std::string &var_nam
     static std::unordered_map<std::string, std::string> var_map = {
         {"name", "proc_name"},
         {"description", "description"},
+        {"time", "time_start"},
+        {"weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
+        {"hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"},
         {"start", "time_start"},
         {"start_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
         {"start_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"},

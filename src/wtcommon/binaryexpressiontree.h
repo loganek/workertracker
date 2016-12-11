@@ -9,7 +9,7 @@
 
 namespace WT {
 
-typedef  boost::variant<std::int64_t, std::string, bool, std::tm> operand_value_t;
+typedef  boost::variant<int, std::string, bool, std::tm> operand_value_t;
 
 class Operand
 {

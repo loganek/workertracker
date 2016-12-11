@@ -26,14 +26,14 @@ TEST(BinaryExpressionTree, CheckPrecedenceForBinaryOperations)
 
 TEST(BinaryExpressionTree, SingleBinaryOperationOfTheSameTypes_ShouldPass)
 {
-    auto expression = binary_expr_from_values(5L, 2L, '>');
+    auto expression = binary_expr_from_values(5, 2, '>');
 
     ASSERT_TRUE(expression->get_result());
 }
 
 TEST(BinaryExpressionTree, SingleBinaryOperationOfDifferentTypes_ShouldFail)
 {
-    auto expression = binary_expr_from_values(5L, true, '>');
+    auto expression = binary_expr_from_values(5, true, '>');
 
     EXPECT_ANY_THROW(expression->get_result());
 }
@@ -42,7 +42,7 @@ TEST(BinaryExpressionTree, SingleBinaryOperationOfDifferentTypes_ShouldFail)
 TEST(BinaryExpressionTree, AdvancedOperationTree_1)
 {
     auto expression1 = binary_expr_from_values(std::string("a"), std::string("b"), '=');
-    auto expression2 = binary_expr_from_values(4L, 2L, '>');
+    auto expression2 = binary_expr_from_values(4, 2, '>');
 
     auto out = std::make_shared<BinaryExpression>(expression1, expression2, '&');
 
@@ -53,7 +53,7 @@ TEST(BinaryExpressionTree, AdvancedOperationTree_1)
 TEST(BinaryExpressionTree, AdvancedOperationTree_2)
 {
     auto expression1 = binary_expr_from_values(std::string("a"), std::string("b"), '=');
-    auto expression2 = binary_expr_from_values(4L, 2L, '>');
+    auto expression2 = binary_expr_from_values(4, 2, '>');
 
     auto out = std::make_shared<BinaryExpression>(expression1, expression2, '|');
 
@@ -64,8 +64,8 @@ TEST(BinaryExpressionTree, AdvancedOperationTree_2)
 TEST(BinaryExpressionTree, AdvancedOperationTree_3)
 {
     auto expression1 = binary_expr_from_values(std::string("a"), std::string("b"), '=');
-    auto expression2 = binary_expr_from_values(4L, 2L, '>');
-    auto expression3 = binary_expr_from_values(5L, 4L, '=');
+    auto expression2 = binary_expr_from_values(4, 2, '>');
+    auto expression3 = binary_expr_from_values(5, 4, '=');
 
     auto out = std::make_shared<BinaryExpression>(
                 std::make_shared<BinaryExpression>(expression1, expression2, '&'),
@@ -79,8 +79,8 @@ TEST(BinaryExpressionTree, AdvancedOperationTree_3)
 TEST(BinaryExpressionTree, AdvancedOperationTree_4)
 {
     auto expression1 = binary_expr_from_values(std::string("a"), std::string("b"), '=');
-    auto expression2 = binary_expr_from_values(4L, 2L, '>');
-    auto expression3 = binary_expr_from_values(5L, 4L, '=');
+    auto expression2 = binary_expr_from_values(4, 2, '>');
+    auto expression3 = binary_expr_from_values(5, 4, '=');
     auto expression4 = binary_expr_from_values(std::string("testowy"), std::string("t.*ow"), '~');
 
     auto out = std::make_shared<BinaryExpression>(

@@ -45,7 +45,7 @@ void BinaryExpressionParser::read_identifier()
     std::string identifier;
     do {
         identifier += peek();
-    } while (move_next() && isalpha(peek()));
+    } while (move_next() && (isalpha(peek()) || peek() == '_'));
 
     if (!is_eof())
     {
@@ -76,7 +76,7 @@ void BinaryExpressionParser::read_number()
         back();
     }
 
-    operands.push(std::make_shared<ValueOperand>(static_cast<std::int64_t>(std::stoll(number))));
+    operands.push(std::make_shared<ValueOperand>(std::stoi(number)));
 }
 
 std::shared_ptr<ValueOperand> BinaryExpressionParser::get_datetime_from_string(const std::string& str)

@@ -277,7 +277,6 @@ void SQLiteDataAccess::persist_records()
     last_entry = entries.back();
     entries.clear();
 }
-// select * from WT_ENTRIES where strftime('%H', datetime(time_start, 'unixepoch'))  > 17
 
 std::string SQLiteDataAccess::translate_variable_name(const std::string &var_name)
 {
@@ -285,7 +284,11 @@ std::string SQLiteDataAccess::translate_variable_name(const std::string &var_nam
         {"name", "proc_name"},
         {"description", "description"},
         {"start", "time_start"},
-        {"end", "time_end"}
+        {"start_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
+        {"start_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"},
+        {"end", "time_end"},
+        {"end_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
+        {"end_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"}
     };
 
     return var_map[var_name];

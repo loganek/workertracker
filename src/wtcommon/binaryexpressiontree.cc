@@ -73,7 +73,7 @@ bool BinaryExpression::get_operand_value(const operand_value_t& left, const oper
 }
 
 DECLARE_TYPE(std::string)
-DECLARE_TYPE(std::int64_t)
+DECLARE_TYPE(int)
 DECLARE_TYPE(std::tm)
 DECLARE_TYPE(bool)
 
@@ -86,7 +86,7 @@ void OperatorFunctions<std::string>::init_operators()
     functions['~'] = [](const this_type_t& left, const this_type_t& right) { return std::regex_search(left, std::regex(right)); };
 }
 
-void OperatorFunctions<std::int64_t>::init_operators()
+void OperatorFunctions<int>::init_operators()
 {
     DEFINE_OPERATOR('=', ==)
     DEFINE_OPERATOR('>', >)
@@ -118,7 +118,8 @@ void OperatorFunctions<bool>::init_operators()
 int BinaryExpression::get_operator_precedence(char op)
 {
     if (OperatorFunctions<std::string>::get().implements_operator(op)
-        || OperatorFunctions<std::int64_t>::get().implements_operator(op))
+        || OperatorFunctions<std::tm>::get().implements_operator(op)
+        || OperatorFunctions<int>::get().implements_operator(op))
     {
         return 2;
     }

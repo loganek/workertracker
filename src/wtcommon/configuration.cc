@@ -25,6 +25,7 @@ Configuration::Configuration(const std::string &path)
     {
         boost::property_tree::json_parser::read_json(path, prop_tree);
         WT_LOG_I  << "Loaded configuration from " << path;
+        validate_configuration();
     }
     else
     {
@@ -32,6 +33,20 @@ Configuration::Configuration(const std::string &path)
     }
 
     add_plugins_path((boost::filesystem::path(path).parent_path() / "plugins").string());
+}
+
+void Configuration::validate_configuration()
+{
+    // TODO: instead of validating this value, process should split overlaping
+    // values to multiple entries, and guarantees that start_time and end_time
+    // belong to the same hour.
+    if (get_read_info_interval() > MAX_READ_INFO_INTERVAL)
+    {
+        WT_LOG_D << "Read info interval to high(" << get_read_info_interval() <<"),"
+                   << "set to max read info interval(" << MAX_READ_INFO_INTERVAL << ")";
+        prop_tree.put<int>("general.read-info-interval", MAX_READ_INFO_INTERVAL);
+
+    }
 }
 
 std::vector<std::string> Configuration::get_plugins_paths()

@@ -17,6 +17,8 @@ namespace WT {
 
 class GeneralConfiguration
 {
+protected:
+    const int MAX_READ_INFO_INTERVAL = 60 * 60; // An hour
 public:
     virtual ~GeneralConfiguration() {}
 
@@ -63,6 +65,8 @@ class Configuration :
 {
     boost::property_tree::ptree prop_tree;
     std::string path;
+
+    void validate_configuration();
 
 public:
     Configuration(const std::string &path = WT::Configuration::get_default_config_path());

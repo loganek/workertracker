@@ -202,7 +202,8 @@ void SQLiteDataAccess::backup_existing_db()
 
 static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)
 {
-    return before.description == after.description
+    return std::localtime(&after.time_start)->tm_hour == std::localtime(&before.time_start)->tm_hour
+            && before.description == after.description
             && before.proc_name == after.proc_name
             && before.time_end == after.time_start;
 }

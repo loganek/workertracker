@@ -1,5 +1,6 @@
 #include "binaryexpressionparser.h"
 
+#include <sstream>
 #include <unordered_map>
 #include <iomanip>
 

@@ -64,7 +64,10 @@ include_directories("${workertracker_SOURCE_DIR}/src")
 enable_testing()
 
 add_subdirectory(src)
-add_subdirectory(tests)
+
+if (UNIX)
+    add_subdirectory(tests)
+endif()
 
 ################### INSTALLER ###################
 

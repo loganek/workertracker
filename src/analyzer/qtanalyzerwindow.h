@@ -13,6 +13,8 @@
 
 #include <QMainWindow>
 
+#include <array>
+
 class QTreeView;
 class QLabel;
 class QAbstractItemModel;

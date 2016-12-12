@@ -20,6 +20,7 @@
 
 #include <boost/optional.hpp>
 
+#include <array>
 #include <memory>
 
 struct DataRange

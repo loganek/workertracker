@@ -18,6 +18,7 @@
 #include <QFileDialog>
 #include <QLabel>
 #include <QMessageBox>
+#include <QShortcut>
 
 QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -42,6 +43,20 @@ QtAnalyzerWindow::QtAnalyzerWindow(QWidget *parent) :
     }
 
     connect_signals();
+
+    init_secret();
+}
+
+void QtAnalyzerWindow::init_secret()
+{
+    ui->secretExpressionLineEdit->setVisible(false);
+    auto secret_shortcut = new QShortcut(QKeySequence("Ctrl+Alt+U"), this);
+    secret_shortcut->connect(secret_shortcut, &QShortcut::activated, this, [this] {
+        ui->secretExpressionLineEdit->setVisible(true);
+    });
+    connect(ui->secretExpressionLineEdit, &QLineEdit::returnPressed, this, [this] {
+        controller->apply_expression(ui->secretExpressionLineEdit->text().toStdString());
+    });
 }
 
 void QtAnalyzerWindow::connect_signals()
@@ -149,8 +164,9 @@ void QtAnalyzerWindow::set_controller(AnalyzerController *controller)
 
 void QtAnalyzerWindow::print_error(const std::string &message)
 {
-    QErrorMessage msg;
-    msg.showMessage(QString::fromStdString(message));
+    auto msg = new QErrorMessage(this);
+    msg->setAttribute(Qt::WA_DeleteOnClose);
+    msg->showMessage(QString::fromStdString(message));
 }
 
 void QtAnalyzerWindow::on_exitAction_triggered(bool)

@@ -59,6 +59,7 @@ public:
 
     int run();
     void load_from_file(const std::string &filename);
+    void apply_expression(const std::string &expression_str);
     void set_range(const DataRange& data_range);
     void apply_filter(const std::string &search_text, bool case_sensitive);
     const QTFilterProxyModel& get_proxy_model() { return proxy_model; }

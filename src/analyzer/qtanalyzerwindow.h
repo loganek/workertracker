@@ -41,6 +41,7 @@ class QtAnalyzerWindow : public QMainWindow, public IMainWindow
         CUSTOM
     };
 
+    void init_secret();
     void connect_signals();
     void perform_search();
     void load_data_file();

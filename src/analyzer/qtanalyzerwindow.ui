@@ -155,6 +155,9 @@
      </widget>
     </item>
     <item>
+     <widget class="QLineEdit" name="secretExpressionLineEdit"/>
+    </item>
+    <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
        <string>Quick filter</string>

@@ -114,6 +114,18 @@ void AnalyzerController::set_range(const DataRange& data_range)
     }
 }
 
+void AnalyzerController::apply_expression(const std::string &expression_str)
+{
+    try
+    {
+        load_model(data_access->get_tree(WT::BinaryExpressionParser(expression_str, WT::DataAccess::get_variables()).parse()));
+    }
+    catch (const std::exception &ex)
+    {
+        main_window->print_error(ex.what());
+    }
+}
+
 QList<QStandardItem*> AnalyzerController::create_model_item(const std::string &name, qlonglong time)
 {
     QList<QStandardItem *> rowItems;

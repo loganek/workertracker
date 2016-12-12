@@ -31,6 +31,7 @@ int AnalyzerController::run()
 
     load_from_file(WT::SQLiteDataAccess::default_data_file());
 
+    QCoreApplication::arguments();
     main_window->show_window();
 
     return app.exec();

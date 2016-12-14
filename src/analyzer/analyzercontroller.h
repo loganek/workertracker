@@ -46,7 +46,7 @@ class AnalyzerController
     DataRange data_range;
 
     boost::optional<std::regex> filter_pattern = boost::none;
-    std::shared_ptr<IMainWindow> main_window;
+    IMainWindow* main_window;
     std::shared_ptr<WT::DataAccess> data_access;
 
     QList<QStandardItem*> create_model_item(const std::string &name, qlonglong time);

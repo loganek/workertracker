@@ -26,15 +26,17 @@ AnalyzerController::AnalyzerController(int argc, char **argv)
 
 int AnalyzerController::run()
 {
-    main_window = std::make_shared<QtAnalyzerWindow>();
+    QtAnalyzerWindow wnd;
+    main_window = &wnd;
     main_window->set_controller(this);
 
     load_from_file(WT::SQLiteDataAccess::default_data_file());
 
-    QCoreApplication::arguments();
     main_window->show_window();
 
-    return app.exec();
+    int ret = app.exec();
+    main_window = nullptr;
+    return ret;
 }
 
 void AnalyzerController::apply_filter(const std::string &search_text, bool case_sensitive)

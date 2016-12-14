@@ -285,14 +285,14 @@ std::string SQLiteDataAccess::translate_variable_name(const std::string &var_nam
         {"name", "proc_name"},
         {"description", "description"},
         {"time", "time_start"},
-        {"weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
-        {"hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"},
+        {"weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch', 'localtime')) as integer)"},
+        {"hour", "cast(strftime('%H', datetime(time_start, 'unixepoch', 'localtime')) as integer)"},
         {"start", "time_start"},
-        {"start_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
-        {"start_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"},
+        {"start_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch', 'localtime')) as integer)"},
+        {"start_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch', 'localtime')) as integer)"},
         {"end", "time_end"},
-        {"end_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch')) as integer)"},
-        {"end_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch')) as integer)"}
+        {"end_weekday", "cast(strftime('%w', datetime(time_start, 'unixepoch', 'localtime')) as integer)"},
+        {"end_hour", "cast(strftime('%H', datetime(time_start, 'unixepoch', 'localtime')) as integer)"}
     };
 
     return var_map[var_name];

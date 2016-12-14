@@ -66,7 +66,7 @@ public:
     }
 
     template<typename GroupPolicy>
-    std::array<std::pair<std::vector<const DataEntry*>, std::size_t>, GroupPolicy::array_size> get_grouped()
+    std::array<std::pair<std::vector<const DataEntry*>, std::size_t>, GroupPolicy::array_size> get_grouped() const
     {
         std::array<std::pair<std::vector<const DataEntry*>, std::size_t>, GroupPolicy::array_size> ret;
 

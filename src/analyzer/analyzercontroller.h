@@ -63,6 +63,7 @@ public:
     void set_range(const DataRange& data_range);
     void apply_filter(const std::string &search_text, bool case_sensitive);
     const QTFilterProxyModel& get_proxy_model() { return proxy_model; }
+    WT::DataContainerV2 get_container_v2();
 };
 
 #endif // ANALYZERCONTROLLER_H

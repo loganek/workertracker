@@ -171,3 +171,8 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
     proxy_model.setFilterRegExp(filter_pattern);
     main_window->update_total_time(proxy_model.get_total_time());
 }
+
+WT::DataContainerV2 AnalyzerController::get_container_v2()
+{
+    return data_access->get_entries(build_expression_from_range());
+}

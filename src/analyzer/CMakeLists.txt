@@ -1,5 +1,5 @@
-qt5_wrap_cpp(WTANALYZER_HDR_MOC qtanalyzerwindow.h graphdialog.h)
-qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui graphdialog.ui aboutdialog.ui)
+qt5_wrap_cpp(WTANALYZER_HDR_MOC qtanalyzerwindow.h graphdialog.h ofchartbardialog.h)
+qt5_wrap_ui (WTANALYZER_UI_MOC  qtanalyzerwindow.ui graphdialog.ui aboutdialog.ui ofchartbardialog.ui)
 
 add_executable(workertracker-analyzer
     main.cc
@@ -7,6 +7,7 @@ add_executable(workertracker-analyzer
     imainwindow.h
     qtanalyzerwindow.cc
     qtfilterproxymodel.cc
+    ofchartbardialog.cc
     graphdialog.cc
     drilldownslice.cc
     drilldownchart.cc

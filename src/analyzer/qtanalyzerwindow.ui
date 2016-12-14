@@ -223,6 +223,7 @@
      <string>Visualizations</string>
     </property>
     <addaction name="visualizeCurrentViewAction"/>
+    <addaction name="dayOfWeekAction"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -265,6 +266,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="dayOfWeekAction">
+   <property name="text">
+    <string>Day of Week...</string>
    </property>
   </action>
  </widget>

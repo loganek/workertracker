@@ -13,51 +13,48 @@
 
 #include <vector>
 #include <unordered_map>
-#include <chrono>
 
 namespace WT {
 
-class DataContainer
-{
-    std::unordered_map<std::string, std::unordered_map<std::string, std::chrono::seconds>> values;
-
-public:
-    void insert(const std::string &key, const std::string &value, std::chrono::seconds duration);
-
-    std::chrono::seconds get_duration(const std::string &key, const std::string &value) const;
-
-    std::vector<std::string> get_keys() const;
-    std::vector<std::string> get_values(const std::string &key) const;
-
-    void clear();
-};
-
 struct HourGroupPolicy
 {
-    static constexpr std::size_t array_size = 24;
+    using container_t = std::array<std::size_t, 24>;
+    container_t container{};
 
-    static std::size_t index(const DataEntry& entry)
+    void process_entry(const DataEntry& entry)
     {
-        return std::localtime(&entry.time_start)->tm_hour;
+        container[std::localtime(&entry.time_start)->tm_hour] += entry.get_duration();
     }
 };
 
 struct WeekdayGroupPolicy
 {
-    static constexpr std::size_t array_size = 7;
+    using container_t = std::array<std::size_t, 7>;
+    container_t container{};
 
-    static std::size_t index(const DataEntry& entry)
+    void process_entry(const DataEntry& entry)
     {
-        return std::localtime(&entry.time_start)->tm_wday;
+        container[std::localtime(&entry.time_start)->tm_wday] += entry.get_duration();
     }
 };
 
-class DataContainerV2 // TODO: remove DataContainer
+struct ProcNameGroupPolicy
+{
+    using container_t = std::unordered_map<std::string, std::vector<const DataEntry*>>;
+    container_t container;
+
+    void process_entry(const DataEntry& entry)
+    {
+        container[entry.proc_name].push_back(&entry);
+    }
+};
+
+class DataContainer
 {
     std::vector<DataEntry> entries;
 
 public:
-    virtual ~DataContainerV2() {}
+    virtual ~DataContainer() {}
 
     template <class... Args>
     void emplace_back(Args&&... args)
@@ -66,19 +63,18 @@ public:
     }
 
     template<typename GroupPolicy>
-    std::array<std::pair<std::vector<const DataEntry*>, std::size_t>, GroupPolicy::array_size> get_grouped() const
+    typename GroupPolicy::container_t get_grouped() const
     {
-        std::array<std::pair<std::vector<const DataEntry*>, std::size_t>, GroupPolicy::array_size> ret;
+        GroupPolicy policy;
 
         for (const auto &entry : entries)
         {
-            auto index = GroupPolicy::index(entry);
-            ret[index].first.push_back(&entry);
-            ret[index].second += entry.time_end - entry.time_start;
+            policy.process_entry(entry);
         }
 
-        return ret;
+        return policy.container;
     }
+
 };
 
 }

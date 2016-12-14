@@ -17,7 +17,7 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-OfChartBarDialog::OfChartBarDialog(const WT::DataContainerV2 &container, QWidget *parent) :
+OfChartBarDialog::OfChartBarDialog(const WT::DataContainer &container, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OfChartBarDialog)
 {
@@ -29,7 +29,7 @@ OfChartBarDialog::OfChartBarDialog(const WT::DataContainerV2 &container, QWidget
     constexpr double SecondsInHour = 60 * 60;
     for (std::size_t i = 0; i < data.size(); i++)
     {
-        barset->append(data[i].second / SecondsInHour);
+        barset->append(data[i] / SecondsInHour);
     }
 
     QBarSeries *series = new QBarSeries();

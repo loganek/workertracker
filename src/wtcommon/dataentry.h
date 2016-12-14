@@ -26,6 +26,13 @@ struct DataEntry
     DataEntry(const std::string &proc_name, const std::string& description, std::time_t time_start, std::time_t time_end)
         : time_start(time_start), time_end(time_end), proc_name(proc_name), description(description)
     {}
+
+    double get_duration() const { return std::difftime(time_end, time_start); }
+
+    bool is_continuous(const DataEntry& next) const
+    {
+        return time_end+2 > next.time_start && description == next.description && proc_name == next.proc_name;
+    }
 };
 
 }

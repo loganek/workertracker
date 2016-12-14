@@ -67,7 +67,7 @@ void AnalyzerController::load_from_file(const std::string &filename)
         data_access = std::make_shared<WT::SQLiteDataAccess>(filename, config);
         data_access->open(true);
 
-        load_model(data_access->get_tree(build_expression_from_range()));
+        load_model(data_access->get_entries(build_expression_from_range()));
     }
     catch (const std::runtime_error &ex)
     {
@@ -113,7 +113,7 @@ void AnalyzerController::set_range(const DataRange& data_range)
     this->data_range = data_range;
     if (data_access)
     {
-        load_model(data_access->get_tree(build_expression_from_range()));
+        load_model(data_access->get_entries(build_expression_from_range()));
     }
 }
 
@@ -121,7 +121,7 @@ void AnalyzerController::apply_expression(const std::string &expression_str)
 {
     try
     {
-        load_model(data_access->get_tree(WT::BinaryExpressionParser(expression_str, WT::DataAccess::get_variables()).parse()));
+        load_model(data_access->get_entries(WT::BinaryExpressionParser(expression_str, WT::DataAccess::get_variables()).parse()));
     }
     catch (const std::exception &ex)
     {
@@ -148,14 +148,14 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
     auto standard_model = proxy_model.get_source_model();
     standard_model->clear();
 
-    for (auto app : container.get_keys())
+    for (auto app : container.get_grouped<WT::ProcNameGroupPolicy>())
     {
-        QList<QStandardItem *> app_row = create_model_item(app, 0);
+        QList<QStandardItem *> app_row = create_model_item(app.first, 0);
         qlonglong total_time = 0;
-        for (auto details : container.get_values(app))
+        for (auto details : app.second)
         {
-            auto duration = container.get_duration(app, details).count();
-            app_row.first()->appendRow(create_model_item(details, duration));
+            auto duration = details->get_duration();
+            app_row.first()->appendRow(create_model_item(details->description, duration));
 
             total_time += duration;
         }
@@ -172,7 +172,7 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
     main_window->update_total_time(proxy_model.get_total_time());
 }
 
-WT::DataContainerV2 AnalyzerController::get_container_v2()
+WT::DataContainer AnalyzerController::get_container_v2()
 {
     return data_access->get_entries(build_expression_from_range());
 }

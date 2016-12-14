@@ -35,9 +35,6 @@ class SQLiteDataAccess : public DataAccess
     sqlite3_stmt *insert_stmt = nullptr;
     sqlite3_stmt *update_stmt = nullptr;
 
-    DataContainer container;
-
-    static int query_container_callback(void *data_access, int argc, char **argv, char **col_name);
     static std::string translate_operator(Operator op);
     static std::string translate_variable_name(const std::string &var_name);
     void load_expression_condition(std::shared_ptr<Operand> op, std::ostream& stream);
@@ -58,8 +55,7 @@ public:
 
     void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
-    DataContainer get_tree(const std::shared_ptr<BinaryExpression>& expression) override;
-    DataContainerV2 get_entries(const std::shared_ptr<BinaryExpression>& expression) override;
+    DataContainer get_entries(const std::shared_ptr<BinaryExpression>& expression) override;
 
     static std::string default_data_file();
 };

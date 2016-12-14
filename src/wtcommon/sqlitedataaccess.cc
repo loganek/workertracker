@@ -45,18 +45,6 @@ std::string SQLiteDataAccess::default_data_file()
     return (boost::filesystem::path(WT::Configuration::get_default_config_path()).parent_path() / "data.dat").string();
 }
 
-int SQLiteDataAccess::query_container_callback(void *data_access, int argc, char **argv, char ** /*col_name*/)
-{
-    SQLiteDataAccess* this_ = reinterpret_cast<SQLiteDataAccess*>(data_access);
-
-    for (int i = 0; i < argc; i += 3)
-    {
-        this_->container.insert(argv[i], argv[i+1], std::chrono::seconds(std::stoll(argv[i+2])));
-    }
-
-    return 0;
-}
-
 bool SQLiteDataAccess::table_exists()
 {
     auto sql = "SELECT name FROM sqlite_master WHERE name='" + table_name + "'";
@@ -347,28 +335,9 @@ void SQLiteDataAccess::load_expression_condition(std::shared_ptr<Operand> op, st
     }
 }
 
-DataContainer SQLiteDataAccess::get_tree(const std::shared_ptr<BinaryExpression>& expression)
+DataContainer SQLiteDataAccess::get_entries(const std::shared_ptr<BinaryExpression>& expression)
 {
-    container.clear();
-    std::ostringstream sql_s;
-
-    sql_s << "SELECT PROC_NAME, DESCRIPTION, SUM(TIME_END - TIME_START) FROM " << table_name << " ";
-
-    if (expression)
-    {
-        sql_s << "WHERE ";
-        load_expression_condition(expression, sql_s);
-    }
-
-    sql_s << " GROUP BY PROC_NAME, DESCRIPTION;";
-    execute_query(sql_s.str(), query_container_callback);
-
-    return container;
-}
-
-DataContainerV2 SQLiteDataAccess::get_entries(const std::shared_ptr<BinaryExpression>& expression)
-{
-    DataContainerV2 out;
+    DataContainer out;
 
     std::ostringstream sql_s;
 

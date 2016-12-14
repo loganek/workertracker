@@ -7,7 +7,7 @@ elseif(WIN32)
 endif(UNIX)
 
 add_library(wtcommon
-    datacontainer.cc
+    datacontainer.h
     dataaccess.h
     dataentry.h
     sqlitedataaccess.cc

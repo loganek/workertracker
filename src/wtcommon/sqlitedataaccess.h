@@ -59,6 +59,7 @@ public:
     void open(bool readonly) override;
     void save_entry(const DataEntry &entry) override;
     DataContainer get_tree(const std::shared_ptr<BinaryExpression>& expression) override;
+    DataContainerV2 get_entries(const std::shared_ptr<BinaryExpression>& expression) override;
 
     static std::string default_data_file();
 };

@@ -9,6 +9,7 @@ endif(UNIX)
 add_library(wtcommon
     datacontainer.cc
     dataaccess.h
+    dataentry.h
     sqlitedataaccess.cc
     logger.cc
     itracksuspendable.h

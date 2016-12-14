@@ -54,7 +54,7 @@ int SQLiteDataAccess::query_container_callback(void *data_access, int argc, char
         this_->container.insert(argv[i], argv[i+1], std::chrono::seconds(std::stoll(argv[i+2])));
     }
 
-   return 0;
+    return 0;
 }
 
 bool SQLiteDataAccess::table_exists()
@@ -364,6 +364,50 @@ DataContainer SQLiteDataAccess::get_tree(const std::shared_ptr<BinaryExpression>
     execute_query(sql_s.str(), query_container_callback);
 
     return container;
+}
+
+DataContainerV2 SQLiteDataAccess::get_entries(const std::shared_ptr<BinaryExpression>& expression)
+{
+    DataContainerV2 out;
+
+    std::ostringstream sql_s;
+
+    sql_s << "SELECT PROC_NAME, DESCRIPTION, TIME_START, TIME_END FROM " << table_name << " ";
+
+    if (expression)
+    {
+        sql_s << "WHERE ";
+        load_expression_condition(expression, sql_s);
+    }
+
+    sql_s << " ORDER BY TIME_START;";
+    std::string sql_str = sql_s.str();
+
+    sqlite3_stmt *select_stmt;
+    sqlite3_prepare_v2(db, sql_str.c_str(), -1, &select_stmt, nullptr);
+    int status;
+    do
+    {
+        switch (status = sqlite3_step(select_stmt))
+        {
+        case SQLITE_ROW:
+        {
+            out.emplace_back(
+                        reinterpret_cast<const char*>(sqlite3_column_text(select_stmt, 0)),
+                        reinterpret_cast<const char*>(sqlite3_column_text(select_stmt, 1)),
+                        sqlite3_column_int64(select_stmt, 2),
+                        sqlite3_column_int64(select_stmt, 3));
+        }
+        case SQLITE_DONE:
+            break;
+        default:
+            WT_LOG_ERR << "Error on reading data";
+            break;
+        }
+    } while (status == SQLITE_ROW);
+    sqlite3_finalize(select_stmt);
+
+    return out;
 }
 
 }

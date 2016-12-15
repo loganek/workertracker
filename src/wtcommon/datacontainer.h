@@ -40,12 +40,12 @@ struct WeekdayGroupPolicy
 
 struct ProcNameGroupPolicy
 {
-    using container_t = std::unordered_map<std::string, std::vector<const DataEntry*>>;
+    using container_t = std::unordered_map<std::string, std::unordered_map<std::string, std::time_t>>;
     container_t container;
 
     void process_entry(const DataEntry& entry)
     {
-        container[entry.proc_name].push_back(&entry);
+        container[entry.proc_name][entry.description] += entry.get_duration();
     }
 };
 

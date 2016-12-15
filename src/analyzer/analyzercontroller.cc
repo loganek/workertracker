@@ -154,8 +154,8 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
         qlonglong total_time = 0;
         for (auto details : app.second)
         {
-            auto duration = details->get_duration();
-            app_row.first()->appendRow(create_model_item(details->description, duration));
+            auto duration = details.second;
+            app_row.first()->appendRow(create_model_item(details.first, duration));
 
             total_time += duration;
         }

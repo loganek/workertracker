@@ -27,7 +27,7 @@ struct DataEntry
         : time_start(time_start), time_end(time_end), proc_name(proc_name), description(description)
     {}
 
-    double get_duration() const { return std::difftime(time_end, time_start); }
+    std::time_t get_duration() const { return static_cast<std::time_t>(std::difftime(time_end, time_start)); }
 
     bool is_continuous(const DataEntry& next) const
     {

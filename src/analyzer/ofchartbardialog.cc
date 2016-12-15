@@ -29,7 +29,7 @@ OfChartBarDialog::OfChartBarDialog(const WT::DataContainer &container, QWidget *
     constexpr double SecondsInHour = 60 * 60;
     for (std::size_t i = 0; i < data.size(); i++)
     {
-        barset->append(data[i] / SecondsInHour);
+        barset->append(data[i].first / SecondsInHour);
     }
 
     QBarSeries *series = new QBarSeries();

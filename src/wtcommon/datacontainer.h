@@ -11,30 +11,55 @@
 
 #include "dataentry.h"
 
+#include <tuple>
 #include <vector>
+#include <unordered_set>
 #include <unordered_map>
 
 namespace WT {
 
-struct HourGroupPolicy
+template<typename ConcretePolicy, int SIZE>
+struct OfGroupPolicy
 {
-    using container_t = std::array<std::size_t, 24>;
+    using container_t = std::array<std::pair<std::time_t, int>, SIZE>;
     container_t container{};
+    std::array<std::unordered_set<std::size_t>, SIZE> vals{};
 
     void process_entry(const DataEntry& entry)
     {
-        container[std::localtime(&entry.time_start)->tm_hour] += entry.get_duration();
+        auto time_st = std::localtime(&entry.time_start);
+        auto key = ConcretePolicy::get_key(time_st);
+        bool inserted;
+        std::tie(std::ignore, inserted) = vals[key].insert(ConcretePolicy::get_count_key(time_st));
+
+        container[key].first += entry.get_duration();
+        container[key].second += inserted;
     }
 };
 
-struct WeekdayGroupPolicy
+struct HourGroupPolicy : public OfGroupPolicy<HourGroupPolicy, 24>
 {
-    using container_t = std::array<std::size_t, 7>;
-    container_t container{};
-
-    void process_entry(const DataEntry& entry)
+    static std::size_t get_key(const tm* time_st)
     {
-        container[std::localtime(&entry.time_start)->tm_wday] += entry.get_duration();
+        return time_st->tm_hour;
+    }
+
+    static std::size_t get_count_key(const tm* time_st)
+    {
+        return (time_st->tm_year << 8) | time_st->tm_yday;
+    }
+};
+
+struct WeekdayGroupPolicy : public OfGroupPolicy<WeekdayGroupPolicy, 7>
+{
+    static std::size_t get_key(const tm* time_st)
+    {
+        return time_st->tm_wday;
+    }
+
+    static std::size_t get_count_key(const tm* time_st)
+    {
+        return (time_st->tm_year << 8) | time_st->tm_yday;
     }
 };
 

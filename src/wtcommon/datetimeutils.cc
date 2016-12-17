@@ -17,6 +17,7 @@ std::string time_to_display(std::chrono::seconds sec)
 {
     using namespace std::chrono;
     std::ostringstream ss;
+    auto sec_init = sec;
 
     using namespace std::literals::chrono_literals;
 
@@ -32,7 +33,7 @@ std::string time_to_display(std::chrono::seconds sec)
         sec -= m;
         ss << m.count() << "min ";
     }
-    if (sec.count() > 0)
+    if (sec.count() > 0 || sec_init == 0s)
     {
         ss << sec.count() << "s";
     }

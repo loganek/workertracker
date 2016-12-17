@@ -9,9 +9,12 @@
 #include "ofchartbardialog.h"
 #include "ui_ofchartbardialog.h"
 
+#include "wtcommon/datetimeutils.h"
+
 #include <QtCharts/QBarSeries>
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QBarSet>
+#include <QtCharts/QValueAxis>
 #include <QtCharts/QChart>
 #include <QtCharts/QChartView>
 
@@ -23,30 +26,90 @@ OfChartBarDialog::OfChartBarDialog(const WT::DataContainer &container, QWidget *
 {
     ui->setupUi(this);
 
-    auto data = container.get_grouped<WT::WeekdayGroupPolicy>();
+    weekdays << tr("Sun") << tr("Mon") << tr("Tue") << tr("Wed") << tr("Thu") << tr("Fri") << tr("Sat");
 
-    QBarSet *barset = new QBarSet("");
-    constexpr double SecondsInHour = 60 * 60;
-    for (std::size_t i = 0; i < data.size(); i++)
+    auto data = container.get_grouped<WT::WeekdayGroupPolicy>();
+    create_bar_series(data);
+    create_info_tree(data);
+
+    create_chart();
+
+    ui->chartInfoTree->expandAll();
+
+    set_series(total_series);
+
+    connect(ui->totalRadioButton, &QRadioButton::toggled, this, [this] (bool) {
+        set_series(ui->totalRadioButton->isChecked() ? total_series : average_series);
+    });
+}
+
+void OfChartBarDialog::set_series(QBarSeries* series)
+{
+    if (current_series)
     {
-        barset->append(data[i].first / SecondsInHour);
+        chart->removeSeries(current_series);
     }
 
-    QBarSeries *series = new QBarSeries();
-    series->append(barset);
+    current_series = series;
+    time_axis->setRange(0, max_of_series[current_series]);
+    chart->addSeries(current_series);
+}
 
+void OfChartBarDialog::create_bar_series(const WT::WeekdayGroupPolicy::container_t &container)
+{
+    constexpr double SecondsInHour = 60 * 60;
 
-    QChart *chart = new QChart();
-    chart->addSeries(series);
+    auto barset_total = new QBarSet(tr("Total"));
+    auto barset_average = new QBarSet(tr("Average"));
+
+    double max_total = 0.0, max_average = 0.0;
+
+    for (std::size_t i = 0; i < container.size(); i++)
+    {
+        auto hours = container[i].first / SecondsInHour;
+        max_total = std::max(hours, max_total);
+        barset_total->append(hours);
+
+        auto average = (container[i].second ? container[i].first / (double)container[i].second : 0) / SecondsInHour;
+        max_average = std::max(average, max_average);
+        barset_average->append(average);
+    }
+
+    total_series = new QBarSeries(this);
+    total_series->append(barset_total);
+    max_of_series[total_series] = max_total;
+
+    average_series = new QBarSeries(this);
+    average_series->append(barset_average);
+    max_of_series[average_series] = max_average;
+}
+
+void OfChartBarDialog::create_info_tree(const WT::WeekdayGroupPolicy::container_t &container)
+{
+    for (std::size_t i = 0; i < container.size(); i++)
+    {
+        auto average = container[i].second ? container[i].first / (double)container[i].second : 0;
+
+        auto parent_item = new QTreeWidgetItem(ui->chartInfoTree, {weekdays[i]});
+        new QTreeWidgetItem(parent_item, {tr("Total: "), QString::fromStdString(WT::time_to_display(std::chrono::seconds(container[i].first)))});
+        new QTreeWidgetItem(parent_item, {tr("Average: "), QString::fromStdString(WT::time_to_display(std::chrono::seconds(int(average))))});
+        new QTreeWidgetItem(parent_item, {tr("Count: "), QString::number(container[i].second)});
+    }
+
+    ui->chartInfoTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+}
+
+void OfChartBarDialog::create_chart()
+{
+    chart = new QChart();
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
-    QStringList categories;
-    categories << tr("Sun") << tr("Mon") << tr("Tue") << tr("Wed") << tr("Thu") << tr("Fri") << tr("Sat");
     QBarCategoryAxis *axis = new QBarCategoryAxis();
-    axis->append(categories);
-    chart->createDefaultAxes();
-    chart->setAxisX(axis, series);
+    axis->append(weekdays);
+    chart->addAxis(axis, Qt::AlignBottom);
 
+    time_axis = new QValueAxis();
+    chart->addAxis(time_axis, Qt::AlignLeft);
 
     QChartView *chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);

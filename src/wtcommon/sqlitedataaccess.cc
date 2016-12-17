@@ -11,6 +11,7 @@
 #include "logger.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/io/detail/quoted_manip.hpp>
 
 extern "C" {
 
@@ -309,7 +310,7 @@ struct SQLiteValueVisitor : boost::static_visitor<void>
     SQLiteValueVisitor(std::ostream& stream) : stream(stream) {}
 
     void operator()(const std::tm & val) const { stream << std::mktime(const_cast<std::tm*>(&val)); }
-    void operator()(const std::string &val) const { stream << "'" << val << "'"; } // TODO escape '
+    void operator()(const std::string &val) const { stream << boost::io::quoted(val, '\'', '\''); }
     template <typename T> void operator()(const T& val) const { stream << val; }
 };
 

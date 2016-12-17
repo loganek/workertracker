@@ -11,6 +11,8 @@
 
 #include "dataentry.h"
 
+#include <boost/optional/optional.hpp>
+
 #include <tuple>
 #include <vector>
 #include <unordered_set>
@@ -88,13 +90,16 @@ public:
     }
 
     template<typename GroupPolicy>
-    typename GroupPolicy::container_t get_grouped() const
+    typename GroupPolicy::container_t get_grouped(boost::optional<const std::regex&> quick_filter = boost::none) const
     {
         GroupPolicy policy;
 
         for (const auto &entry : entries)
         {
-            policy.process_entry(entry);
+            if (!quick_filter || entry.match_filter(quick_filter.get()))
+            {
+                policy.process_entry(entry);
+            }
         }
 
         return policy.container;

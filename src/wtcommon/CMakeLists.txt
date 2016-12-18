@@ -11,6 +11,7 @@ add_library(wtcommon
     dataaccess.h
     dataentry.h
     sqlitedataaccess.cc
+    tokenizer.cc
     logger.cc
     itracksuspendable.h
     configuration.cc

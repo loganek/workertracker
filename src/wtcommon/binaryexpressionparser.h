@@ -10,6 +10,7 @@
 #define BINARYEXPRESSIONPARSER_H
 
 #include "binaryexpressiontree.h"
+#include "tokenizer.h"
 
 #include <unordered_map>
 #include <stack>
@@ -23,25 +24,10 @@ class BinaryExpressionParser
     std::stack<Operator> operators;
     std::stack<operand_ptr_t> operands;
 
-    std::string expression_str;
-    std::size_t pos;
+    Tokenizer tokenizer;
 
-    void reset() { pos = -1; }
-
-    bool is_eof();
-    bool move_next();
-    char peek();
-    void back();
-
-    void read_identifier();
-    void read_number();
-    void read_string();
-    void read_operator();
-
-    bool is_operator_beginning();
-
-    std::exception unexpected_eof();
-    std::exception unexpected_character();
+    void read_operator(const Token& token);
+    void read_identifier(const Token& token);
 
     void make_binary_expression();
 

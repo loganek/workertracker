@@ -20,85 +20,8 @@ static int precedence(Operator op)
 }
 
 BinaryExpressionParser::BinaryExpressionParser(const std::string &expression_str, const std::unordered_map<std::string, operand_value_t>& variables)
-    : variables(variables), expression_str(expression_str)
+    : variables(variables), tokenizer(expression_str)
 {
-}
-
-bool BinaryExpressionParser::is_eof()
-{
-    return pos >= expression_str.size();
-}
-
-bool BinaryExpressionParser::move_next()
-{
-    pos++;
-    return !is_eof();
-}
-
-void BinaryExpressionParser::back()
-{
-    pos--;
-}
-
-char BinaryExpressionParser::peek()
-{
-    return expression_str.at(pos);
-}
-
-bool BinaryExpressionParser::is_operator_beginning()
-{
-    switch (peek())
-    {
-    case '>':
-    case '<':
-    case '=':
-    case '~':
-    case '!':
-    case '&':
-    case '|':
-        return true;
-    default:
-        return false;
-    }
-}
-
-void BinaryExpressionParser::read_identifier()
-{
-    std::string identifier;
-    do {
-        identifier += peek();
-    } while (move_next() && (isalpha(peek()) || peek() == '_'));
-
-    if (!is_eof())
-    {
-        if (peek() != ')' && !is_operator_beginning() && !isspace(peek()))
-            throw unexpected_character();
-        back();
-    }
-
-    auto it = variables.find(identifier);
-    if (it == variables.end())
-        throw std::runtime_error("undefined identifier " + identifier);
-
-    operands.push(std::make_shared<VariableOperand>(identifier, it->second));
-}
-
-void BinaryExpressionParser::read_number()
-{
-    std::string number;
-    do
-    {
-        number += peek();
-    } while (move_next() && isdigit(peek()));
-
-    if (!is_eof())
-    {
-        if (peek() != ')' && !is_operator_beginning() && !isspace(peek()))
-            throw unexpected_character();
-        back();
-    }
-
-    operands.push(std::make_shared<ValueOperand>(std::stoi(number)));
 }
 
 std::shared_ptr<ValueOperand> BinaryExpressionParser::get_datetime_from_string(const std::string& str)
@@ -115,37 +38,7 @@ std::shared_ptr<ValueOperand> BinaryExpressionParser::get_datetime_from_string(c
     return std::make_shared<ValueOperand>(tm_struct);
 }
 
-void BinaryExpressionParser::read_string()
-{
-    std::string value;
-    while (move_next() && peek() != '"') // TODO escape string
-    {
-        value += peek();
-    }
-
-    if (is_eof())
-        throw unexpected_eof();
-
-    move_next();
-
-    std::shared_ptr<ValueOperand> operand;
-
-    if (!is_eof())
-    {
-        if (peek() == 'd')
-            operand = get_datetime_from_string(value);
-        else if (peek() != ')' && !is_operator_beginning() && !isspace(peek()))
-            throw unexpected_character();
-        else
-            back();
-    }
-
-    if (!operand) operand = std::make_shared<ValueOperand>(value);
-
-    operands.push(operand);
-}
-
-void BinaryExpressionParser::read_operator()
+static Operator translate_operator(const std::string &op)
 {
     static std::unordered_map<std::string, Operator> translation = {
         {"!", Operator::NEQ},
@@ -156,52 +49,53 @@ void BinaryExpressionParser::read_operator()
         {"<=", Operator::LE},
         {"~", Operator::MATCH},
         {"&", Operator::AND},
-        {"|", Operator::OR}
+        {"|", Operator::OR},
+        {"(", Operator::OPEN_PARENTHESIS},
+        {")", Operator::CLOSE_PARENTHESIS}
     };
-    char expected = 0;
-    switch (peek())
+
+    return translation.at(op); // TODO throw custom exception
+}
+
+void BinaryExpressionParser::read_operator(const Token& token)
+{
+    assert(token.type == TokenType::OPERATOR);
+
+    auto op = translate_operator(token.value);
+
+    if (op == Operator::OPEN_PARENTHESIS)
     {
-    case '<':
-    case '>':
-        expected = '=';
-        break;
+        operators.push(op);
+    }
+    else if (op == Operator::CLOSE_PARENTHESIS)
+    {
+        while (!operators.empty() && operators.top() != Operator::OPEN_PARENTHESIS)
+        {
+            make_binary_expression();
+        }
+        operators.pop();
+    }
+    else
+    {
+        int op_precendence = precedence(op);
+        while ((!operators.empty()) && (op_precendence <= precedence(operators.top())))
+        {
+            make_binary_expression();
+        }
+        operators.push(op);
+    }
+}
+
+void BinaryExpressionParser::read_identifier(const Token& token)
+{
+    auto it = variables.find(token.value);
+
+    if (it == variables.end())
+    {
+        throw std::runtime_error("undefined identifier " + token.value);
     }
 
-    std::string str(1, peek());
-
-    if (expected > 0)
-    {
-        if (!move_next())
-            throw unexpected_eof();
-        if (peek() != expected && is_operator_beginning())
-            throw unexpected_character();
-        else if (peek() == expected)
-            str += peek();
-        else
-            back();
-    }
-
-    if (!move_next())
-        throw unexpected_eof();
-
-    if (is_operator_beginning())
-        throw unexpected_character();
-
-    auto it = translation.find(str);
-    if (it == translation.end())
-        throw unexpected_character();
-
-    Operator op = it->second;
-    back();
-
-    int op_precendence = precedence(op);
-
-    while ((!operators.empty()) && (op_precendence <= precedence(operators.top())))
-    {
-        make_binary_expression();
-    }
-
-    operators.push(op);
+    operands.push(std::make_shared<VariableOperand>(token.value, it->second));
 }
 
 void BinaryExpressionParser::make_binary_expression()
@@ -213,24 +107,22 @@ void BinaryExpressionParser::make_binary_expression()
 
 std::shared_ptr<BinaryExpression> BinaryExpressionParser::parse()
 {
-    reset();
-
-    while (move_next())
+    for (const auto &token : tokenizer.get_tokens())
     {
-        if (isspace(peek())) continue;
-
-        if (isalpha(peek())) { read_identifier(); }
-        else if (isdigit(peek())) { read_number(); }
-        else if (is_operator_beginning()) { read_operator(); }
-        else if (peek() == '"') { read_string(); }
-        else if (peek() == '(') operators.push(Operator::OPEN_PARENTHESIS);
-        else if (peek() == ')')
+        switch (token.type)
         {
-            while (!operators.empty() && operators.top() != Operator::OPEN_PARENTHESIS)
-            {
-                make_binary_expression();
-            }
-            operators.pop();
+        case TokenType::IDENTIFIER:
+            read_identifier(token);
+            break;
+        case TokenType::INTEGER:
+            operands.push(std::make_shared<ValueOperand>(std::stoi(token.value)));
+            break;
+        case TokenType::STRING:
+            operands.push(std::make_shared<ValueOperand>(token.value));
+            break;
+        case TokenType::OPERATOR:
+            read_operator(token);
+            break;
         }
     }
 
@@ -241,21 +133,10 @@ std::shared_ptr<BinaryExpression> BinaryExpressionParser::parse()
 
     if (operands.size()  != 1)
     {
-        throw std::runtime_error("somethings wrong");
+        throw std::runtime_error("something's wrong");
     }
 
     return std::dynamic_pointer_cast<BinaryExpression>(operands.top());
-}
-
-std::exception BinaryExpressionParser::unexpected_eof()
-{
-    return std::runtime_error("Unexpected EoF!");
-}
-
-
-std::exception BinaryExpressionParser::unexpected_character()
-{
-    return std::runtime_error(std::string("Unexpected character '") + peek() + "' on position " + std::to_string(pos));
 }
 
 }

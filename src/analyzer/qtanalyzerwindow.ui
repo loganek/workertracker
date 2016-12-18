@@ -272,6 +272,9 @@
    <property name="text">
     <string>Day of Week...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
   </action>
  </widget>
  <resources/>

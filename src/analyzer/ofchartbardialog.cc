@@ -40,6 +40,12 @@ OfChartBarDialog::OfChartBarDialog(const WT::WeekdayGroupPolicy::container_t &co
     connect(ui->totalRadioButton, &QRadioButton::toggled, this, [this] (bool) {
         set_series(ui->totalRadioButton->isChecked() ? total_series : average_series);
     });
+
+    connect(ui->viewDetailsCheckBox, &QCheckBox::toggled, this, [this] (bool checked) {
+        ui->chartInfoTree->setVisible(checked);
+    });
+
+    ui->viewDetailsCheckBox->setChecked(false);
 }
 
 void OfChartBarDialog::set_series(QBarSeries* series)

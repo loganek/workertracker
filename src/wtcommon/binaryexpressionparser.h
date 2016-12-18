@@ -25,9 +25,11 @@ class BinaryExpressionParser
     std::stack<operand_ptr_t> operands;
 
     Tokenizer tokenizer;
+    std::vector<Token>::iterator current_token;
 
-    void read_operator(const Token& token);
-    void read_identifier(const Token& token);
+    void read_operator();
+    void read_identifier();
+    void read_string(const std::vector<Token>::iterator& last);
 
     void make_binary_expression();
 

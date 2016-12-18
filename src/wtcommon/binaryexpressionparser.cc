@@ -57,11 +57,11 @@ static Operator translate_operator(const std::string &op)
     return translation.at(op); // TODO throw custom exception
 }
 
-void BinaryExpressionParser::read_operator(const Token& token)
+void BinaryExpressionParser::read_operator()
 {
-    assert(token.type == TokenType::OPERATOR);
+    assert(current_token->type == TokenType::OPERATOR);
 
-    auto op = translate_operator(token.value);
+    auto op = translate_operator(current_token->value);
 
     if (op == Operator::OPEN_PARENTHESIS)
     {
@@ -86,16 +86,34 @@ void BinaryExpressionParser::read_operator(const Token& token)
     }
 }
 
-void BinaryExpressionParser::read_identifier(const Token& token)
+void BinaryExpressionParser::read_identifier()
 {
-    auto it = variables.find(token.value);
+    auto it = variables.find(current_token->value);
 
     if (it == variables.end())
     {
-        throw std::runtime_error("undefined identifier " + token.value);
+        throw std::runtime_error("undefined identifier " + current_token->value);
     }
 
-    operands.push(std::make_shared<VariableOperand>(token.value, it->second));
+    operands.push(std::make_shared<VariableOperand>(current_token->value, it->second));
+}
+
+void BinaryExpressionParser::read_string(const std::vector<Token>::iterator& last)
+{
+    std::shared_ptr<ValueOperand> operand;
+    auto next_it = std::next(current_token);
+
+    if (next_it != last && next_it->type == TokenType::IDENTIFIER && next_it->value == "d")
+    {
+        operand = get_datetime_from_string(current_token->value);
+        current_token = next_it;
+    }
+    else
+    {
+        operand = std::make_shared<ValueOperand>(current_token->value);
+    }
+
+    operands.push(operand);
 }
 
 void BinaryExpressionParser::make_binary_expression()
@@ -107,21 +125,22 @@ void BinaryExpressionParser::make_binary_expression()
 
 std::shared_ptr<BinaryExpression> BinaryExpressionParser::parse()
 {
-    for (const auto &token : tokenizer.get_tokens())
+    auto tokens = tokenizer.get_tokens();
+    for (current_token = tokens.begin(); current_token != tokens.end(); ++current_token)
     {
-        switch (token.type)
+        switch (current_token->type)
         {
         case TokenType::IDENTIFIER:
-            read_identifier(token);
+            read_identifier();
             break;
         case TokenType::INTEGER:
-            operands.push(std::make_shared<ValueOperand>(std::stoi(token.value)));
+            operands.push(std::make_shared<ValueOperand>(std::stoi(current_token->value)));
             break;
         case TokenType::STRING:
-            operands.push(std::make_shared<ValueOperand>(token.value));
+            read_string(tokens.end());
             break;
         case TokenType::OPERATOR:
-            read_operator(token);
+            read_operator();
             break;
         }
     }

@@ -6,6 +6,8 @@
  * this stuff is worth it, you can buy me a beer in return.       Marcin Kolny
  * ----------------------------------------------------------------------------
  */
+#include "qtanalyzerwindow.h"
+#include "ofchartbardialog.h"
 #include "analyzercontroller.h"
 
 #include "wtcommon/sqlitedataaccess.h"
@@ -13,8 +15,6 @@
 #include "wtcommon/configuration.h"
 #include "wtcommon/datetimeutils.h"
 #include "wtcommon/binaryexpressionparser.h"
-
-#include "qtanalyzerwindow.h"
 
 #include <boost/date_time.hpp>
 
@@ -172,7 +172,10 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
     main_window->update_total_time(proxy_model.get_total_time());
 }
 
-WT::DataContainer AnalyzerController::get_container_v2()
+void AnalyzerController::open_of_chart_dialog()
 {
-    return data_access->get_entries(build_expression_from_range());
+    // TODO: cache entries
+    auto dialog = new OfChartBarDialog(data_access->get_entries(build_expression_from_range()).get_grouped<WT::WeekdayGroupPolicy>(filter_pattern), dynamic_cast<QMainWindow*>(main_window));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
 }

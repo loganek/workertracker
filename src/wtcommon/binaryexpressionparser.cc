@@ -54,7 +54,12 @@ static Operator translate_operator(const std::string &op)
         {")", Operator::CLOSE_PARENTHESIS}
     };
 
-    return translation.at(op); // TODO throw custom exception
+    auto it = translation.find(op);
+    if (it == translation.end())
+    {
+        throw std::runtime_error("unknown operator: " + op);
+    }
+    return it->second;
 }
 
 void BinaryExpressionParser::read_operator()

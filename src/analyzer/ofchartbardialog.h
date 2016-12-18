@@ -38,7 +38,7 @@ class OfChartBarDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OfChartBarDialog(const WT::DataContainer &container, QWidget *parent = 0);
+    explicit OfChartBarDialog(const WT::WeekdayGroupPolicy::container_t &container, QWidget *parent = 0);
     ~OfChartBarDialog();
 
 private:

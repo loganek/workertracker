@@ -11,8 +11,6 @@
 #include "ui_aboutdialog.h"
 #include "analyzercontroller.h"
 #include "graphdialog.h"
-#include "ofchartbardialog.h"
-
 #include "wtcommon/datetimeutils.h"
 
 #include <QErrorMessage>
@@ -84,9 +82,7 @@ void QtAnalyzerWindow::connect_signals()
     });
 
     connect(ui->dayOfWeekAction, &QAction::triggered, this, [this] (bool) {
-        auto dialog = new OfChartBarDialog(controller->get_container_v2(), this); // TODO move to controller
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
+        controller->open_of_chart_dialog();
     });
 }
 

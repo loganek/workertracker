@@ -90,7 +90,7 @@ public:
     }
 
     template<typename GroupPolicy>
-    typename GroupPolicy::container_t get_grouped(boost::optional<const std::regex&> quick_filter = boost::none) const
+    typename GroupPolicy::container_t get_grouped(const boost::optional<std::regex>& quick_filter = boost::none) const
     {
         GroupPolicy policy;
 

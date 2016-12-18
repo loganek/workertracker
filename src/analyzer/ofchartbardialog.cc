@@ -20,7 +20,7 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-OfChartBarDialog::OfChartBarDialog(const WT::DataContainer &container, QWidget *parent) :
+OfChartBarDialog::OfChartBarDialog(const WT::WeekdayGroupPolicy::container_t &container, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OfChartBarDialog)
 {
@@ -28,9 +28,8 @@ OfChartBarDialog::OfChartBarDialog(const WT::DataContainer &container, QWidget *
 
     weekdays << tr("Sun") << tr("Mon") << tr("Tue") << tr("Wed") << tr("Thu") << tr("Fri") << tr("Sat");
 
-    auto data = container.get_grouped<WT::WeekdayGroupPolicy>();
-    create_bar_series(data);
-    create_info_tree(data);
+    create_bar_series(container);
+    create_info_tree(container);
 
     create_chart();
 

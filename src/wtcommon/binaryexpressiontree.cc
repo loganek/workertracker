@@ -118,9 +118,9 @@ void OperatorFunctions<std::tm>::init_operators()
 {
     DEFINE_OPERATOR(Operator::EQ, ==)
     DEFINE_OPERATOR(Operator::GT, >)
-    DEFINE_OPERATOR(Operator::GT, >=)
+    DEFINE_OPERATOR(Operator::GE, >=)
     DEFINE_OPERATOR(Operator::LT, <)
-    DEFINE_OPERATOR(Operator::LT, <=)
+    DEFINE_OPERATOR(Operator::LE, <=)
     DEFINE_OPERATOR(Operator::NEQ, !=)
 }
 

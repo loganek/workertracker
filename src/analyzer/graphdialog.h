@@ -24,7 +24,7 @@ class GraphDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit GraphDialog(const QTFilterProxyModel *model, QWidget *parent = 0);
+    explicit GraphDialog(const WT::DataContainer& container, QWidget *parent = 0);
 
     ~GraphDialog();
 private:

@@ -7,9 +7,8 @@
  * ----------------------------------------------------------------------------
  */
 #include "drilldownchart.h"
-#include "drilldownslice.h"
-#include "qtfilterproxymodel.h"
 #include "smartpieseries.h"
+#include "drilldownslice.h"
 
 #include "wtcommon/datetimeutils.h"
 
@@ -17,12 +16,21 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const QTFilterProxyModel *model, QGraphicsItem *parent, Qt::WindowFlags wFlags)
+DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const WT::DataContainer& container, QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QChart(QChart::ChartTypeCartesian, parent, wFlags),
-      model(model),
+      model(container.get_grouped<WT::ProcNameGroupPolicy>()),
       m_currentSeries(0),
       policy(policy)
 {
+    total_time = container.get_total_duration();
+    for (const auto& proc : model)
+    {
+        for (const auto& desc : proc.second)
+        {
+            proc_duration[proc.first] += desc.second;
+        }
+    }
+
     QSmartPieSeries *series = get_series();
     change_series(series);
 
@@ -46,48 +54,42 @@ void DrilldownChart::set_policy(const std::shared_ptr<PieSeriesPolicy>& policy)
     change_series(get_series());
 }
 
-QSmartPieSeries* DrilldownChart::get_series(const QModelIndex &parent_index)
+QSmartPieSeries* DrilldownChart::get_series(const std::string &proc_name)
 {
-    auto val = model->data(model->index(parent_index.row(), 1)).toString();
+    qlonglong duration = proc_name.empty() ? total_time : proc_duration[proc_name];
+    QVariant variant; variant.setValue(duration);
 
-    qlonglong total_count = parent_index.isValid() ? model->data(model->index(parent_index.row(), 2)).toLongLong() : model->get_total_time().count();
-    QVariant variant; variant.setValue(total_count);
+    std::unordered_map<std::string, std::time_t> the_model = proc_name.empty() ? proc_duration : model.at(proc_name);
 
     auto series = new QSmartPieSeries(policy->make_new(variant));
 
-    series->setName(val);
+    series->setName(QString::fromStdString(proc_name));
 
     std::vector<DrilldownSlice*> slices;
 
-    for (int row = 0; row < model->rowCount(parent_index); row++)
+    for (const auto &value : the_model)
     {
-        qlonglong value = model->data(model->index(row, 2, parent_index)).toLongLong();
-        if (value == 0)
+        if (value.second == 0)
         {
             continue;
         }
 
         if (!is_full)
         {
-            slices.push_back(new DrilldownSlice(value, model->data(model->index(row, 1, parent_index)).toString(), parent_index.isValid() ? -1 : row));
+            slices.push_back(new DrilldownSlice(value.second, value.first, proc_name.empty()));
             continue;
         }
-        auto idx = model->index(row, 0);
-        for (int child_row = 0; child_row < model->rowCount(idx); child_row++)
+        for (const auto& detail_value: model.at(value.first))
         {
-            value = model->data(model->index(child_row, 2, idx)).toLongLong();
-            if (value == 0)
+            if (detail_value.second == 0)
             {
                 continue;
             }
-            slices.push_back(new DrilldownSlice(value, model->data(model->index(child_row, 1, idx)).toString(), -1));
+            slices.push_back(new DrilldownSlice(detail_value.second, detail_value.first, false));
         }
     }
 
-    if (is_full)
-    {
-        std::sort(slices.begin(), slices.end(), [](DrilldownSlice* left, DrilldownSlice* right) { return left->value() > right->value(); });
-    }
+    std::sort(slices.begin(), slices.end(), [](DrilldownSlice* left, DrilldownSlice* right) { return left->value() > right->value(); });
 
     for (auto slice : slices)
     {
@@ -133,8 +135,7 @@ void DrilldownChart::handleSliceClicked(QPieSlice *slice)
         return;
 
     DrilldownSlice *drilldownSlice = static_cast<DrilldownSlice *>(slice);
-    auto index = drilldownSlice->get_row() == -1 ? QModelIndex() : model->index(drilldownSlice->get_row(), 0);
-    change_series(get_series(index));
+    change_series(get_series(drilldownSlice->get_name()));
 }
 
 #include "moc_drilldownchart.cpp"

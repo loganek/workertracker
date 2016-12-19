@@ -42,16 +42,16 @@ class DrilldownSlice : public QPieSlice
     Q_OBJECT
 
 public:
-    DrilldownSlice(qreal value, QString prefix, int row);
-    int get_row() const { return row; }
+    DrilldownSlice(qreal value, const std::string& prefix, bool allow_drilldown);
+    std::string get_name() const { return allow_drilldown ? m_prefix : ""; }
 
 public Q_SLOTS:
     void updateLabel();
     void showHighlight(bool show);
 
 private:
-    QString m_prefix;
-    int row;
+    std::string m_prefix;
+    bool allow_drilldown;
 };
 
 #endif // DRILLDOWNSLICE_H

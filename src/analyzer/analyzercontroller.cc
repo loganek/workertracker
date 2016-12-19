@@ -8,6 +8,7 @@
  */
 #include "qtanalyzerwindow.h"
 #include "ofchartbardialog.h"
+#include "graphdialog.h"
 #include "analyzercontroller.h"
 
 #include "wtcommon/sqlitedataaccess.h"
@@ -176,6 +177,13 @@ void AnalyzerController::open_of_chart_dialog()
 {
     // TODO: cache entries
     auto dialog = new OfChartBarDialog(data_access->get_entries(build_expression_from_range()).get_grouped<WT::WeekdayGroupPolicy>(filter_pattern), dynamic_cast<QMainWindow*>(main_window));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+}
+
+void AnalyzerController::open_drilldown_pie_chart()
+{
+    auto dialog = new GraphDialog(data_access->get_entries(build_expression_from_range()), dynamic_cast<QMainWindow*>(main_window));
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
 }

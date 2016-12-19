@@ -7,6 +7,7 @@
  * ----------------------------------------------------------------------------
  */
 #include "graphdialog.h"
+#include "smartpieseries.h"
 #include "ui_graphdialog.h"
 
 #include "drilldownslice.h"
@@ -14,13 +15,13 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-GraphDialog::GraphDialog(const QTFilterProxyModel *model, QWidget *parent) :
+GraphDialog::GraphDialog(const WT::DataContainer& container, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::GraphDialog)
 {
     ui->setupUi(this);
 
-    chart = new DrilldownChart(update_policy(), model);
+    chart = new DrilldownChart(update_policy(), container);
     chart->legend()->setVisible(true);
     chart->legend()->setAlignment(Qt::AlignRight);
     chart->setAnimationOptions(QChart::AllAnimations);

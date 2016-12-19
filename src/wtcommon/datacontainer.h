@@ -79,6 +79,7 @@ struct ProcNameGroupPolicy
 class DataContainer
 {
     std::vector<DataEntry> entries;
+    std::time_t total_duration = 0;
 
 public:
     virtual ~DataContainer() {}
@@ -87,7 +88,10 @@ public:
     void emplace_back(Args&&... args)
     {
         entries.emplace_back(std::forward<Args>(args)...);
+        total_duration += entries.back().get_duration();
     }
+
+    std::time_t get_total_duration() const { return total_duration; }
 
     template<typename GroupPolicy>
     typename GroupPolicy::container_t get_grouped(const boost::optional<std::regex>& quick_filter = boost::none) const

@@ -1,4 +1,5 @@
 #include "smartpieseries.h"
+#include "drilldownslice.h"
 
 QSmartPieSeries::QSmartPieSeries(std::shared_ptr<PieSeriesPolicy> policy, QObject *parent)
     : QPieSeries(parent),
@@ -16,7 +17,7 @@ void QSmartPieSeries::smart_add(QPieSlice *slice)
     {
         if (!others_slice)
         {
-            others_slice = new DrilldownSlice(0, tr("Others"), -1);
+            others_slice = new DrilldownSlice(0, tr("Others").toStdString(), false);
         }
         others_slice->setValue(others_slice->value() + slice->value());
         delete slice;

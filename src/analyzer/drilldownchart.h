@@ -9,8 +9,9 @@
 #ifndef DRILLDOWNCHART_H
 #define DRILLDOWNCHART_H
 
+#include "wtcommon/datacontainer.h"
+
 #include <QtCharts/QChart>
-#include <QModelIndex>
 
 #include <memory>
 
@@ -18,9 +19,7 @@ QT_CHARTS_BEGIN_NAMESPACE
 class QPieSlice;
 QT_CHARTS_END_NAMESPACE
 
-#include "smartpieseries.h"
-
-class QTFilterProxyModel;
+class PieSeriesPolicy;
 class QSmartPieSeries;
 
 QT_CHARTS_USE_NAMESPACE
@@ -28,17 +27,20 @@ QT_CHARTS_USE_NAMESPACE
 class DrilldownChart : public QChart
 {
     Q_OBJECT
-    const QTFilterProxyModel *model;
+    WT::ProcNameGroupPolicy::container_t model;
 
     bool is_full = false;
     QSmartPieSeries *m_currentSeries = nullptr;
     std::shared_ptr<PieSeriesPolicy> policy;
 
-    QSmartPieSeries* get_series(const QModelIndex &parent_index = QModelIndex());
+    QSmartPieSeries* get_series(const std::string &proc_name = std::string());
     void remove_current_series();
 
+    std::time_t total_time;
+    std::unordered_map<std::string, std::time_t> proc_duration;
+
 public:
-    explicit DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const QTFilterProxyModel *model, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const WT::DataContainer& container, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
     ~DrilldownChart();
     void change_series(QSmartPieSeries *series);
     void set_model_type(bool is_full);

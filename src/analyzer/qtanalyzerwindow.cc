@@ -10,7 +10,6 @@
 #include "ui_qtanalyzerwindow.h"
 #include "ui_aboutdialog.h"
 #include "analyzercontroller.h"
-#include "graphdialog.h"
 #include "wtcommon/datetimeutils.h"
 
 #include <QErrorMessage>
@@ -69,9 +68,7 @@ void QtAnalyzerWindow::connect_signals()
     });
 
     connect(ui->visualizeCurrentViewAction, &QAction::triggered, this, [this] (bool) {
-        auto dialog = new GraphDialog(&controller->get_proxy_model(), this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
+        controller->open_drilldown_pie_chart();
     });
     connect(ui->aboutAction, &QAction::triggered, this, [this] (bool) {
         auto dialog = new QDialog(this);

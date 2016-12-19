@@ -33,9 +33,9 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-DrilldownSlice::DrilldownSlice(qreal value, QString prefix, int row)
+DrilldownSlice::DrilldownSlice(qreal value, const std::string& prefix, bool allow_drilldown)
     : m_prefix(prefix),
-      row(row)
+      allow_drilldown(allow_drilldown)
 {
     setValue(value);
     updateLabel();
@@ -48,7 +48,7 @@ void DrilldownSlice::updateLabel()
 {
     QString label = QString::number(this->percentage() * 100, 'f', 1);
     label += "% ";
-    label += m_prefix;
+    label += QString::fromStdString(m_prefix);
     label += " " + QString::fromStdString(WT::time_to_display(std::chrono::seconds(qlonglong(this->value()))));
     setLabel(label);
 }

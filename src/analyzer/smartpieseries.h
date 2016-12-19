@@ -1,12 +1,9 @@
 #ifndef SMARTPIESERIES_H
 #define SMARTPIESERIES_H
 
-#include "drilldownslice.h"
-
 #include <QPieSeries>
 
 #include <memory>
-#include <map>
 
 QT_CHARTS_USE_NAMESPACE
 

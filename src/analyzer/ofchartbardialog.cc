@@ -101,7 +101,7 @@ void OfChartBarDialog::create_info_tree(const WT::WeekdayGroupPolicy::container_
         new QTreeWidgetItem(parent_item, {tr("Count: "), QString::number(container[i].second)});
     }
 
-    ui->chartInfoTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->chartInfoTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 }
 
 void OfChartBarDialog::create_chart()

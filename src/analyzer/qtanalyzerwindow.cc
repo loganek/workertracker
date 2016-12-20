@@ -79,7 +79,10 @@ void QtAnalyzerWindow::connect_signals()
     });
 
     connect(ui->dayOfWeekAction, &QAction::triggered, this, [this] (bool) {
-        controller->open_of_chart_dialog();
+        controller->open_weekday_of_chart_dialog();
+    });
+    connect(ui->hourOfDayAction, &QAction::triggered, this, [this] (bool) {
+        controller->open_hour_of_chart_dialog();
     });
 }
 

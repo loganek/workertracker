@@ -20,16 +20,45 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-OfChartBarDialog::OfChartBarDialog(const WT::WeekdayGroupPolicy::container_t &container, QWidget *parent) :
+template<>
+QStringList OfGroupPolicyWrapper<WT::WeekdayGroupPolicy>::get_x_description() const
+{
+    return {QObject::tr("Sun"), QObject::tr("Mon"), QObject::tr("Tue"), QObject::tr("Wed"), QObject::tr("Thu"), QObject::tr("Fri"), QObject::tr("Sat")};
+}
+
+template<>
+QStringList OfGroupPolicyWrapper<WT::HourGroupPolicy>::get_x_description() const
+{
+    QStringList ret;
+    for (int i = 0; i < 24; i++)
+    {
+        ret.push_back(QString::number(i));
+    }
+    return ret;
+}
+
+template<>
+QString OfGroupPolicyWrapper<WT::WeekdayGroupPolicy>::get_title() const
+{
+    return QObject::tr("Day of Week");
+}
+
+template<>
+QString OfGroupPolicyWrapper<WT::HourGroupPolicy>::get_title() const
+{
+    return QObject::tr("Hour of Day");
+}
+
+OfChartBarDialog::OfChartBarDialog(const OfGroupPolicyWrapperBase &policy_wrapper, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OfChartBarDialog)
 {
     ui->setupUi(this);
 
-    weekdays << tr("Sun") << tr("Mon") << tr("Tue") << tr("Wed") << tr("Thu") << tr("Fri") << tr("Sat");
-
-    create_bar_series(container);
-    create_info_tree(container);
+    setWindowTitle(policy_wrapper.get_title());
+    x_description = policy_wrapper.get_x_description();
+    create_bar_series(policy_wrapper);
+    create_info_tree(policy_wrapper);
 
     create_chart();
 
@@ -60,7 +89,7 @@ void OfChartBarDialog::set_series(QBarSeries* series)
     chart->addSeries(current_series);
 }
 
-void OfChartBarDialog::create_bar_series(const WT::WeekdayGroupPolicy::container_t &container)
+void OfChartBarDialog::create_bar_series(const OfGroupPolicyWrapperBase &policy_wrapper)
 {
     constexpr double SecondsInHour = 60 * 60;
 
@@ -69,13 +98,13 @@ void OfChartBarDialog::create_bar_series(const WT::WeekdayGroupPolicy::container
 
     double max_total = 0.0, max_average = 0.0;
 
-    for (std::size_t i = 0; i < container.size(); i++)
+    for (std::size_t i = 0; i < policy_wrapper.get_size(); i++)
     {
-        auto hours = container[i].first / SecondsInHour;
+        auto hours = policy_wrapper[i].first / SecondsInHour;
         max_total = std::max(hours, max_total);
         barset_total->append(hours);
 
-        auto average = (container[i].second ? container[i].first / (double)container[i].second : 0) / SecondsInHour;
+        auto average = (policy_wrapper[i].second ? policy_wrapper[i].first / (double)policy_wrapper[i].second : 0) / SecondsInHour;
         max_average = std::max(average, max_average);
         barset_average->append(average);
     }
@@ -89,16 +118,16 @@ void OfChartBarDialog::create_bar_series(const WT::WeekdayGroupPolicy::container
     max_of_series[average_series] = max_average;
 }
 
-void OfChartBarDialog::create_info_tree(const WT::WeekdayGroupPolicy::container_t &container)
+void OfChartBarDialog::create_info_tree(const OfGroupPolicyWrapperBase &policy_wrapper)
 {
-    for (std::size_t i = 0; i < container.size(); i++)
+    for (std::size_t i = 0; i < policy_wrapper.get_size(); i++)
     {
-        auto average = container[i].second ? container[i].first / (double)container[i].second : 0;
+        auto average = policy_wrapper[i].second ? policy_wrapper[i].first / (double)policy_wrapper[i].second : 0;
 
-        auto parent_item = new QTreeWidgetItem(ui->chartInfoTree, {weekdays[i]});
-        new QTreeWidgetItem(parent_item, {tr("Total: "), QString::fromStdString(WT::time_to_display(std::chrono::seconds(container[i].first)))});
+        auto parent_item = new QTreeWidgetItem(ui->chartInfoTree, {x_description[i]});
+        new QTreeWidgetItem(parent_item, {tr("Total: "), QString::fromStdString(WT::time_to_display(std::chrono::seconds(policy_wrapper[i].first)))});
         new QTreeWidgetItem(parent_item, {tr("Average: "), QString::fromStdString(WT::time_to_display(std::chrono::seconds(int(average))))});
-        new QTreeWidgetItem(parent_item, {tr("Count: "), QString::number(container[i].second)});
+        new QTreeWidgetItem(parent_item, {tr("Count: "), QString::number(policy_wrapper[i].second)});
     }
 
     ui->chartInfoTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
@@ -110,7 +139,7 @@ void OfChartBarDialog::create_chart()
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
     QBarCategoryAxis *axis = new QBarCategoryAxis();
-    axis->append(weekdays);
+    axis->append(x_description);
     chart->addAxis(axis, Qt::AlignBottom);
 
     time_axis = new QValueAxis();

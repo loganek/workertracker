@@ -224,6 +224,7 @@
     </property>
     <addaction name="visualizeCurrentViewAction"/>
     <addaction name="dayOfWeekAction"/>
+    <addaction name="hourOfDayAction"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -274,6 +275,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="hourOfDayAction">
+   <property name="text">
+    <string>Hour of Day...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
  </widget>

@@ -63,7 +63,8 @@ public:
     void set_range(const DataRange& data_range);
     void apply_filter(const std::string &search_text, bool case_sensitive);
 
-    void open_of_chart_dialog();
+    void open_weekday_of_chart_dialog();
+    void open_hour_of_chart_dialog();
     void open_drilldown_pie_chart();
 };
 

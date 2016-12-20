@@ -173,10 +173,17 @@ void AnalyzerController::load_model(const WT::DataContainer &container)
     main_window->update_total_time(proxy_model.get_total_time());
 }
 
-void AnalyzerController::open_of_chart_dialog()
+void AnalyzerController::open_weekday_of_chart_dialog()
 {
     // TODO: cache entries
-    auto dialog = new OfChartBarDialog(data_access->get_entries(build_expression_from_range()).get_grouped<WT::WeekdayGroupPolicy>(filter_pattern), dynamic_cast<QMainWindow*>(main_window));
+    auto dialog = new OfChartBarDialog(OfGroupPolicyWrapper<WT::WeekdayGroupPolicy>(data_access->get_entries(build_expression_from_range()).get_grouped<WT::WeekdayGroupPolicy>(filter_pattern)), dynamic_cast<QMainWindow*>(main_window));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+}
+
+void AnalyzerController::open_hour_of_chart_dialog()
+{
+    auto dialog = new OfChartBarDialog(OfGroupPolicyWrapper<WT::HourGroupPolicy>(data_access->get_entries(build_expression_from_range()).get_grouped<WT::HourGroupPolicy>(filter_pattern)), dynamic_cast<QMainWindow*>(main_window));
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
 }

@@ -16,18 +16,20 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const WT::DataContainer& container, QGraphicsItem *parent, Qt::WindowFlags wFlags)
+DrilldownChart::DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const WT::ProcNameGroupPolicy::container_t& container, QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QChart(QChart::ChartTypeCartesian, parent, wFlags),
-      model(container.get_grouped<WT::ProcNameGroupPolicy>()),
+      model(container),
       m_currentSeries(0),
       policy(policy)
 {
-    total_time = container.get_total_duration();
+    total_time = 0;
+
     for (const auto& proc : model)
     {
         for (const auto& desc : proc.second)
         {
             proc_duration[proc.first] += desc.second;
+            total_time += desc.second;
         }
     }
 

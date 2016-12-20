@@ -40,7 +40,7 @@ class DrilldownChart : public QChart
     std::unordered_map<std::string, std::time_t> proc_duration;
 
 public:
-    DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const WT::DataContainer& container, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    DrilldownChart(const std::shared_ptr<PieSeriesPolicy> &policy, const WT::ProcNameGroupPolicy::container_t& container, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
     ~DrilldownChart();
     void change_series(QSmartPieSeries *series);
     void set_model_type(bool is_full);

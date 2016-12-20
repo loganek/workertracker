@@ -190,7 +190,7 @@ void AnalyzerController::open_hour_of_chart_dialog()
 
 void AnalyzerController::open_drilldown_pie_chart()
 {
-    auto dialog = new GraphDialog(data_access->get_entries(build_expression_from_range()), dynamic_cast<QMainWindow*>(main_window));
+    auto dialog = new GraphDialog(data_access->get_entries(build_expression_from_range()).get_grouped<WT::ProcNameGroupPolicy>(filter_pattern), dynamic_cast<QMainWindow*>(main_window));
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
 }

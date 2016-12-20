@@ -15,7 +15,7 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-GraphDialog::GraphDialog(const WT::DataContainer& container, QWidget *parent) :
+GraphDialog::GraphDialog(const WT::ProcNameGroupPolicy::container_t& container, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::GraphDialog)
 {

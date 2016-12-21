@@ -7,6 +7,7 @@
  * ----------------------------------------------------------------------------
  */
 #include "wtcommon/itracksuspendable.h"
+#include "wtcommon/idatamodifier.h"
 
 #include "wtcommon/logger.h"
 
@@ -51,7 +52,41 @@ public:
     }
 };
 
+class DummyModifierPlugin : public WT::IDataModifier
+{
+protected:
+    virtual ~DummyModifierPlugin() {}
+
+public:
+    virtual void WT_APICALL modify_data(
+            char /*in_out_app_name*/[WT_MAX_APP_NAME_LEN],
+            char /*in_out_window_title*/[WT_MAX_WIN_TITLE_LEN],
+            bool &force_break) override
+    {
+        force_break = false;
+    }
+
+    void WT_APICALL load_configuration(const char **[2], int ) override
+    {
+    }
+
+    int WT_APICALL get_rank() { return 999; }
+
+    const char* WT_APICALL get_name() override { return "dummymodifierplugin"; }
+
+    void WT_APICALL destroy() override
+    {
+        delete this;
+    }
+};
+
 extern "C" WT_PLUGIN_EXPORT WT::ITrackSuspendable* WT_APICALL create_suspendable()
 {
     return new DummyTrackerPlugin();
+}
+
+
+extern "C" WT_PLUGIN_EXPORT WT::IDataModifier* WT_APICALL create_data_modifier()
+{
+    return new DummyModifierPlugin();
 }

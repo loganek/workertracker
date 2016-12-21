@@ -13,6 +13,7 @@
 
 #include <boost/optional/optional.hpp>
 
+#include <array>
 #include <tuple>
 #include <vector>
 #include <unordered_set>

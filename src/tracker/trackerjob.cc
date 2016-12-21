@@ -17,7 +17,8 @@ namespace WT {
 
 TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
     : period(configuration->get_read_info_interval()),
-      suspendable(configuration)
+      suspendable(configuration),
+      modifier_container(configuration)
 {
     data_access = std::make_shared<SQLiteDataAccess>(SQLiteDataAccess::default_data_file(), configuration);
     data_access->open(false);
@@ -64,11 +65,14 @@ void TrackerJob::read_window_info()
             continue;
         }
 
+        // TODO it should take DataEntry instead
         if (suspendable.suspend_tracking(window_info))
         {
             WT_LOG_D << "Logging suspended";
             continue;
         }
+
+        modifier_container.update_data(entry);
 
         WT_LOG_D << "Saving entry: {" << entry.proc_name << ", " << entry.description << ", " << (entry.time_end - entry.time_start) << "}";
 

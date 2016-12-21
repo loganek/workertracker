@@ -20,7 +20,7 @@ template<typename PluginType>
 class PluginLoader
 {
     std::vector<std::shared_ptr<boost::dll::shared_library>> handlers;
-    std::vector<std::shared_ptr<PluginType>> suspendable;
+    std::vector<std::shared_ptr<PluginType>> plugins;
 
     void try_load_plugin(const std::string &path);
     void load_handlers(const std::string &plugin_dir_path);
@@ -29,7 +29,7 @@ public:
     PluginLoader(const std::vector<std::string> &plugin_dir_paths);
     virtual ~PluginLoader();
 
-    std::vector<std::shared_ptr<PluginType>> get_suspendable() const;
+    std::vector<std::shared_ptr<PluginType>> get_plugins() const;
 };
 
 }

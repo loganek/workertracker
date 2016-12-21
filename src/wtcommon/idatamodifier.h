@@ -29,10 +29,11 @@ class IDataModifier
 {
 public:
     virtual void WT_APICALL modify_data(
-            const char *app_name,
-            const char *window_title,
-            char out_app_name[WT_MAX_APP_NAME_LEN],
-            char out_window_title[WT_MAX_WIN_TITLE_LEN]) = 0;
+            char in_out_app_name[WT_MAX_APP_NAME_LEN],
+            char in_out_window_title[WT_MAX_WIN_TITLE_LEN],
+            bool& force_break) = 0;
+
+    virtual int WT_APICALL get_rank() = 0;
 
     virtual void WT_APICALL load_configuration(const char **config[2], int size) = 0;
 

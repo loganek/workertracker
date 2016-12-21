@@ -10,6 +10,7 @@
 
 #include "wtcommon/logger.h"
 #include "wtcommon/itracksuspendable.h"
+#include "wtcommon/idatamodifier.h"
 
 #include <boost/filesystem.hpp>
 
@@ -22,6 +23,12 @@ template<>
 const char* get_create_method_name<WT::ITrackSuspendable>()
 {
     return "create_suspendable";
+}
+
+template<>
+const char* get_create_method_name<WT::IDataModifier>()
+{
+    return "create_data_modifier";
 }
 
 template<typename T>
@@ -37,7 +44,7 @@ PluginLoader<T>::PluginLoader(const std::vector<std::string> &plugin_dir_paths)
 template<typename T>
 PluginLoader<T>::~PluginLoader()
 {
-    suspendable.clear();
+    plugins.clear();
     handlers.clear();
 }
 
@@ -61,9 +68,9 @@ void PluginLoader<T>::load_handlers(const std::string &plugin_dir_path)
 }
 
 template<typename T>
-std::vector<std::shared_ptr<T>> PluginLoader<T>::get_suspendable() const
+std::vector<std::shared_ptr<T>> PluginLoader<T>::get_plugins() const
 {
-    return suspendable;
+    return plugins;
 }
 
 template<typename T>
@@ -80,14 +87,14 @@ void PluginLoader<T>::try_load_plugin(const std::string &path)
         WT_LOG_D << "Trying to load plugin: " << pt;
         auto handle = std::make_shared<boost::dll::shared_library>(pt);
 
-        typedef T* (WT_APICALL suspendable_create_t)();
-        auto create = handle->get<suspendable_create_t>(get_create_method_name<T>());
+        typedef T* (WT_APICALL plugin_create_t)();
+        auto create = handle->get<plugin_create_t>(get_create_method_name<T>());
 
         handlers.push_back(handle);
         auto obj = create();
-        suspendable.push_back(std::shared_ptr<T>(obj, std::mem_fn(&T::destroy)));
+        plugins.push_back(std::shared_ptr<T>(obj, std::mem_fn(&T::destroy)));
 
-        WT_LOG_I << "Added pluign " << suspendable.back()->get_name();
+        WT_LOG_I << "Added pluign " << plugins.back()->get_name();
     }
     catch (const boost::system::system_error& err)
     {
@@ -96,5 +103,6 @@ void PluginLoader<T>::try_load_plugin(const std::string &path)
 }
 
 template class PluginLoader<WT::ITrackSuspendable>;
+template class PluginLoader<WT::IDataModifier>;
 
 }

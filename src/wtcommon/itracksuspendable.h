@@ -9,15 +9,8 @@
 #ifndef ITRACKSUSPENDABLE_H
 #define ITRACKSUSPENDABLE_H
 
-#include "wtcommon/registrable.h"
-
-#ifdef WIN32
-# define WT_PLUGIN_EXPORT __declspec(dllexport)
-# define WT_APICALL __cdecl
-#else
-# define WT_APICALL
-# define WT_PLUGIN_EXPORT // empty
-#endif
+#include "registrable.h"
+#include "plugindefs.h"
 
 namespace WT {
 
@@ -35,5 +28,6 @@ public:
 
 }
 
+extern "C" WT_PLUGIN_EXPORT WT::ITrackSuspendable* WT_APICALL create_suspendable();
 
 #endif // ITRACKSUSPENDABLE_H

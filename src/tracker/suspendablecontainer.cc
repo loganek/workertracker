@@ -15,49 +15,33 @@
 namespace WT {
 
 SuspendableContainer::SuspendableContainer(const std::shared_ptr<PluginsConfiguration> &configuration)
-    : loader(configuration->get_plugins_paths())
+    : PluginContainer(configuration)
 {
-    load_configuration_to_plugins(configuration);
-}
-
-bool SuspendableContainer::foreach_suspendable(std::function<bool(const std::shared_ptr<ITrackSuspendable>&)> func) const
-{
-    for (auto susp : loader.get_suspendable())
-    {
-        if (func(susp)) return true;
-    }
-
     for (auto susp : RegistrableCollection<ITrackSuspendable>::registry())
     {
-        if (func(susp.second)) return true;
+        load_configuration_to_plugin(susp.second, configuration);
     }
 
-    return false;
-}
-
-void SuspendableContainer::load_configuration_to_plugins(const std::shared_ptr<PluginsConfiguration> &configuration)
-{
-    foreach_suspendable([&configuration](const std::shared_ptr<ITrackSuspendable> &susp)
-    {
-        auto plugin_config = configuration->get_plugin_configuration(susp->get_name());
-
-        susp->load_configuration((const char***)plugin_config.first, plugin_config.second);
-        configuration->free_configuration(plugin_config);
-
-        return false;
-    });
 }
 
 bool SuspendableContainer::suspend_tracking(const WindowInfoProvider::Info &window_info) const
 {
     WT_LOG_D << "Checking if tracking should be suspended...";
 
-    if (foreach_suspendable([&window_info](const std::shared_ptr<ITrackSuspendable> &susp)
+    for (auto susp : RegistrableCollection<ITrackSuspendable>::registry())
     {
-        return susp->suspend_tracking(window_info.get_app_name().c_str(), window_info.get_window_title().c_str());
-    }))
+        if (susp.second->suspend_tracking(window_info.get_app_name().c_str(), window_info.get_window_title().c_str()))
+        {
+            return true;
+        }
+    }
+
+    for (auto susp : loader.get_plugins())
     {
-        return true;
+        if (susp->suspend_tracking(window_info.get_app_name().c_str(), window_info.get_window_title().c_str()))
+        {
+            return true;
+        }
     }
 
     WT_LOG_D << "Tracking NOT suspended";

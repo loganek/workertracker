@@ -6,10 +6,8 @@
  * this stuff is worth it, you can buy me a beer in return.       Marcin Kolny
  * ----------------------------------------------------------------------------
  */
-#ifndef SUSPENDABLELOADER_H
-#define SUSPENDABLELOADER_H
-
-#include "wtcommon/itracksuspendable.h"
+#ifndef PLUGINLOADER_H
+#define PLUGINLOADER_H
 
 #include <boost/dll/shared_library.hpp>
 
@@ -18,21 +16,22 @@
 
 namespace WT {
 
-class SuspendableLoader
+template<typename PluginType>
+class PluginLoader
 {
     std::vector<std::shared_ptr<boost::dll::shared_library>> handlers;
-    std::vector<std::shared_ptr<ITrackSuspendable>> suspendable;
+    std::vector<std::shared_ptr<PluginType>> suspendable;
 
     void try_load_plugin(const std::string &path);
     void load_handlers(const std::string &plugin_dir_path);
 
 public:
-    SuspendableLoader(const std::vector<std::string> &plugin_dir_paths);
-    virtual ~SuspendableLoader();
+    PluginLoader(const std::vector<std::string> &plugin_dir_paths);
+    virtual ~PluginLoader();
 
-    std::vector<std::shared_ptr<ITrackSuspendable>> get_suspendable() const;
+    std::vector<std::shared_ptr<PluginType>> get_suspendable() const;
 };
 
 }
 
-#endif // SUSPENDABLELOADER_H
+#endif // PLUGINLOADER_H

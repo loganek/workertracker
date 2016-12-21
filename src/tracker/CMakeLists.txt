@@ -22,7 +22,7 @@ add_executable(workertracker
     workertracker.cc
     trackerjob.cc
     suspendablecontainer.cc
-    suspendableloader.cc
+    pluginloader.cc
     windowinfoprovider.h
     backgroundrunner.h
     singleapplocker.h

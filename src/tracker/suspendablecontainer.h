@@ -9,9 +9,10 @@
 #ifndef SUSPENDABLECONTAINER_H
 #define SUSPENDABLECONTAINER_H
 
-#include "suspendableloader.h"
+#include "pluginloader.h"
 #include "windowinfoprovider.h"
 
+#include "wtcommon/itracksuspendable.h"
 #include "wtcommon/configuration.h"
 
 #include <functional>
@@ -21,7 +22,7 @@ namespace WT {
 
 class SuspendableContainer
 {
-    SuspendableLoader loader;
+    PluginLoader<WT::ITrackSuspendable> loader;
     std::vector<ITrackSuspendable*> suspendable;
 
     void load_configuration_to_plugins(const std::shared_ptr<PluginsConfiguration> &configuration);

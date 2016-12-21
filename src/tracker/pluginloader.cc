@@ -6,15 +6,26 @@
  * this stuff is worth it, you can buy me a beer in return.       Marcin Kolny
  * ----------------------------------------------------------------------------
  */
-#include "suspendableloader.h"
+#include "pluginloader.h"
 
 #include "wtcommon/logger.h"
+#include "wtcommon/itracksuspendable.h"
 
 #include <boost/filesystem.hpp>
 
 namespace WT {
 
-SuspendableLoader::SuspendableLoader(const std::vector<std::string> &plugin_dir_paths)
+template<typename T>
+static const char* get_create_method_name();
+
+template<>
+const char* get_create_method_name<WT::ITrackSuspendable>()
+{
+    return "create_suspendable";
+}
+
+template<typename T>
+PluginLoader<T>::PluginLoader(const std::vector<std::string> &plugin_dir_paths)
 {
     for (const auto &path : plugin_dir_paths)
     {
@@ -23,13 +34,15 @@ SuspendableLoader::SuspendableLoader(const std::vector<std::string> &plugin_dir_
     }
 }
 
-SuspendableLoader::~SuspendableLoader()
+template<typename T>
+PluginLoader<T>::~PluginLoader()
 {
     suspendable.clear();
     handlers.clear();
 }
 
-void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
+template<typename T>
+void PluginLoader<T>::load_handlers(const std::string &plugin_dir_path)
 {
     namespace fs = boost::filesystem;
     if (!fs::exists(plugin_dir_path) || !fs::is_directory(plugin_dir_path))
@@ -47,12 +60,14 @@ void SuspendableLoader::load_handlers(const std::string &plugin_dir_path)
     }
 }
 
-std::vector<std::shared_ptr<ITrackSuspendable>> SuspendableLoader::get_suspendable() const
+template<typename T>
+std::vector<std::shared_ptr<T>> PluginLoader<T>::get_suspendable() const
 {
     return suspendable;
 }
 
-void SuspendableLoader::try_load_plugin(const std::string &path)
+template<typename T>
+void PluginLoader<T>::try_load_plugin(const std::string &path)
 {
     boost::filesystem::path pt = path;
     if (!boost::filesystem::is_regular_file(pt) || pt.extension() != boost::dll::shared_library::suffix())
@@ -65,12 +80,12 @@ void SuspendableLoader::try_load_plugin(const std::string &path)
         WT_LOG_D << "Trying to load plugin: " << pt;
         auto handle = std::make_shared<boost::dll::shared_library>(pt);
 
-        typedef WT::ITrackSuspendable* (WT_APICALL suspendable_create_t)();
-        auto create = handle->get<suspendable_create_t>("create_suspendable");
+        typedef T* (WT_APICALL suspendable_create_t)();
+        auto create = handle->get<suspendable_create_t>(get_create_method_name<T>());
 
         handlers.push_back(handle);
         auto obj = create();
-        suspendable.push_back(std::shared_ptr<ITrackSuspendable>(obj, std::mem_fn(&WT::ITrackSuspendable::destroy)));
+        suspendable.push_back(std::shared_ptr<T>(obj, std::mem_fn(&T::destroy)));
 
         WT_LOG_I << "Added pluign " << suspendable.back()->get_name();
     }
@@ -79,5 +94,7 @@ void SuspendableLoader::try_load_plugin(const std::string &path)
         WT_LOG_W << "cannot load plugin " << pt << ": "<< err.what();
     }
 }
+
+template class PluginLoader<WT::ITrackSuspendable>;
 
 }

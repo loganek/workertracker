@@ -10,8 +10,8 @@
 #define SUSPENDABLECONTAINER_H
 
 #include "plugincontainer.h"
-#include "windowinfoprovider.h"
 
+#include "wtcommon/dataentry.h"
 #include "wtcommon/itracksuspendable.h"
 
 #include <functional>
@@ -24,7 +24,7 @@ class SuspendableContainer : public PluginContainer<ITrackSuspendable>
 public:
     SuspendableContainer(const std::shared_ptr<PluginsConfiguration> &configuration);
 
-    bool suspend_tracking(const WindowInfoProvider::Info &window_info) const;
+    bool suspend_tracking(const DataEntry &entry) const;
 };
 
 }

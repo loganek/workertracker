@@ -65,8 +65,7 @@ void TrackerJob::read_window_info()
             continue;
         }
 
-        // TODO it should take DataEntry instead
-        if (suspendable.suspend_tracking(window_info))
+        if (suspendable.suspend_tracking(entry))
         {
             WT_LOG_D << "Logging suspended";
             continue;

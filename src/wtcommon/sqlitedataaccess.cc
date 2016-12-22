@@ -189,6 +189,7 @@ void SQLiteDataAccess::backup_existing_db()
     boost::filesystem::rename(filename, filename + buf);
 }
 
+// TODO DataEntry::is_continuous
 static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)
 {
     return std::localtime(&after.time_start)->tm_hour == std::localtime(&before.time_start)->tm_hour

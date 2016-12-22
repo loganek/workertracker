@@ -81,9 +81,10 @@ void TrackerJob::read_window_info()
             persist_result.get();
         }
 
-        persist_result = std::future<void>(std::async([this, entry] {
+        // TODO threadpool
+        persist_result = std::async(std::launch::async, [this, entry] {
             data_access->save_entry(entry);
-        }));
+        });
     }
 }
 

@@ -90,6 +90,22 @@ void SQLiteDataAccess::prepare_statements()
     }
 }
 
+void SQLiteDataAccess::start_persist_worker(bool readonly)
+{
+    if (readonly)
+    {
+        WT_LOG_D << "Database opened in readonly mode, persist worker won't start.";
+        return;
+    }
+
+    is_running = true;
+    persist_worker_th = std::thread([this] {
+        WT_LOG_D << "Starting persist worker thread...";
+        this->persist_worker();
+        WT_LOG_D << "Finishing persist worker thread...";
+    });
+}
+
 void SQLiteDataAccess::open(bool readonly)
 {
     if (boost::filesystem::exists(filename))
@@ -102,6 +118,7 @@ void SQLiteDataAccess::open(bool readonly)
         else if (table_exists())
         {
             init_sqlite3();
+            start_persist_worker(readonly);
             return;
         }
 
@@ -118,12 +135,18 @@ void SQLiteDataAccess::open(bool readonly)
         create_database();
     }
     init_sqlite3();
+    start_persist_worker(readonly);
 }
 
 SQLiteDataAccess::~SQLiteDataAccess()
 {
     if (db)
     {
+        if (is_running)
+        {
+            is_running = false;
+            cv.notify_one();
+        }
         sqlite3_finalize(insert_stmt);
         sqlite3_finalize(update_stmt);
         sqlite3_close_v2(db);
@@ -199,7 +222,36 @@ static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)
 
 void SQLiteDataAccess::save_entry(const DataEntry &entry)
 {
-    persist_record(entry);
+    {
+        std::lock_guard<std::mutex> lck(mtx);
+        data_queue.push(entry);
+    }
+    cv.notify_one();
+}
+
+void SQLiteDataAccess::persist_worker()
+{
+    while (true)
+    {
+        DataEntry entry;
+        {
+            std::unique_lock<std::mutex> lck(mtx);
+            while (data_queue.empty() && is_running)
+            {
+                cv.wait(lck);
+            }
+
+            if (!is_running)
+            {
+                WT_LOG_D << "Finishing persist worker...";
+                return;
+            }
+            entry = data_queue.front();
+            data_queue.pop();
+        }
+        persist_record(entry);
+    }
+
 }
 
 static void execute_statement(bool binding_result, sqlite3_stmt *statement)

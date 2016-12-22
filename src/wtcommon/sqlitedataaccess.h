@@ -13,8 +13,11 @@
 
 #include "sqlite3/sqlite3.h"
 
+#include <thread>
+#include <queue>
 #include <functional>
 #include <vector>
+#include <condition_variable>
 
 namespace WT {
 
@@ -25,6 +28,12 @@ class SQLiteDataAccess : public DataAccess
     const std::string table_name = "WT_ENTRIES";
 
     DataEntry last_entry;
+
+    std::queue<DataEntry> data_queue;
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool is_running = false;
+    std::thread persist_worker_th;
 
     sqlite3 *db = nullptr;
     std::string filename;
@@ -44,6 +53,9 @@ class SQLiteDataAccess : public DataAccess
     void prepare_statements();
     void create_regexp_function();
     void init_sqlite3();
+
+    void persist_worker();
+    void start_persist_worker(bool readonly);
 
 public:
     SQLiteDataAccess(const std::string &data_file);

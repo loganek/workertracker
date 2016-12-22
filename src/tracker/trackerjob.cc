@@ -80,10 +80,9 @@ void TrackerJob::read_window_info()
             persist_result.get();
         }
 
-        // TODO threadpool
-        persist_result = std::async(std::launch::async, [this, entry] {
-            data_access->save_entry(entry);
-        });
+        // TODO data access as a service, queue in trackerjob
+        // i.e. move the logic from sqlitedataaccess to this/another class.
+        data_access->save_entry(entry);
     }
 }
 

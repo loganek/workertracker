@@ -20,7 +20,7 @@ TrackerJob::TrackerJob(const std::shared_ptr<Configuration>& configuration)
       suspendable(configuration),
       modifier_container(configuration)
 {
-    data_access = std::make_shared<SQLiteDataAccess>(SQLiteDataAccess::default_data_file(), configuration);
+    data_access = std::make_shared<SQLiteDataAccess>(SQLiteDataAccess::default_data_file());
     data_access->open(false);
 
     window_info_provider = WindowInfoProvider::registry();

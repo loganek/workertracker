@@ -13,15 +13,13 @@
 
 #include "wtcommon/sqlitedataaccess.h"
 #include "wtcommon/logger.h"
-#include "wtcommon/configuration.h"
 #include "wtcommon/datetimeutils.h"
 #include "wtcommon/binaryexpressionparser.h"
 
 #include <boost/date_time.hpp>
 
 AnalyzerController::AnalyzerController(int argc, char **argv)
-    : app(argc, argv),
-      config(std::make_shared<WT::Configuration>())
+    : app(argc, argv)
 {
 }
 
@@ -65,7 +63,7 @@ void AnalyzerController::load_from_file(const std::string &filename)
 {
     try
     {
-        data_access = std::make_shared<WT::SQLiteDataAccess>(filename, config);
+        data_access = std::make_shared<WT::SQLiteDataAccess>(filename);
         data_access->open(true);
 
         load_model(data_access->get_entries(build_expression_from_range()));

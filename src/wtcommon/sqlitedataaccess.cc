@@ -9,6 +9,7 @@
 
 #include "sqlitedataaccess.h"
 #include "logger.h"
+#include "configuration.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/io/detail/quoted_manip.hpp>
@@ -35,9 +36,8 @@ static void sqlite3_ext_regexp(sqlite3_context *ctx, int, sqlite3_value **argv)
 
 namespace WT {
 
-SQLiteDataAccess::SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<SQLiteDAConfiguration> &configuration)
-    : store_cnt(configuration->get_persist_frequency()),
-      filename(data_file)
+SQLiteDataAccess::SQLiteDataAccess(const std::string &data_file)
+     : filename(data_file)
 {
 }
 
@@ -124,7 +124,6 @@ SQLiteDataAccess::~SQLiteDataAccess()
 {
     if (db)
     {
-        persist_records();
         sqlite3_finalize(insert_stmt);
         sqlite3_finalize(update_stmt);
         sqlite3_close_v2(db);
@@ -200,20 +199,7 @@ static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)
 
 void SQLiteDataAccess::save_entry(const DataEntry &entry)
 {
-    if (!entries.empty() && is_continuous_entry(entries.back(), entry))
-    {
-        entries.back().time_end = entry.time_end;
-    }
-    else
-    {
-        entries.push_back(entry);
-    }
-
-    if (++saved_entry_counter % store_cnt == 0)
-    {
-        persist_records();
-        saved_entry_counter = 0;
-    }
+    persist_record(entry);
 }
 
 static void execute_statement(bool binding_result, sqlite3_stmt *statement)
@@ -232,41 +218,29 @@ static void execute_statement(bool binding_result, sqlite3_stmt *statement)
     sqlite3_reset(statement);
 }
 
-void SQLiteDataAccess::persist_records()
+void SQLiteDataAccess::persist_record(const DataEntry& entry)
 {
-    if (entries.empty())
-    {
-        WT_LOG_D << "Nothing to persist";
-        return;
-    }
-
-    WT_LOG_D << "Persisiting records";
-
-    std::size_t i = 0;
-
-    if (is_continuous_entry(last_entry, entries.front()))
+    if (is_continuous_entry(last_entry, entry))
     {
         WT_LOG_D << "Updating entry";
-        bool ret = sqlite3_bind_int64(update_stmt, 1, entries.front().time_end) == SQLITE_OK;
-        ret &= sqlite3_bind_int64(update_stmt, 2, entries.front().time_start) == SQLITE_OK;
+        bool ret = sqlite3_bind_int64(update_stmt, 1, entry.time_end) == SQLITE_OK;
+        ret &= sqlite3_bind_int64(update_stmt, 2, entry.time_start) == SQLITE_OK;
 
         execute_statement(ret, update_stmt);
-        i++;
     }
-
-    WT_LOG_D << "Inserting " << (entries.size() - i) << " records in sqlite data base";
-    for (; i < entries.size(); i++)
+    else
     {
-        bool ret = sqlite3_bind_int64(insert_stmt, 1, entries[i].time_start) == SQLITE_OK;
-        ret &= sqlite3_bind_int64(insert_stmt, 2, entries[i].time_end) == SQLITE_OK;
-        ret &= sqlite3_bind_text(insert_stmt, 3, entries[i].proc_name.c_str(), -1, nullptr) == SQLITE_OK;
-        ret &= sqlite3_bind_text(insert_stmt, 4, entries[i].description.c_str(), -1, nullptr) == SQLITE_OK;
+        WT_LOG_D << "Inserting record to a sqlite data base";
+
+        bool ret = sqlite3_bind_int64(insert_stmt, 1, entry.time_start) == SQLITE_OK;
+        ret &= sqlite3_bind_int64(insert_stmt, 2, entry.time_end) == SQLITE_OK;
+        ret &= sqlite3_bind_text(insert_stmt, 3, entry.proc_name.c_str(), -1, nullptr) == SQLITE_OK;
+        ret &= sqlite3_bind_text(insert_stmt, 4, entry.description.c_str(), -1, nullptr) == SQLITE_OK;
 
         execute_statement(ret, insert_stmt);
     }
 
-    last_entry = entries.back();
-    entries.clear();
+    last_entry = entry;
 }
 
 std::string SQLiteDataAccess::translate_variable_name(const std::string &var_name)

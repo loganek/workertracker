@@ -42,13 +42,6 @@ public:
     virtual ~WIProviderConfiguration() {}
 };
 
-class SQLiteDAConfiguration
-{
-public:
-    virtual ~SQLiteDAConfiguration() {}
-    virtual int get_persist_frequency() = 0;
-};
-
 class X11Configuration : public WIProviderConfiguration
 {
 public:
@@ -60,7 +53,6 @@ public:
 class Configuration :
         public GeneralConfiguration,
         public X11Configuration,
-        public SQLiteDAConfiguration,
         public PluginsConfiguration
 {
     boost::property_tree::ptree prop_tree;
@@ -84,9 +76,6 @@ public:
 
     // X11Configuration
     std::string get_x11_display_name() override;
-
-    // SQLiteDAConfiguration
-    int get_persist_frequency() override;
 };
 
 }

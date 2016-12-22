@@ -78,11 +78,6 @@ std::string Configuration::get_x11_display_name()
     return prop_tree.get("x11.display-name", "");
 }
 
-int Configuration::get_persist_frequency()
-{
-    return prop_tree.get<int>("sqliteda.persist-frequency", 12);
-}
-
 std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name)
 {
     char*** config = new char**[2] {nullptr, nullptr};

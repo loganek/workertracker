@@ -13,7 +13,6 @@
 #include "qtfilterproxymodel.h"
 
 #include "wtcommon/dataaccess.h"
-#include "wtcommon/configuration.h"
 
 #include <QStandardItemModel>
 #include <QApplication>
@@ -41,7 +40,6 @@ struct DataRange
 class AnalyzerController
 {
     QApplication app;
-    std::shared_ptr<WT::Configuration> config;
     QTFilterProxyModel proxy_model;
     DataRange data_range;
 

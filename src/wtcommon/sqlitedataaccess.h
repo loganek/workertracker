@@ -10,7 +10,6 @@
 #define SQLITEDATAACCESS_H
 
 #include "dataaccess.h"
-#include "configuration.h"
 
 #include "sqlite3/sqlite3.h"
 
@@ -26,10 +25,7 @@ class SQLiteDataAccess : public DataAccess
     const std::string table_name = "WT_ENTRIES";
 
     DataEntry last_entry;
-    int saved_entry_counter = 0;
-    const int store_cnt;
 
-    std::vector<DataEntry> entries;
     sqlite3 *db = nullptr;
     std::string filename;
     sqlite3_stmt *insert_stmt = nullptr;
@@ -44,13 +40,13 @@ class SQLiteDataAccess : public DataAccess
     void on_database_created();
     void create_database();
     void backup_existing_db();
-    void persist_records();
+    void persist_record(const DataEntry& entry);
     void prepare_statements();
     void create_regexp_function();
     void init_sqlite3();
 
 public:
-    SQLiteDataAccess(const std::string &data_file, const std::shared_ptr<SQLiteDAConfiguration> &configuration);
+    SQLiteDataAccess(const std::string &data_file);
     virtual ~SQLiteDataAccess();
 
     void open(bool readonly) override;

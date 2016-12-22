@@ -146,6 +146,7 @@ SQLiteDataAccess::~SQLiteDataAccess()
         {
             is_running = false;
             cv.notify_one();
+            persist_worker_th.join();
         }
         sqlite3_finalize(insert_stmt);
         sqlite3_finalize(update_stmt);

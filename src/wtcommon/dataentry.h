@@ -32,7 +32,7 @@ struct DataEntry
 
     bool is_continuous(const DataEntry& next) const
     {
-        return time_end+2 > next.time_start && description == next.description && proc_name == next.proc_name;
+        return time_end == next.time_start && description == next.description && proc_name == next.proc_name;
     }
 
     bool match_filter(const std::regex& filter) const

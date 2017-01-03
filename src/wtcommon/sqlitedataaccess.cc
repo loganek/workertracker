@@ -212,15 +212,6 @@ void SQLiteDataAccess::backup_existing_db()
     boost::filesystem::rename(filename, filename + buf);
 }
 
-// TODO DataEntry::is_continuous
-static bool is_continuous_entry(const DataEntry& before, const DataEntry& after)
-{
-    return std::localtime(&after.time_start)->tm_hour == std::localtime(&before.time_start)->tm_hour
-            && before.description == after.description
-            && before.proc_name == after.proc_name
-            && before.time_end == after.time_start;
-}
-
 void SQLiteDataAccess::save_entry(const DataEntry &entry)
 {
     {
@@ -273,7 +264,8 @@ static void execute_statement(bool binding_result, sqlite3_stmt *statement)
 
 void SQLiteDataAccess::persist_record(const DataEntry& entry)
 {
-    if (is_continuous_entry(last_entry, entry))
+    if (last_entry.is_continuous(entry)
+                && std::localtime(&last_entry.time_start)->tm_hour == std::localtime(&entry.time_start)->tm_hour)
     {
         WT_LOG_D << "Updating entry";
         bool ret = sqlite3_bind_int64(update_stmt, 1, entry.time_end) == SQLITE_OK;

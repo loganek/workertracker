@@ -14,8 +14,6 @@ add_library(wtcommon
     tokenizer.cc
     logger.cc
     idatacontrolplugin.h
-    itracksuspendable.h
-    idatamodifier.h
     configuration.cc
     dataaccess.cc
     binaryexpressiontree.cc

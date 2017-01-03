@@ -9,14 +9,10 @@
 #ifndef GNOMESCREENSAVER_H
 #define GNOMESCREENSAVER_H
 
-#include "wtcommon/itracksuspendable.h"
-
 struct _GDBusConnection;
 struct _GDBusMessage;
 
-namespace WT {
-
-class GNOMEScreenSaver : public ITrackSuspendable
+class GNOMEScreenSaver
 {
     const char* const dbus_service = "org.freedesktop.DBus";
     const char* const dbus_path = "/org/freedesktop/DBus";
@@ -34,15 +30,7 @@ class GNOMEScreenSaver : public ITrackSuspendable
 public:
     virtual ~GNOMEScreenSaver();
 
-    bool suspend_tracking(const char *app_name, const char *window_title) override;
-    void load_configuration(const char **/*config*/[2], int /*size*/) override {}
-
-    const char* get_name() override { return "gnomescreensaver"; }
-    void destroy() override { delete this; }
-
-    static RegistrarCollection<GNOMEScreenSaver> registrar;
+    bool suspend_tracking();
 };
-
-}
 
 #endif // GNOMESCREENSAVER_H

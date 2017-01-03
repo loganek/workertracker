@@ -47,7 +47,10 @@ bool PluginContainer::process_controllers(DataEntry &entry)
 
     for (const auto &plugin : plugins)
     {
-        plugin->process_data_entry(in_out_app_name, in_out_window_title, &force_break);
+        if (plugin->process_data_entry(in_out_app_name, in_out_window_title, &force_break))
+        {
+            return true;
+        }
 
         if (force_break)
         {

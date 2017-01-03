@@ -1,7 +1,6 @@
 if (UNIX)
     set(SYSTEM_SPECIFIC_SOURCES
         x11windowinfoprovider.cc
-        #gnomescreensaver.cc
         posixsingleapplocker.cc
         daemonizer.cc)
 

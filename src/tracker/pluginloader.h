@@ -9,6 +9,9 @@
 #ifndef PLUGINLOADER_H
 #define PLUGINLOADER_H
 
+#include "wtcommon/dataentry.h" // TODO MOve out
+#include "wtcommon/idatacontrolplugin.h"
+
 #include <boost/dll/shared_library.hpp>
 
 #include <vector>
@@ -16,20 +19,56 @@
 
 namespace WT {
 
-template<typename PluginType>
+class PluginWrapper
+{
+    WT_PluginInfo plugin_info;
+    WT_IDataControlPlugin *plugin;
+    std::shared_ptr<boost::dll::shared_library> handler;
+
+public:
+    PluginWrapper(const std::shared_ptr<boost::dll::shared_library>& handler)
+        : handler(handler)
+    {
+        plugin_info = handler->get<WT_PluginInfo>("wt_plugin_info");
+        plugin = plugin_info.create_func();
+    }
+
+    virtual ~PluginWrapper()
+    {
+        plugin_info.destroy_func(plugin);
+    }
+
+    const char* get_name() const
+    {
+        return plugin_info.name;
+    }
+
+    int get_rank() const
+    {
+        return plugin_info.rank;
+    }
+
+    bool process_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
+                            char in_out_window_title[WT_MAX_WIN_TITLE_LEN],
+                            int* out_force_break);
+
+    void load_configuration(const char*** config, int size)
+    {
+        plugin_info.load_config_func(plugin, config, size);
+    }
+};
+
 class PluginLoader
 {
-    std::vector<std::shared_ptr<boost::dll::shared_library>> handlers;
-    std::vector<std::shared_ptr<PluginType>> plugins;
+    std::vector<std::shared_ptr<PluginWrapper>> plugins;
 
     void try_load_plugin(const std::string &path);
     void load_handlers(const std::string &plugin_dir_path);
 
 public:
     PluginLoader(const std::vector<std::string> &plugin_dir_paths);
-    virtual ~PluginLoader();
 
-    std::vector<std::shared_ptr<PluginType>> get_plugins() const;
+    std::vector<std::shared_ptr<PluginWrapper>> get_plugins() const;
 };
 
 }

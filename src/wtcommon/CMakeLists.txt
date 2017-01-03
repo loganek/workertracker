@@ -13,9 +13,9 @@ add_library(wtcommon
     sqlitedataaccess.cc
     tokenizer.cc
     logger.cc
+    idatacontrolplugin.h
     itracksuspendable.h
     idatamodifier.h
-    plugindefs.h
     configuration.cc
     dataaccess.cc
     binaryexpressiontree.cc

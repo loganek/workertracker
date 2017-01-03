@@ -10,8 +10,7 @@
 #define TRACKERJOB_H
 
 #include "windowinfoprovider.h"
-#include "suspendablecontainer.h"
-#include "datamodifiercontainer.h"
+#include "plugincontainer.h"
 
 #include "wtcommon/dataaccess.h"
 #include "wtcommon/configuration.h"
@@ -35,8 +34,7 @@ class TrackerJob
 
     void read_window_info();
 
-    SuspendableContainer suspendable;
-    DataModifierContainer modifier_container;
+    PluginContainer plugin_container;
 
 public:
     TrackerJob(const std::shared_ptr<Configuration>& configuration);

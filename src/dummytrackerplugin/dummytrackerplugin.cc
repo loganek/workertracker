@@ -6,87 +6,45 @@
  * this stuff is worth it, you can buy me a beer in return.       Marcin Kolny
  * ----------------------------------------------------------------------------
  */
-#include "wtcommon/itracksuspendable.h"
-#include "wtcommon/idatamodifier.h"
+#include "wtcommon/idatacontrolplugin.h"
 
-#include "wtcommon/logger.h"
+#include <cstdio>
 
-#include <cstring>
-
-class DummyTrackerPlugin : public WT::ITrackSuspendable
+struct WT_IDataControlPlugin
 {
-    bool silent = false;
-
-protected:
-    virtual ~DummyTrackerPlugin() {}
-
-public:
-    bool WT_APICALL suspend_tracking(const char *app, const char *title) override
-    {
-        if (!silent)
-        {
-            WT_LOG_D << "I'm not suspending, I'm just dummy plugin";
-            WT_LOG_D << "APP: " << app << ", Title: " << title;
-        }
-
-        return false;
-    }
-
-    void WT_APICALL load_configuration(const char **config[2], int size) override
-    {
-        for (int i = 0; i < size; i++)
-        {
-            if (strcmp(config[0][i], "silent") == 0)
-            {
-                silent = std::atoi(config[1][i]);
-                WT_LOG_D << "Loaded configuration 'silent': " << silent;
-            }
-        }
-    }
-
-    const char* WT_APICALL get_name() override { return "dummytrackerplugin"; }
-
-    void WT_APICALL destroy() override
-    {
-        delete this;
-    }
+    int cnt = 0;
 };
 
-class DummyModifierPlugin : public WT::IDataModifier
+static WT_IDataControlPlugin* create_plugin()
 {
-protected:
-    virtual ~DummyModifierPlugin() {}
-
-public:
-    virtual void WT_APICALL modify_data(
-            char /*in_out_app_name*/[WT_MAX_APP_NAME_LEN],
-            char /*in_out_window_title*/[WT_MAX_WIN_TITLE_LEN],
-            bool &force_break) override
-    {
-        force_break = false;
-    }
-
-    void WT_APICALL load_configuration(const char **[2], int ) override
-    {
-    }
-
-    int WT_APICALL get_rank() { return 999; }
-
-    const char* WT_APICALL get_name() override { return "dummymodifierplugin"; }
-
-    void WT_APICALL destroy() override
-    {
-        delete this;
-    }
-};
-
-extern "C" WT_PLUGIN_EXPORT WT::ITrackSuspendable* WT_APICALL create_suspendable()
-{
-    return new DummyTrackerPlugin();
+    return new WT_IDataControlPlugin();
 }
 
-
-extern "C" WT_PLUGIN_EXPORT WT::IDataModifier* WT_APICALL create_data_modifier()
+static void destroy_plugin(WT_IDataControlPlugin* obj)
 {
-    return new DummyModifierPlugin();
+    delete obj;
 }
+
+static void load_config(WT_IDataControlPlugin*, const char ***, int)
+{
+
+}
+
+static int plugin_process(WT_IDataControlPlugin* obj,
+                char[WT_MAX_APP_NAME_LEN],
+                char[WT_MAX_WIN_TITLE_LEN],
+                int*)
+{
+    obj->cnt++;
+    printf("%d \n", obj->cnt);
+    return 0;
+}
+
+WT_PLUGIN_DEFINE(
+        1,
+        1,
+        "testowy",
+        create_plugin,
+        destroy_plugin,
+        load_config,
+        plugin_process)

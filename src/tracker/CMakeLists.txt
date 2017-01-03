@@ -1,7 +1,7 @@
 if (UNIX)
     set(SYSTEM_SPECIFIC_SOURCES
         x11windowinfoprovider.cc
-        gnomescreensaver.cc
+        #gnomescreensaver.cc
         posixsingleapplocker.cc
         daemonizer.cc)
 
@@ -21,10 +21,8 @@ add_executable(workertracker
     main.cc
     workertracker.cc
     trackerjob.cc
-    suspendablecontainer.cc
     pluginloader.cc
-    plugincontainer.h
-    datamodifiercontainer.cc
+    plugincontainer.cc
     windowinfoprovider.h
     backgroundrunner.h
     singleapplocker.h

@@ -9,30 +9,12 @@
 #include "pluginloader.h"
 
 #include "wtcommon/logger.h"
-#include "wtcommon/itracksuspendable.h"
-#include "wtcommon/idatamodifier.h"
 
 #include <boost/filesystem.hpp>
 
 namespace WT {
 
-template<typename T>
-static const char* get_create_method_name();
-
-template<>
-const char* get_create_method_name<WT::ITrackSuspendable>()
-{
-    return "create_suspendable";
-}
-
-template<>
-const char* get_create_method_name<WT::IDataModifier>()
-{
-    return "create_data_modifier";
-}
-
-template<typename T>
-PluginLoader<T>::PluginLoader(const std::vector<std::string> &plugin_dir_paths)
+PluginLoader::PluginLoader(const std::vector<std::string> &plugin_dir_paths)
 {
     for (const auto &path : plugin_dir_paths)
     {
@@ -41,15 +23,7 @@ PluginLoader<T>::PluginLoader(const std::vector<std::string> &plugin_dir_paths)
     }
 }
 
-template<typename T>
-PluginLoader<T>::~PluginLoader()
-{
-    plugins.clear();
-    handlers.clear();
-}
-
-template<typename T>
-void PluginLoader<T>::load_handlers(const std::string &plugin_dir_path)
+void PluginLoader::load_handlers(const std::string &plugin_dir_path)
 {
     namespace fs = boost::filesystem;
     if (!fs::exists(plugin_dir_path) || !fs::is_directory(plugin_dir_path))
@@ -67,14 +41,12 @@ void PluginLoader<T>::load_handlers(const std::string &plugin_dir_path)
     }
 }
 
-template<typename T>
-std::vector<std::shared_ptr<T>> PluginLoader<T>::get_plugins() const
+std::vector<std::shared_ptr<PluginWrapper>> PluginLoader::get_plugins() const
 {
     return plugins;
 }
 
-template<typename T>
-void PluginLoader<T>::try_load_plugin(const std::string &path)
+void PluginLoader::try_load_plugin(const std::string &path)
 {
     boost::filesystem::path pt = path;
     if (!boost::filesystem::is_regular_file(pt) || pt.extension() != boost::dll::shared_library::suffix())
@@ -85,14 +57,9 @@ void PluginLoader<T>::try_load_plugin(const std::string &path)
     try
     {
         WT_LOG_D << "Trying to load plugin: " << pt;
-        auto handle = std::make_shared<boost::dll::shared_library>(pt);
+        auto handler = std::make_shared<boost::dll::shared_library>(pt);
 
-        typedef T* (WT_APICALL plugin_create_t)();
-        auto create = handle->get<plugin_create_t>(get_create_method_name<T>());
-
-        handlers.push_back(handle);
-        auto obj = create();
-        plugins.push_back(std::shared_ptr<T>(obj, std::mem_fn(&T::destroy)));
+        plugins.push_back(std::make_shared<PluginWrapper>(handler));
 
         WT_LOG_I << "Added pluign " << plugins.back()->get_name();
     }
@@ -102,7 +69,11 @@ void PluginLoader<T>::try_load_plugin(const std::string &path)
     }
 }
 
-template class PluginLoader<WT::ITrackSuspendable>;
-template class PluginLoader<WT::IDataModifier>;
+bool PluginWrapper::process_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
+                                       char in_out_window_title[WT_MAX_WIN_TITLE_LEN],
+                                       int* out_force_break)
+{
+    return plugin_info.control_data_func(plugin, in_out_app_name, in_out_window_title, out_force_break);
+}
 
 }

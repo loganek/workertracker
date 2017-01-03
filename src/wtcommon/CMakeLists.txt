@@ -32,6 +32,6 @@ target_link_libraries(wtcommon
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY})
 
-install(FILES itracksuspendable.h
+install(FILES idatacontrolplugin.h
   DESTINATION include
   COMPONENT headers)

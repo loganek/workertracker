@@ -143,7 +143,7 @@ static int plugin_process(WT_IDataControlPlugin* plugin,
 }
 
 WT_PLUGIN_DEFINE(
-        1,
+        0,
         1,
         "gnomescreensaver",
         create_plugin,

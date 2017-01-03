@@ -57,9 +57,15 @@ void PluginLoader::try_load_plugin(const std::string &path)
     try
     {
         WT_LOG_D << "Trying to load plugin: " << pt;
-        auto handler = std::make_shared<boost::dll::shared_library>(pt);
 
-        plugins.push_back(std::make_shared<PluginWrapper>(handler));
+        auto wrapper = std::make_shared<PluginWrapper>(std::make_shared<boost::dll::shared_library>(pt));
+        if (wrapper->get_version() != WT_VERSION_MAJOR)
+        {
+            WT_LOG_D << "Found symbol, but version doesn't match(expected " << WT_VERSION_MAJOR << " but is " << wrapper->get_version() << ")";
+            return;
+        }
+
+        plugins.push_back(wrapper);
 
         WT_LOG_I << "Added pluign " << plugins.back()->get_name();
     }

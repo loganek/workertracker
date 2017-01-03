@@ -48,6 +48,11 @@ public:
         return plugin_info.rank;
     }
 
+    int get_version() const
+    {
+        return plugin_info.version;
+    }
+
     bool process_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
                             char in_out_window_title[WT_MAX_WIN_TITLE_LEN],
                             int* out_force_break);

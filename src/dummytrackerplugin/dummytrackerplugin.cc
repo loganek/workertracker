@@ -54,7 +54,7 @@ static int plugin_process(WT_IDataControlPlugin* obj,
 }
 
 WT_PLUGIN_DEFINE(
-        1,
+        0,
         1,
         "testowy",
         create_plugin,

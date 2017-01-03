@@ -13,6 +13,7 @@ set(WT_VERSION_PATCH 0)
 set(WT_FULL_VERSION "${WT_VERSION_MAJOR}.${WT_VERSION_MINOR}.${WT_VERSION_PATCH}")
 add_definitions(-DWT_PROJECT_NAME_AND_VERSION="${WT_PROJECT_NAME} v${WT_FULL_VERSION}")
 add_definitions(-DWT_PROJECT_NAME="${PROJECT_NAME}")
+add_definitions(-DWT_VERSION_MAJOR=${WT_VERSION_MAJOR})
 
 find_package(Boost 1.61 COMPONENTS system filesystem program_options REQUIRED)
 

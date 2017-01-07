@@ -134,10 +134,9 @@ static void load_config(WT_IDataControlPlugin*, const char ***, int)
 
 }
 
-static int plugin_process(WT_IDataControlPlugin* plugin,
-                char[WT_MAX_APP_NAME_LEN],
-                char[WT_MAX_WIN_TITLE_LEN],
-                int*)
+static int plugin_suspend(WT_IDataControlPlugin* plugin,
+                const char[WT_MAX_APP_NAME_LEN],
+                const char[WT_MAX_WIN_TITLE_LEN])
 {
     return plugin->suspend_tracking();
 }
@@ -149,4 +148,5 @@ WT_PLUGIN_DEFINE(
         create_plugin,
         destroy_plugin,
         load_config,
-        plugin_process)
+        nullptr,
+        plugin_suspend)

@@ -53,13 +53,18 @@ public:
         return plugin_info.version;
     }
 
-    bool process_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
-                            char in_out_window_title[WT_MAX_WIN_TITLE_LEN],
-                            int* out_force_break);
+    bool update_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
+                            char in_out_window_title[WT_MAX_WIN_TITLE_LEN]);
+
+    bool suspend_logging(char in_out_app_name[WT_MAX_APP_NAME_LEN],
+                            char in_out_window_title[WT_MAX_WIN_TITLE_LEN]);
 
     void load_configuration(const char*** config, int size)
     {
-        plugin_info.load_config_func(plugin, config, size);
+        if (plugin_info.load_config_func)
+        {
+            plugin_info.load_config_func(plugin, config, size);
+        }
     }
 };
 

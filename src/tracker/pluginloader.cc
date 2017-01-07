@@ -75,11 +75,24 @@ void PluginLoader::try_load_plugin(const std::string &path)
     }
 }
 
-bool PluginWrapper::process_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
-                                       char in_out_window_title[WT_MAX_WIN_TITLE_LEN],
-                                       int* out_force_break)
+bool PluginWrapper::update_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
+                                       char in_out_window_title[WT_MAX_WIN_TITLE_LEN])
 {
-    return plugin_info.control_data_func(plugin, in_out_app_name, in_out_window_title, out_force_break);
+    if (plugin_info.update_data_func)
+    {
+        return plugin_info.update_data_func(plugin, in_out_app_name, in_out_window_title);
+    }
+    return false;
+}
+
+bool PluginWrapper::suspend_logging(char in_out_app_name[WT_MAX_APP_NAME_LEN],
+                                    char in_out_window_title[WT_MAX_WIN_TITLE_LEN])
+{
+    if (plugin_info.suspend_tracking_func)
+    {
+        return plugin_info.suspend_tracking_func(plugin, in_out_app_name, in_out_window_title);
+    }
+    return false;
 }
 
 }

@@ -40,10 +40,9 @@ static void load_config(WT_IDataControlPlugin* obj, const char ***config, int si
     }
 }
 
-static int plugin_process(WT_IDataControlPlugin* obj,
-                char[WT_MAX_APP_NAME_LEN],
-                char[WT_MAX_WIN_TITLE_LEN],
-                int*)
+static int plugin_suspend(WT_IDataControlPlugin* obj,
+                const char[WT_MAX_APP_NAME_LEN],
+                const char[WT_MAX_WIN_TITLE_LEN])
 {
     if (!obj->silent)
     {
@@ -60,4 +59,5 @@ WT_PLUGIN_DEFINE(
         create_plugin,
         destroy_plugin,
         load_config,
-        plugin_process)
+        nullptr,
+        plugin_suspend)

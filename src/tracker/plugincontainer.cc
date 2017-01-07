@@ -38,35 +38,37 @@ bool PluginContainer::process_controllers(DataEntry &entry)
 {
     WT_LOG_D << "Updating data...";
 
-    int force_break = 0;
-    char in_out_app_name[WT_MAX_APP_NAME_LEN] = {0};
-    char in_out_window_title[WT_MAX_WIN_TITLE_LEN] = {0};
+    char app_name[WT_MAX_APP_NAME_LEN] = {0};
+    char window_title[WT_MAX_WIN_TITLE_LEN] = {0};
 
-    strncpy(in_out_app_name, entry.proc_name.c_str(), WT_MAX_APP_NAME_LEN-1);
-    strncpy(in_out_window_title, entry.description.c_str(), WT_MAX_WIN_TITLE_LEN-1);
+    strncpy(app_name, entry.proc_name.c_str(), WT_MAX_APP_NAME_LEN-1);
+    strncpy(window_title, entry.description.c_str(), WT_MAX_WIN_TITLE_LEN-1);
 
     for (const auto &plugin : plugins)
     {
-        if (plugin->process_data_entry(in_out_app_name, in_out_window_title, &force_break))
+        if (plugin->suspend_logging(app_name, window_title))
         {
             return true;
         }
+    }
 
-        if (force_break)
+    for (const auto &plugin : plugins)
+    {
+        if (plugin->update_data_entry(app_name, window_title))
         {
             WT_LOG_D << "Force break from plugin " << plugin->get_name();
             break;
         }
     }
 
-    if (strcmp(in_out_app_name, entry.proc_name.c_str()))
+    if (strcmp(app_name, entry.proc_name.c_str()))
     {
-        entry.proc_name = in_out_app_name;
+        entry.proc_name = app_name;
     }
 
-    if (strcmp(in_out_window_title, entry.description.c_str()))
+    if (strcmp(window_title, entry.description.c_str()))
     {
-        entry.description = in_out_window_title;
+        entry.description = window_title;
     }
 
     return false;

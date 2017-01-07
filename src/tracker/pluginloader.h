@@ -9,7 +9,6 @@
 #ifndef PLUGINLOADER_H
 #define PLUGINLOADER_H
 
-#include "wtcommon/dataentry.h" // TODO MOve out
 #include "wtcommon/idatacontrolplugin.h"
 
 #include <boost/dll/shared_library.hpp>

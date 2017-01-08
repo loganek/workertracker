@@ -5,6 +5,7 @@ add_subdirectory(dummytrackerplugin)
 
 if (UNIX)
     add_subdirectory(gnomescreensaverplugin)
+    add_subdirectory(webbrowserurlreader)
 endif(UNIX)
 
 if (WITH_QT)

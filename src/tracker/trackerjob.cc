@@ -48,13 +48,13 @@ void TrackerJob::read_window_info()
 
     while (is_running)
     {
-        auto window_info = window_info_provider->get_current_window_info();
-
-        entry.description = window_info.get_window_title();
-        entry.proc_name = window_info.get_app_name();
         entry.time_start = entry.time_end;
         terminate.wait_for(locked, period);
         entry.time_end = std::time(nullptr);
+
+        auto window_info = window_info_provider->get_current_window_info();
+        entry.description = window_info.get_window_title();
+        entry.proc_name = window_info.get_app_name();
 
         // TODO: it's a hack. I need to figure out better way than this.
         // And the magic number...

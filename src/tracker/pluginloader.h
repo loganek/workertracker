@@ -47,6 +47,14 @@ public:
         return plugin_info.rank;
     }
 
+    void set_rank(int rank)
+    {
+        if (rank >= 0)
+        {
+            plugin_info.rank = rank;
+        }
+    }
+
     int get_version() const
     {
         return plugin_info.version;

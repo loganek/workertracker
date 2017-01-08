@@ -78,6 +78,16 @@ std::string Configuration::get_x11_display_name()
     return prop_tree.get("x11.display-name", "");
 }
 
+bool Configuration::is_plugin_enabled(const std::string &plugin_name)
+{
+    return prop_tree.get("plugin_" + plugin_name + ".enabled", true);
+}
+
+int Configuration::get_plugin_rank(const std::string &plugin_name)
+{
+    return prop_tree.get("plugin_" + plugin_name + ".rank", -1);
+}
+
 std::pair<char***, int> Configuration::get_plugin_configuration(const std::string &plugin_name)
 {
     char*** config = new char**[2] {nullptr, nullptr};

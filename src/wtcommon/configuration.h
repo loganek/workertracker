@@ -34,6 +34,8 @@ public:
     virtual void add_plugins_path(const std::string &plugins_path) = 0;
     virtual std::pair<char***, int> get_plugin_configuration(const std::string &plugin_name) = 0;
     virtual void free_configuration(const std::pair<char***, int> &config) = 0;
+    virtual bool is_plugin_enabled(const std::string &/*plugin_name*/) { return true; }
+    virtual int get_plugin_rank(const std::string &/*plugin_name*/) { return -1; }
 };
 
 class WIProviderConfiguration
@@ -70,6 +72,8 @@ public:
     void free_configuration(const std::pair<char***, int> &config) override;
     void add_plugins_path(const std::string &plugins_path) override;
     std::vector<std::string> get_plugins_paths() override;
+    bool is_plugin_enabled(const std::string &plugin_name) override;
+    int get_plugin_rank(const std::string &plugin_name) override;
 
     // GeneralConfiguration
     virtual int get_read_info_interval() override;

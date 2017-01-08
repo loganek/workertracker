@@ -14,11 +14,18 @@ namespace WT {
 
 PluginContainer::PluginContainer(const std::shared_ptr<PluginsConfiguration> &configuration)
 {
-    plugins = PluginLoader(configuration->get_plugins_paths()).get_plugins();
-
-    for (const auto &plugin : plugins)
+    for (const auto &plugin : PluginLoader(configuration->get_plugins_paths()).get_plugins())
     {
-        load_configuration_to_plugin(plugin, configuration);
+        if (configuration->is_plugin_enabled(plugin->get_name()))
+        {
+            plugins.push_back(plugin);
+            load_configuration_to_plugin(plugin, configuration);
+            plugin->set_rank(configuration->get_plugin_rank(plugin->get_name()));
+        }
+        else
+        {
+            WT_LOG_D << "Plugin " << plugin->get_name() << " is disabled and won't be used.";
+        }
     }
 
     std::sort(plugins.begin(), plugins.end(), [] (const std::shared_ptr<PluginWrapper>& left, const std::shared_ptr<PluginWrapper>& right) {

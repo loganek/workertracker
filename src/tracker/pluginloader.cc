@@ -65,6 +65,15 @@ void PluginLoader::try_load_plugin(const std::string &path)
             return;
         }
 
+        if (plugins.end() != std::find_if(plugins.begin(), plugins.end(),
+                                          [wrapper] (const std::shared_ptr<PluginWrapper>& plugin_wrapper) {
+                                          return strcmp(wrapper->get_name(), plugin_wrapper->get_name()) == 0;
+    }))
+        {
+            WT_LOG_W << "Plugin has not been added because plugin with the same name (" << wrapper->get_name() << ") already exists.";
+            return;
+        }
+
         plugins.push_back(wrapper);
 
         WT_LOG_I << "Added pluign " << plugins.back()->get_name();
@@ -76,7 +85,7 @@ void PluginLoader::try_load_plugin(const std::string &path)
 }
 
 bool PluginWrapper::update_data_entry(char in_out_app_name[WT_MAX_APP_NAME_LEN],
-                                       char in_out_window_title[WT_MAX_WIN_TITLE_LEN])
+                                      char in_out_window_title[WT_MAX_WIN_TITLE_LEN])
 {
     if (plugin_info.update_data_func)
     {

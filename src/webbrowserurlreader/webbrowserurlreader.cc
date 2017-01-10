@@ -3,6 +3,9 @@
 #include <chromietabs/pathutils.h>
 #include <chromietabs/sessionanalyzer.h>
 
+#include <boost/algorithm/string/predicate.hpp>
+
+#include <codecvt>
 #include <regex>
 #include <cstring>
 
@@ -20,24 +23,45 @@ static void destroy_plugin(WT_IDataControlPlugin* obj)
     delete obj;
 }
 
-static std::string get_chrome_url(ChromieTabs::BrowserType browser)
+static std::string get_chrome_url(const char* window_title, ChromieTabs::BrowserType browser)
 {
     ChromieTabs::SessionAnalyzer analyzer{ChromieTabs::SessionReader(ChromieTabs::PathUtils::get_current_session_path(browser))};
+    std::string url;
     auto win_id = analyzer.get_current_window_id();
-    auto tab_id = analyzer.get_current_tab_id(win_id);
-    return analyzer.get_current_url(tab_id);
+
+    if (win_id < 0)
+    {
+        return url;
+    }
+
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+    try
+    {
+        const auto& navigation_entry = analyzer.get_current_tab(win_id).get_current_navigation_entry();
+        std::string title = convert.to_bytes(navigation_entry.title);
+        // google-chrome might add - Google Chrome at the end of the title to the application
+        // title, so I use starts_with() instead of operator==().
+        if (boost::starts_with(window_title, title))
+        {
+            url = navigation_entry.url;
+        }
+    }
+    catch (const std::out_of_range&)
+    {
+    }
+    return url;
 }
 
-static bool get_url(const char *app_name, std::string &out_url)
+static bool get_url(const char *app_name, const char *window_title, std::string &out_url)
 {
     if (strcmp(app_name, "google-chrome") == 0)
     {
-        out_url = get_chrome_url(ChromieTabs::BrowserType::GOOGLE_CHROME);
+        out_url = get_chrome_url(window_title, ChromieTabs::BrowserType::GOOGLE_CHROME);
         return !out_url.empty();
     }
     else if (strcmp(app_name, "chromium-browser") == 0)
     {
-        out_url = get_chrome_url(ChromieTabs::BrowserType::CHROMIUM);
+        out_url = get_chrome_url(window_title, ChromieTabs::BrowserType::CHROMIUM);
         return !out_url.empty();
     }
 
@@ -63,7 +87,7 @@ static int plugin_update_data(WT_IDataControlPlugin* ,
                 char window_title[WT_MAX_WIN_TITLE_LEN])
 {
     std::string url;
-    if (!get_url(app_name, url))
+    if (!get_url(app_name, window_title, url))
     {
         return 0;
     }

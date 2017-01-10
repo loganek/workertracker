@@ -2,7 +2,7 @@ include(ExternalProject)
 
 ExternalProject_Add(
     chromietabsproject
-    URL https://github.com/loganek/chromietabs/archive/0.1.zip
+    URL https://github.com/loganek/chromietabs/archive/master.zip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/chromietabs
     INSTALL_COMMAND ""
     CMAKE_ARGS "-DCMAKE_CXX_FLAGS=-fPIC"
